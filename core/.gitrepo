@@ -1,0 +1,12 @@
+; DO NOT EDIT (unless you know what you are doing)
+;
+; This subdirectory is a git "subrepo", and this file is maintained by the
+; git-subrepo command. See https://github.com/git-commands/git-subrepo#readme
+;
+[subrepo]
+	remote = git@github.com:RIT-VEX-U/Core.git
+	branch = master
+	commit = 020d9af6e8ea1c5e994280cf3a1df22c7af7d396
+	parent = 585ed47f78fa36a245359af13ce76b142e2122ab
+	method = merge
+	cmdver = 0.4.3
