@@ -11,6 +11,7 @@
 // ---- END VEXCODE CONFIGURED DEVICES ----
 
 #include "vex.h"
+#include "robot-config.h"
 #include "competition/opcontrol.h"
 #include "competition/autonomous.h"
 
