@@ -2,13 +2,10 @@
 
 // Subsystems
 #include "../core/include/subsystems/odometry/odometry_base.h"
-#include "../core/include/subsystems/odometry/odometry_swerve.h"
 #include "../core/include/subsystems/odometry/odometry_tank.h"
 #include "../core/include/subsystems/custom_encoder.h"
 #include "../core/include/subsystems/lift.h"
 #include "../core/include/subsystems/mecanum_drive.h"
-#include "../core/include/subsystems/swerve_drive.h"
-#include "../core/include/subsystems/swerve_module.h"
 #include "../core/include/subsystems/tank_drive.h"
 
 // Utils
