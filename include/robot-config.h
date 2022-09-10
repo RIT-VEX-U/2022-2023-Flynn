@@ -1,4 +1,5 @@
 #pragma once
+#include "vex.h"
 #include "core.h"
 
 using namespace vex;
