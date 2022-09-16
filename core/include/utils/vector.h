@@ -6,7 +6,7 @@
 #define PI 3.141592654
 #endif
 
-class Vector
+class Vector2D
 {
 public:
 
@@ -22,7 +22,7 @@ public:
           return sqrt(pow(this->x - other.x, 2) + pow(this->y - other.y, 2));
         }
 
-        // Vector addition operation on points
+        // Vector2D addition operation on points
         point_t operator+(const point_t &other)
         {
           point_t p 
@@ -33,7 +33,7 @@ public:
           return p;
         }
 
-        // Vector subtraction operation on points
+        // Vector2D subtraction operation on points
         point_t operator-(const point_t &other)
         {
           point_t p 
@@ -51,14 +51,14 @@ public:
      * @param dir Direction, in radians. 'foward' is 0, clockwise positive when viewed from the top.
      * @param mag Magnitude.
      */ 
-    Vector(double dir, double mag);
+    Vector2D(double dir, double mag);
     
     /**
      * Construct a vector object from a cartesian point.
      * 
      * @param p point_t.x , point_t.y
      */
-    Vector(point_t &p);
+    Vector2D(point_t &p);
 
     /**
      * Get the direction of the vector, in radians.
@@ -86,16 +86,16 @@ public:
     /**
      * Changes the magnetude of the vector to 1
     */
-    Vector normalize();
+    Vector2D normalize();
 
     /**
     * Returns a point from the vector
     */
-    Vector::point_t point();
+    Vector2D::point_t point();
 
-    Vector operator*(const double &x);
-    Vector operator+(const Vector &other);
-    Vector operator-(const Vector &other);
+    Vector2D operator*(const double &x);
+    Vector2D operator+(const Vector2D &other);
+    Vector2D operator-(const Vector2D &other);
 
 private:
 

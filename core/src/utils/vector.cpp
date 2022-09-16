@@ -6,7 +6,7 @@
  * @param dir Direction, in radians. 'foward' is 0, clockwise positive when viewed from the top.
  * @param mag Magnitude.
  */
-Vector::Vector(double dir, double mag)
+Vector2D::Vector2D(double dir, double mag)
 : dir(dir), mag(mag)
 {
 
@@ -17,7 +17,7 @@ Vector::Vector(double dir, double mag)
  * 
  * @param p point_t.x , point_t.y
  */
-Vector::Vector(point_t &p)
+Vector2D::Vector2D(point_t &p)
 {
     this->dir = atan2(p.y, p.x);
     this->mag = sqrt( (p.x*p.x) + (p.y*p.y) );
@@ -29,17 +29,17 @@ Vector::Vector(point_t &p)
  * 
  * Use r2d() to convert.
  */
-double Vector::get_dir() const { return dir;}
+double Vector2D::get_dir() const { return dir;}
 
 /**
  * Get the magnitude of the vector
  */
-double Vector::get_mag() const { return mag; }
+double Vector2D::get_mag() const { return mag; }
 
 /**
  * Get the X component of the vector; positive to the right.
  */
-double Vector::get_x() const
+double Vector2D::get_x() const
 {
 return mag * cos(dir);
 }
@@ -47,7 +47,7 @@ return mag * cos(dir);
 /**
  * Get the Y component of the vector, positive forward.
  */
-double Vector::get_y() const
+double Vector2D::get_y() const
 {
 return mag * sin(dir);
 }
@@ -55,15 +55,15 @@ return mag * sin(dir);
 /**
  * Changes the magnetude of the vector to 1
 */
-Vector Vector::normalize()
+Vector2D Vector2D::normalize()
 {
-  return Vector(this->dir, 1);
+  return Vector2D(this->dir, 1);
 }
 
 /**
  * Returns a point from the vector
 */
-Vector::point_t Vector::point()
+Vector2D::point_t Vector2D::point()
 {
   point_t p = 
   {
@@ -76,7 +76,7 @@ Vector::point_t Vector::point()
 /**
  * Correctly add vectors together with the + operator
  */
-Vector Vector::operator+(const Vector &other)
+Vector2D Vector2D::operator+(const Vector2D &other)
 {
     point_t p = 
     {
@@ -84,28 +84,28 @@ Vector Vector::operator+(const Vector &other)
         .y = this->get_y() + other.get_y()
     };
 
-    return Vector( p );
+    return Vector2D( p );
 }
 
 /**
  * Correctly subtract vectors with the - operator
  */
-Vector Vector::operator-(const Vector &other)
+Vector2D Vector2D::operator-(const Vector2D &other)
 {
     point_t p = 
     {
         .x = this->get_x() - other.get_x(),
         .y = this->get_y() - other.get_y()
     };
-    return Vector( p );
+    return Vector2D( p );
 }
 
 /**
  * Multiplies a vector by a double with the * operator
 */
-Vector Vector::operator*(const double &x)
+Vector2D Vector2D::operator*(const double &x)
 {
-  return Vector(this->dir, this->mag * x);
+  return Vector2D(this->dir, this->mag * x);
 }
 
 /**
