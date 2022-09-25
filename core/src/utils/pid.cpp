@@ -1,19 +1,25 @@
 #include "../core/include/utils/pid.h"
 
 /**
-   * Create the PID object
-   */
+ * Create the PID object
+ */
 PID::PID(pid_config_t &config)
     : config(config)
 {
   pid_timer.reset();
 }
 
+void PID::init(double start_pt, double set_pt)
+{
+  set_target(set_pt);
+  reset();
+}
+
 /**
-   * Update the PID loop by taking the time difference from last update,
-   * and running the PID formula with the new sensor data
-   */
-void PID::update(double sensor_val)
+ * Update the PID loop by taking the time difference from last update,
+ * and running the PID formula with the new sensor data
+ */
+double PID::update(double sensor_val)
 {
 
   this->sensor_val = sensor_val;
@@ -48,11 +54,12 @@ void PID::update(double sensor_val)
   if (limits_exist)
     out = (out < lower_limit) ? lower_limit : (out > upper_limit) ? upper_limit : out;
 
+  return out;
 }
 
 /**
-   * Reset the PID loop by resetting time since 0 and accumulated error.
-   */
+ * Reset the PID loop by resetting time since 0 and accumulated error.
+ */
 void PID::reset()
 {
   pid_timer.reset();
@@ -66,8 +73,8 @@ void PID::reset()
 }
 
 /**
-   * Gets the current PID out value, from when update() was last run
-   */
+ * Gets the current PID out value, from when update() was last run
+ */
 double PID::get()
 {
   return out;
@@ -95,9 +102,9 @@ void PID::set_target(double target)
 }
 
 /**
-   * Set the limits on the PID out. The PID out will "clip" itself to be 
-   * between the limits.
-   */
+ * Set the limits on the PID out. The PID out will "clip" itself to be 
+ * between the limits.
+ */
 void PID::set_limits(double lower, double upper)
 {
   lower_limit = lower;

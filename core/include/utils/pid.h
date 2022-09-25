@@ -1,8 +1,8 @@
-#ifndef _PID_
-#define _PID_
+#pragma once
 
 #include <cmath>
 #include "vex.h"
+#include "../core/include/utils/feedback_base.h"
 
 using namespace vex;
 
@@ -20,7 +20,7 @@ using namespace vex;
  * @author Ryan McGee
  * @date 4/3/2020
  */
-class PID
+class PID : Feedback
 {
 public:
   struct pid_config_t
@@ -35,20 +35,40 @@ public:
   PID(pid_config_t &config);
 
   /**
+   * Inherited from Feedback for interoperability.
+   * Update the setpoint and reset integral accumulation
+   * 
+   * start_pt can be safely ignored in this feedback controller
+   */
+  void init(double start_pt, double set_pt) override;
+
+  /**
    * Update the PID loop by taking the time difference from last update,
    * and running the PID formula with the new sensor data
    */
-  void update(double sensorVal);
+  double update(double sensorVal) override;
+
+  /**
+   * Gets the current PID out value, from when update() was last run
+   */
+  double get() override;
+
+  /**
+   * Set the limits on the PID out. The PID out will "clip" itself to be 
+   * between the limits.
+   */
+  void set_limits(double lower, double upper) override;
+
+  /**
+   * Returns true if the loop is within [deadband] for [on_target_time]
+   * seconds
+   */
+  bool is_on_target() override;
 
   /**
    * Reset the PID loop by resetting time since 0 and accumulated error.
    */
   void reset();
-
-  /**
-   * Gets the current PID out value, from when update() was last run
-   */
-  double get();
 
   /**
    * Get the delta between the current sensor data and the target
@@ -65,18 +85,6 @@ public:
    */
   void set_target(double target);
 
-  /**
-   * Set the limits on the PID out. The PID out will "clip" itself to be 
-   * between the limits.
-   */
-  void set_limits(double lower, double upper);
-
-  /**
-   * Returns true if the loop is within [deadband] for [on_target_time]
-   * seconds
-   */
-  bool is_on_target();
-
 private:
   pid_config_t &config;
 
@@ -89,5 +97,3 @@ private:
 
   timer pid_timer;
 };
-
-#endif

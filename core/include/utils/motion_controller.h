@@ -2,6 +2,7 @@
 #include "../core/include/utils/pid.h"
 #include "../core/include/utils/feedforward.h"
 #include "../core/include/utils/trapezoid_profile.h"
+#include "../core/include/utils/feedback_base.h"
 #include "vex.h"
 
 /**
@@ -20,7 +21,7 @@
  * @author Ryan McGee
  * @date 7/13/2022
  */
-class MotionController
+class MotionController : Feedback
 {
     public:
 
@@ -41,7 +42,7 @@ class MotionController
      * @param start_pt Movement starting position
      * @param end_pt Movement ending posiiton 
      */
-    void init(double start_pt, double end_pt);
+    void init(double start_pt, double end_pt) override;
     
     /**
      * @brief Update the motion profile with a new sensor value
@@ -49,13 +50,27 @@ class MotionController
      * @param sensor_val Value from the sensor
      * @return The motor input generated from the motion profile 
      */
-    double update(double sensor_val);
+    double update(double sensor_val) override;
+
+    /**
+     * @return the last saved result from the feedback controller
+     */
+    double get() override;
+
+    /**
+     * Clamp the upper and lower limits of the output. If both are 0, no limits should be applied.
+     * 
+     * @param lower Upper limit
+     * @param upper Lower limit
+     * @return double 
+     */
+    void set_limits(double lower, double upper) override;
 
     /** 
      * @return Whether or not the movement has finished, and the PID
      * confirms it is on target
      */
-    bool is_on_target();
+    bool is_on_target() override;
 
     private: 
 
@@ -65,6 +80,9 @@ class MotionController
     PID pid;
     FeedForward ff;
     TrapezoidProfile profile;
+
+    double lower_limit = 0, upper_limit = 0;
+    double out = 0;
      
     vex::timer tmr;
 

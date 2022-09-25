@@ -1,4 +1,5 @@
 #include "../core/include/utils/motion_controller.h"
+#include "../core/include/utils/math_util.h"
 
 /**
  * @brief Construct a new Motion Controller object
@@ -37,7 +38,33 @@ double MotionController::update(double sensor_val)
     pid.set_target(motion.pos);
     pid.update(sensor_val);
 
-    return pid.get() +  ff.calculate(motion.vel, motion.accel);
+    out = pid.get() +  ff.calculate(motion.vel, motion.accel);
+
+    if(lower_limit != upper_limit)
+        out = clamp(out, lower_limit, upper_limit);
+    
+    return out;
+}
+
+/**
+ * @return the last saved result from the feedback controller
+ */
+double MotionController::get()
+{
+    return out;
+}
+
+/**
+ * Clamp the upper and lower limits of the output. If both are 0, no limits should be applied.
+ * 
+ * @param lower Upper limit
+ * @param upper Lower limit
+ * @return double 
+ */
+void MotionController::set_limits(double lower, double upper)
+{
+    lower_limit = lower;
+    upper_limit = upper;
 }
 
 /** 
