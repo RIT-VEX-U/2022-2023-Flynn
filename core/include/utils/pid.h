@@ -1,16 +1,31 @@
-#pragma once
+#ifndef _PID_
+#define _PID_
 
 #include <cmath>
 #include "vex.h"
 
 using namespace vex;
 
+/**
+ * PID Class
+ * 
+ * Defines a standard feedback loop using the constants kP, kI, kD, deadband, and on_target_time.
+ * The formula is:
+ * 
+ * out = kP*error + kI*integral(d Error) + kD*(dError/dt)
+ * 
+ * The PID object will determine it is "on target" when the error is within the deadband, for
+ * a duration of on_target_time
+ * 
+ * @author Ryan McGee
+ * @date 4/3/2020
+ */
 class PID
 {
 public:
   struct pid_config_t
   {
-    double p, i, d, f, k;
+    double p, i, d;
     double deadband, on_target_time;
   };
 
@@ -40,6 +55,9 @@ public:
    */
   double get_error();
 
+  /**
+   * Get the PID's target
+   */
   double get_target();
 
   /**
@@ -71,3 +89,5 @@ private:
 
   timer pid_timer;
 };
+
+#endif

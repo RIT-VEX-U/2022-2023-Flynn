@@ -27,15 +27,9 @@ void PID::update(double sensor_val)
   else if(last_time != 0)
     printf("(pid.cpp): Warning - running PID without a delay is just a P loop!\n");
 
-  double k_term = 0;
-  if(get_error() > 0)
-    k_term = config.k;
-  else if(get_error() < 0)
-    k_term = -config.k;
 
-
-  // F, P, D and K terms
-  out = (config.f * target) + (config.p * get_error()) + d_term + k_term;
+  // P and D terms
+  out = (config.p * get_error()) + d_term;
 
   bool limits_exist = lower_limit != 0 || upper_limit != 0;
 
@@ -80,8 +74,8 @@ double PID::get()
 }
 
 /**
-   * Get the delta between the current sensor data and the target
-   */
+ * Get the delta between the current sensor data and the target
+ */
 double PID::get_error()
 {
   return target - sensor_val;
@@ -93,8 +87,8 @@ double PID::get_target()
 }
 
 /**
-   * Set the target for the PID loop, where the robot is trying to end up
-   */
+ * Set the target for the PID loop, where the robot is trying to end up
+ */
 void PID::set_target(double target)
 {
   this->target = target;
@@ -111,9 +105,9 @@ void PID::set_limits(double lower, double upper)
 }
 
 /**
-   * Returns true if the loop is within [deadband] for [on_target_time]
-   * seconds
-   */
+ * Returns true if the loop is within [deadband] for [on_target_time]
+ * seconds
+ */
 bool PID::is_on_target()
 {
   if (fabs(get_error()) < config.deadband)
