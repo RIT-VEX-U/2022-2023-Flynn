@@ -5,8 +5,8 @@
 #include "../core/include/subsystems/odometry/odometry_tank.h"
 #include "../core/include/subsystems/custom_encoder.h"
 #include "../core/include/subsystems/lift.h"
-#include "../core/include/subsystems/mecanum_drive.h"
-#include "../core/include/subsystems/tank_drive.h"
+#include "../core/include/subsystems/drivetrains/mecanum_drive.h"
+#include "../core/include/subsystems/drivetrains/tank_drive.h"
 
 // Utils
 #include "../core/include/utils/auto_chooser.h"
