@@ -21,9 +21,17 @@
  * @author Ryan McGee
  * @date 7/13/2022
  */
-class MotionController : Feedback
+class MotionController : public Feedback
 {
     public:
+
+    typedef struct
+    {
+        double max_v;
+        double accel;
+        PID::pid_config_t pid_cfg;
+        FeedForward::ff_config_t ff_cfg;
+    } m_profile_cfg_t;
 
     /**
      * @brief Construct a new Motion Controller object
@@ -33,7 +41,7 @@ class MotionController : Feedback
      * @param pid_cfg Definitions of kP, kI, and kD
      * @param ff_cfg Definitions of kS, kV, and kA
      */
-    MotionController(double max_v, double accel, PID::pid_config_t &pid_cfg, FeedForward::ff_config_t &ff_cfg);
+    MotionController(m_profile_cfg_t &config);
 
     /**
      * @brief Initialize the motion profile for a new movement
@@ -74,8 +82,7 @@ class MotionController : Feedback
 
     private: 
 
-    double max_v, accel;
-    PID::pid_config_t &pid_cfg;
+    m_profile_cfg_t config;
 
     PID pid;
     FeedForward ff;

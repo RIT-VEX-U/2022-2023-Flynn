@@ -9,8 +9,8 @@
  * @param pid_cfg Definitions of kP, kI, and kD
  * @param ff_cfg Definitions of kS, kV, and kA
  */
-MotionController::MotionController(double max_v, double accel, PID::pid_config_t &pid_cfg, FeedForward::ff_config_t &ff_cfg)
-: max_v(max_v), accel(accel), pid_cfg(pid_cfg), pid(pid_cfg), ff(ff_cfg), profile(max_v, accel)
+MotionController::MotionController(m_profile_cfg_t &config)
+: config(config), pid(config.pid_cfg), ff(config.ff_cfg), profile(config.max_v, config.accel)
 {}
 
 /**

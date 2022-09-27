@@ -14,6 +14,7 @@ extern controller main_controller;
 // ======== SUBSYSTEMS ========
 
 // ======== UTILS ========
+extern robot_specs_t config;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

@@ -5,11 +5,13 @@
 #endif
 
 #include "vex.h"
-#include "../core/include/utils/pid.h"
 #include "../core/include/subsystems/odometry/odometry_tank.h"
+#include "../core/include/utils/pid.h"
+#include "../core/include/utils/feedback_base.h"
 #include "../core/include/robot_specs.h"
-#include <vector>
 #include "../core/src/utils/pure_pursuit.cpp"
+#include <vector>
+
 
 using namespace vex;
 
@@ -52,7 +54,8 @@ public:
    * @param correction How much the robot should correct for being off angle
    * @param dir Whether the robot is travelling forwards or backwards
    */
-  bool drive_forward(double inches, double speed, double correction, directionType dir);
+  bool drive_forward(double inches, directionType dir, Feedback &feedback, double max_speed=1);
+  bool drive_forward(double inches, directionType dir, double max_speed=1);
 
   /**
    * Autonomously turn the robot X degrees to the right (negative for left), with a maximum motor speed
@@ -60,19 +63,22 @@ public:
    * 
    * Uses a PID loop for it's control.
    */
-  bool turn_degrees(double degrees, double percent_speed);
+  bool turn_degrees(double degrees, Feedback &feedback, double max_speed=1);
+  bool turn_degrees(double degrees, double max_speed=1);
 
   /**
    * Use odometry to automatically drive the robot to a point on the field.
    * X and Y is the final point we want the robot.
    */
-  bool drive_to_point(double x, double y, double speed, double correction_speed, vex::directionType direction=vex::directionType::fwd);
+  bool drive_to_point(double x, double y, vex::directionType dir, Feedback &feedback, double max_speed=1);
+  bool drive_to_point(double x, double y, vex::directionType dir, double max_speed=1);
 
   /**
    * Turn the robot in place to an exact heading relative to the field.
    * 0 is forward, and 0->360 is clockwise.
    */
-  bool turn_to_heading(double heading_deg, double speed);
+  bool turn_to_heading(double heading_deg, Feedback &feedback, double max_speed=1);
+  bool turn_to_heading(double heading_deg, double max_speed=1);
 
   /**
    * Reset the initialization for autonomous drive functions
@@ -89,23 +95,23 @@ public:
    * Follow a hermite curve using the pure pursuit algorithm.
    * 
    * @param path The hermite curve for the robot to take. Must have 2 or more points.
+   * @param dir Whether the robot should move forward or backwards
    * @param radius How the pure pursuit radius, in inches, for finding the lookahead point
-   * @param speed Robot's maximum speed throughout the path, between 0 and 1.0
    * @param res The number of points to use along the path; the hermite curve is split up into "res" individual points.
+   * @param feedback The feedback controller to use
+   * @param max_speed Robot's maximum speed throughout the path, between 0 and 1.0
    */
-  bool pure_pursuit(std::vector<PurePursuit::hermite_point> path, double radius, double speed, double res, directionType dir=fwd);
+  bool pure_pursuit(std::vector<PurePursuit::hermite_point> path, directionType dir, double radius, double res, Feedback &feedback, double max_speed=1);
 
 private:
   motor_group &left_motors;
   motor_group &right_motors;
 
-  PID drive_pid;
-  PID turn_pid;
   PID correction_pid;
+  Feedback *drive_default_feedback = NULL;
+  Feedback *turn_default_feedback = NULL;
 
   OdometryTank *odometry;
-
-  position_t saved_pos;
 
   robot_specs_t &config;
 
