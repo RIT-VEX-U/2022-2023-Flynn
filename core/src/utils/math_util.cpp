@@ -79,8 +79,8 @@ Calculates the slope and y intercept of the line of best fit for the data
 
 @param points the points for the data
 */
-std::pair<double, double> CalculateLinearRegression(std::vector<std::pair<double, double>> const &points){
-    //Purely for convenience and the ability to reuse mean() and variance() - can be rewritten to avoid allocating these if the code is repeatedly called
+std::pair<double, double> calculate_linear_regression(std::vector<std::pair<double, double>> const &points){
+    //Purely for convenience and the ability to reuse mean() and variance() - can be easily rewritten to avoid allocating these if the code is repeatedly called
     std::vector<double> xs(points.size(), 0.0);
     std::vector<double> ys(points.size(), 0.0);
     for (int i =0; i<points.size(); i++){

@@ -49,5 +49,5 @@ double covariance(std::vector<std::pair<double, double>> const &points, double m
 Calculates the slope and y intercept of the line of best fit for the data
 @param points the points for the data
 */
-std::pair<double, double> CalculateLinearRegression(std::vector<std::pair<double, double>> const &points);
+std::pair<double, double> calculate_linear_regression(std::vector<std::pair<double, double>> const &points);
 
