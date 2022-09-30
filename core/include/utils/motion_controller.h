@@ -3,6 +3,7 @@
 #include "../core/include/utils/feedforward.h"
 #include "../core/include/utils/trapezoid_profile.h"
 #include "../core/include/utils/feedback_base.h"
+#include "../core/include/subsystems/tank_drive.h"
 #include "vex.h"
 
 /**
@@ -79,6 +80,26 @@ class MotionController : public Feedback
      * confirms it is on target
      */
     bool is_on_target() override;
+
+    /**
+     * This method attempts to characterize the robot's drivetrain and automatically tune the feedforward.
+     * It does this by first calculating the kS (voltage to overcome static friction) by slowly increasing
+     * the voltage until it moves.
+     * 
+     * Next is kV (voltage to sustain a certain velocity), where the robot will record it's steady-state velocity
+     * at 'pct' speed.
+     * 
+     * Finally, kA (voltage needed to accelerate by a certain rate), where the robot will record the entire movement's
+     * velocity and acceleration, record a plot of [X=(pct-kV*V-kS), Y=(Acceleration)] along the movement,
+     * and since kA*Accel = pct-kV*V-kS, the reciprocal of the linear regression is the kA value.
+     * 
+     * @param drive The tankdrive to operate on
+     * @param odometry The robot's odometry subsystem
+     * @param pct Maximum velocity in percent (0->1.0)
+     * @param duration Amount of time the robot should be moving for the test
+     * @return A tuned feedforward object
+     */
+    static FeedForward::ff_config_t tune_feedforward(TankDrive &drive, OdometryTank &odometry, double pct=0.6, double duration=2);
 
     private: 
 

@@ -152,8 +152,6 @@ bool TankDrive::turn_degrees(double degrees, Feedback &feedback, double max_spee
   double delta_heading = OdometryBase::smallest_angle(heading, degrees);
   feedback.update(delta_heading);
 
-  // printf("heading: %f, delta_heading: %f\n", heading, delta_heading);
-
   drive_tank(feedback.get(), -feedback.get());
 
   // If the robot is at it's target, return true
@@ -334,8 +332,6 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
   double delta_heading = OdometryBase::smallest_angle(odometry->get_position().rot, heading_deg);
   feedback.update(delta_heading);
 
-  printf("~TURN~ delta: %f\n", delta_heading);
-  // printf("delta heading: %f, pid: %f\n", delta_heading, turn_pid.get());
   fflush(stdout);
 
   drive_tank(feedback.get(), -feedback.get());
