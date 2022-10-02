@@ -36,6 +36,7 @@ extern motor fw_top, fw_bot;
 
 
 // ======== UTILS ========
+extern robot_specs_t config;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
