@@ -1,6 +1,11 @@
 #include "../core/include/utils/pid.h"
 #include "../core/include/utils/slew_pid.h"
 
+SlewPID::SlewPID(pid_config_t &config, double maximum_change) : PID(config){
+    maximum_rate_of_change = maximum_change;
+}
+
+
 double SlewPID::get(){
     //naive PID output value
     double wanted_value = PID::get();

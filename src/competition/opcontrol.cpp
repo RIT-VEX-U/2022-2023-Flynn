@@ -8,7 +8,6 @@ void opcontrol()
 {
   // Initialization
 
-
   // Periodic
   while(true)
   {
