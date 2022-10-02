@@ -2,7 +2,7 @@
 #include "../core/include/utils/pid.h"
 
 #include <cmath>
-#include "C:/Users/richi/VEX/2022-2023-Flynn/core/include/utils/math_util.h"
+#include "../core/include/utils/math_util.h"
 #include "vex.h"
 
 using namespace vex;
