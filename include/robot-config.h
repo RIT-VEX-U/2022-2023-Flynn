@@ -13,14 +13,20 @@ extern motor indexer, intake;
 
 
 // ======== INPUTS ========
+extern inertial imu;
 
 // ======== SUBSYSTEMS ========
 
-extern motor_group drive_right;
-extern motor rf, rm, rr;
+// extern motor_group drive_right;
+// extern motor rf, rm, rr;
 
-extern motor_group drive_left;
-extern motor lf, lm, lr;
+// extern motor_group drive_left;
+// extern motor lf, lm, lr;
+
+// NEMO DRIVE TESTING
+extern motor lf_drive, lr_drive, rf_drive, rr_drive;
+
+extern motor_group left_motors, right_motors;
 
 extern OdometryTank odom;
 extern TankDrive drive_sys;
