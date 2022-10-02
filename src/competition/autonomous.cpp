@@ -11,7 +11,7 @@ void autonomous()
   odom.set_position();
 
   test_drive.add([]() {
-    return drive_sys.drive_to_point(0, 5, 0.5, 0);
+    return drive_sys.drive_to_point(0, 5, vex::directionType::fwd, pid);
   });
 
   test_drive.run(true);

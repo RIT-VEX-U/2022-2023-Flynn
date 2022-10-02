@@ -28,6 +28,8 @@ extern motor lf_drive, lr_drive, rf_drive, rr_drive;
 
 extern motor_group left_motors, right_motors;
 
+extern PID pid;
+
 extern OdometryTank odom;
 extern TankDrive drive_sys;
 
