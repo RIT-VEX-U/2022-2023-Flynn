@@ -8,10 +8,6 @@ void opcontrol()
 {
   // Initialization
 
-  // Periodic
-  while(true)
-  {
-    
     // ========== DRIVING CONTROLS ==========
 
     // ========== MANIPULATING CONTROLS ==========
@@ -19,8 +15,6 @@ void opcontrol()
     // ========== SECONDARY REMOTE ==========
 
     // ========== AUTOMATION ==========    
-
     // Wait 20 milliseconds for control loops to calculate time correctly
     vexDelay(20);
-  }
 }
