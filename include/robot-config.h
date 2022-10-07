@@ -6,6 +6,7 @@ using namespace vex;
 
 extern brain Brain;
 extern controller main_controller;
+extern Debugger debugger;
 
 // ======== OUTPUTS ========
 

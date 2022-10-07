@@ -16,6 +16,7 @@
 #include "../core/include/utils/pid.h"
 #include "../core/include/utils/pure_pursuit.h"
 #include "../core/include/utils/vector2d.h"
+#include "../core/include/utils/debugger.h"
 
 // Misc
 #include "../core/include/robot_specs.h"
