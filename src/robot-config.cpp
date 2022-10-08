@@ -16,10 +16,18 @@ motor intake(PORT10);
 
 // ======== SUBSYSTEMS ========
 PID::pid_config_t flywheel_pid={
-  .p = 0.00075,
-  .i = 0.001,
-  .d = 0.000012
+  .p = 0.00005,
+  .i = 0.0000,
+  .d = 0.0,
 };
+
+FeedForward::ff_config_t flywheel_ff={
+  .kS = .01, // measured
+  .kV = 0.00025, // tested
+  .kA = 0.0, 
+  .kG = 0.0, // no gravity - hopefully
+};
+
 
 motor rf(PORT7);
 motor rm(PORT6);
@@ -68,7 +76,7 @@ TankDrive drive_sys(drive_left, drive_right, specs);
 motor fw_top(PORT1);
 motor fw_bot(PORT2, true);
 motor_group fw_group(fw_top, fw_bot);
-Flywheel flywheel(fw_group, flywheel_pid, 18);
+Flywheel flywheel(fw_group, flywheel_pid, flywheel_ff, 18);
 
 
 // ======== UTILS ========
