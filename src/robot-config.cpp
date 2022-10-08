@@ -11,8 +11,8 @@ controller main_controller;
 motor indexer(PORT9);
 motor intake(PORT10);
 
-
 // ======== INPUTS ========
+limit shoot_limit(Brain.ThreeWirePort.B);
 
 // ======== SUBSYSTEMS ========
 PID::pid_config_t flywheel_pid={
@@ -29,15 +29,19 @@ FeedForward::ff_config_t flywheel_ff={
 };
 
 
-motor rf(PORT7);
-motor rm(PORT6);
-motor rr(PORT8);
+
+
+
+motor rf(PORT3);
+motor rm(PORT5); 
+motor rr(PORT4, true); // yes, cable is sketchy
 motor_group drive_right(rf, rm, rr);
 
-motor lf(PORT3);
-motor lm(PORT5);
-motor lr(PORT4);
+motor lf(PORT7, true);
+motor lm(PORT6, true);
+motor lr(PORT8);
 motor_group drive_left(lf, lm, lr);
+
 
 // WARNING: DUMMY VALUES, TO BE REPLACED
 robot_specs_t specs = {
