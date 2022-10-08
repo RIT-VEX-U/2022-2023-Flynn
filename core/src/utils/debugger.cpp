@@ -14,6 +14,7 @@
 
 #include "vex.h"
 #include "../core/include/utils/debugger.h"
+#include "../core/include/utils/debugger_task.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -25,7 +26,7 @@ Debugger::Debugger(controller main_controller)
   :main_controller(main_controller) 
   { }
 
-void Debugger::printVal(const char* statement, void* valPointer, char valType, bool toController, bool newOrClearline, int line){
+void Debugger::printVal(const char* statement, void* valPointer, char valType, int line){
   std::ostringstream os;
   switch(valType) {
     case 'i':
@@ -49,15 +50,42 @@ void Debugger::printVal(const char* statement, void* valPointer, char valType, b
       break;
   }
   const char* newStatement = (statement + os.str()).c_str();
-  this->print(newStatement, toController, newOrClearline, line);
+  this->print(newStatement, line);
 }
 
-void Debugger::print(const char* statement, bool toController, bool newOrClearline, int line){
-  if(toController) {
-    if(newOrClearline) { main_controller.Screen.clearLine(line); }
+void Debugger::print(const char* statement, int line){
+  if(line != -1) {
+    main_controller.Screen.clearLine(line);
     main_controller.Screen.print(statement, line);
   } else {
-    if(newOrClearline) { printf("\n"); }   
-    printf("%s", statement);
+    printf("\n%s", statement);
   }
+}
+
+bool Debugger::stopTask() { 
+  if(taskRunning) {
+    debugTask.stop(); 
+    taskRunning = false;
+    return true;
+  }
+  return false;
+}
+
+int debugTaskFunction(void* debugTaskUtilVP) {
+  debugger_task debugTaskUtil = *((debugger_task*) debugTaskUtilVP);
+  while(true){
+    debugTaskUtil.print();
+    vexDelay(debugTaskUtil.getDelay());
+  }
+  return 0;
+}
+
+bool Debugger::printAsyncPeriodic(const char* statement, int delay, 
+                                  void* valPointer, char valType, 
+                                  int line){
+  if(taskRunning) return false;
+  debugger_task debugTaskUtil(delay, statement, valType, valPointer, *this, line);
+  debugTask = task(debugTaskFunction, (void*) &debugTaskUtil);
+  taskRunning = true;
+  return true;
 }

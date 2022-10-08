@@ -1,3 +1,5 @@
+#pragma once
+
 /*********************************************************
 *
 *     File:     Debugger.h
@@ -9,6 +11,7 @@
 * EDIT HISTORY
 **********************************************************
 * 10/02/2022  <CRN>   File created, stubbed.
+* 10/06/2022  <CRN>   Simplified, documented, reformatted.
 *********************************************************/
 
 #include "vex.h"
@@ -27,7 +30,7 @@ class Debugger{
     toController -- TRUE if printing to the controller, FALSE if printing to the terminal
     line -- line printed to if using the controller
     */
-    void print(const char* statement, bool toController=false, bool newOrClearline=true, int line=3);
+    void print(const char* statement, int line=-1);
 
     /*
     valPointer -- pointer to the value to be printed.
@@ -38,15 +41,26 @@ class Debugger{
                 4. b  -- boolean
                 5. u  -- unsigned int
     */
-    void printVal(const char* statement, void* valPointer, char valType='i', bool toController=false, bool newOrClearline=true, int line=3);
+    void printVal(const char* statement, void* valPointer, char valType='i', int line=-1);
 
     // async management
+    /*
+    Stops the current debug task; returns true if successful, false otherwise.
+    */
+    bool stopTask();
 
     // async functions
-    bool printAsyncPeriodic(const char* statement, void* data, char dataType='N', int delay=20, bool newline=true);
+
+    /*
+    delay -- time, in milliseconds, between posts
+    returns true if the task has been started, false if it hasn't
+    */
+    bool printAsyncPeriodic(const char* statement, int delay=20, 
+                            void* valPointer=0, char valType='n', 
+                            int line=-1);
 
   private:
-    
     controller main_controller;
-    bool taskRunning();
+    bool taskRunning = false;
+    task debugTask;
 };
