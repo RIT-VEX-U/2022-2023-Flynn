@@ -8,6 +8,7 @@
 * EDIT HISTORY
 **********************************************************
 * 10/07/2022  <CRN>   File created, stubbed.
+* 10/09/2022  <CRN>   Added functionality to async post on value change.
 *********************************************************/
 
 #include "vex.h"
@@ -15,38 +16,64 @@
 
 using namespace vex;
 
+/*
+CONSTRUCTOR:
+Delay       --  time between posts / val difference checks.
+Statement   --  base statement to post.
+valType     --  type of value being posted; 'i' for int, 'd' for double, 'n' for no value,
+                c for character, b for boolean, u for unsigned int.
+debugger    --  the debugger that called it; summoned in order to post the statement.
+line        --  line on the controller to post the output to; -1 if to terminal.
+*/
 debugger_task::debugger_task(int delay, const char* statement, char valType, void* valPointer, 
                              Debugger debugger, int line)
   :delay(delay), valType(valType), valPointer(valPointer), statement(statement),
    line(line), debugger(debugger)
   { };
 
+/*
+Prints a basic statement, then waits [delay] miliseconds before returning.
+Checks for a value type; prints value as well if valType != 'n'.
+*/
 void debugger_task::print(){
   if(valType == 'n') {
     debugger.print(statement, line);
-  } else if(isRunningAverage) {
-    runningAverageTimer++;
-    runningAverage += *(double*) valPointer; 
-    double currentRunner = runningAverage / runningAverageTimer;
-    debugger.printVal(statement, (void*) &currentRunner, valType, line);
   } else {
     debugger.printVal(statement, valPointer, valType, line);
+  } vexDelay(delay);
+}
+
+/*
+Prints the basic statement, if the current value is outside of a given acceptable
+range compared to the previous value; then waits [delay] miliseconds before returning.
+Can only take input of types double, int.
+*/
+void debugger_task::printIfDiff(){
+  double val = 0;
+  switch(valType){
+    case 'i':
+      val += *((int*) valPointer);
+    case 'd':
+      val += *((double*) valPointer);
+      break;
+    default:
+      debugger.print("INVALID VALUE TYPE", line);
+      vexDelay(delay);
+      return;
+  }
+  if(val >= valPrevious + valDiff || val <= valPrevious - valDiff) {
+    this->print();
+    valPrevious = val;
+  } else {
+    vexDelay(delay);
   }
 }
 
-void debugger_task::setToRunningAverage(){
-  if(!isRunningAverage && valType != 'n') {
-    runningAverage = 0;
-    runningAverageTimer = 0;
-    runningAverage = true;
-  }
+/*
+Sets the acceptable range of a value difference to valDiffIn;
+When calling printIfDiff(), the previous value + and - the valDiff is compared to the
+current value, and if it is on the boundary of or outside that range, it will be posted.
+*/
+void debugger_task::setValDiff(double valDiffIN){
+  valDiff = valDiffIN;
 }
-
-
-void debugger_task::resetRunningAverage(){
-  runningAverage = 0;
-  runningAverageTimer = 0;
-}
-
-int debugger_task::getDelay() { return delay; }
-
