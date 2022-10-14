@@ -27,7 +27,7 @@ FeedForward::ff_config_t flywheel_ff={
   .kA = 0.0, 
   .kG = 0.0, // no gravity - hopefully
 };
-double TBH_gain = 0.00001;
+
 
 motor rf(PORT3);
 motor rm(PORT5); 
@@ -77,7 +77,7 @@ TankDrive drive_sys(drive_left, drive_right, specs);
 motor fw_top(PORT1);
 motor fw_bot(PORT2, true);
 motor_group fw_group(fw_top, fw_bot);
-Flywheel flywheel(fw_group, TBH_gain, 18);
+Flywheel flywheel(fw_group, flywheel_pid, flywheel_ff, 18);
 
 
 // ======== UTILS ========
