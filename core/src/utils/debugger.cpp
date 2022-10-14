@@ -15,7 +15,7 @@
 
 #include "vex.h"
 #include "../core/include/utils/debugger.h"
-#include "../core/include/utils/debugger_task.h"
+#include "../core/include/utils/debugger_util.h"
 #include <string>
 #include <iostream>
 #include <sstream>
@@ -92,10 +92,10 @@ bool Debugger::stopTask() {
   return false;
 }
 
-/*  Function called to handle periodic posts; calls the debugger_task's
+/*  Function called to handle periodic posts; calls the debugger_util's
     basic print function.  */
 int debugTaskFunctionPeriodic(void* debugTaskUtilVP) {
-  debugger_task debugTaskUtil = *((debugger_task*) debugTaskUtilVP);
+  debugger_util debugTaskUtil = *((debugger_util*) debugTaskUtilVP);
   while(true){
     debugTaskUtil.print();
   }
@@ -105,7 +105,7 @@ int debugTaskFunctionPeriodic(void* debugTaskUtilVP) {
 /*  Function called to handle posts at value change;
     calls the debugger_task's printIfDiff function.  */
 int debugTaskFunctionValChange(void* debugTaskUtilVP) {
-  debugger_task debugTaskUtil = *((debugger_task*) debugTaskUtilVP);
+  debugger_util debugTaskUtil = *((debugger_util*) debugTaskUtilVP);
   while(true){
     debugTaskUtil.printIfDiff();
   } return 0;
@@ -122,7 +122,7 @@ bool Debugger::printAsyncPeriodic(const char* statement, int delay,
                                   void* valPointer, char valType, 
                                   int line){
   if(taskRunning) return false;
-  debugger_task debugTaskUtil(delay, statement, valType, valPointer, *this, line);
+  debugger_util debugTaskUtil(delay, statement, valType, valPointer, *this, line);
   debugTask = task(debugTaskFunctionPeriodic, (void*) &debugTaskUtil);
   taskRunning = true;
   return true;
@@ -136,7 +136,7 @@ diffMin -- minimum difference in values for value to be printed; acceptable rang
 bool Debugger::printAsyncValueChange(const char* statement, void* valPointer, char valType,
                                      int line, double diffMin, int delay){
   if(taskRunning) return false;
-  debugger_task debugTaskUtil(delay, statement, valType, valPointer, *this, line);
+  debugger_util debugTaskUtil(delay, statement, valType, valPointer, *this, line);
   debugTaskUtil.setValDiff(diffMin);
   debugTask = task(debugTaskFunctionValChange, (void*) &debugTaskUtil);
   taskRunning = true;

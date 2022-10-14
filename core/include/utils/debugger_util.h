@@ -1,7 +1,8 @@
 /*********************************************************
 *
-*     File:     debugger_task.h
-*     Purpose:  Handles a debugger.
+*     File:     debugger_util.h
+*     Purpose:  Handles information used by an async running of 
+*               a debugger output.
 *     Author:   Chris Nokes
 *     
 **********************************************************
@@ -16,7 +17,7 @@
 
 using namespace vex;
 
-class debugger_task{
+class debugger_util{
   public:
     /*
     CONSTRUCTOR:
@@ -27,7 +28,7 @@ class debugger_task{
     debugger    --  the debugger that called it; summoned in order to post the statement.
     line        --  line on the controller to post the output to; -1 if to terminal.
     */
-    debugger_task(int delay, const char* statement, char valType, void* valPointer, 
+    debugger_util(int delay, const char* statement, char valType, void* valPointer, 
                   Debugger debugger, int line=-1);
 
     /*

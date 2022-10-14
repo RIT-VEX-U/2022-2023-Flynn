@@ -1,6 +1,6 @@
 /*********************************************************
 *
-*     File:     debugger_task.cpp
+*     File:     debugger_util.cpp
 *     Purpose:  Handles a debugger.
 *     Author:   Chris Nokes
 *     
@@ -12,7 +12,7 @@
 *********************************************************/
 
 #include "vex.h"
-#include "../core/include/utils/debugger_task.h"
+#include "../core/include/utils/debugger_util.h"
 
 using namespace vex;
 
@@ -25,7 +25,7 @@ valType     --  type of value being posted; 'i' for int, 'd' for double, 'n' for
 debugger    --  the debugger that called it; summoned in order to post the statement.
 line        --  line on the controller to post the output to; -1 if to terminal.
 */
-debugger_task::debugger_task(int delay, const char* statement, char valType, void* valPointer, 
+debugger_util::debugger_util(int delay, const char* statement, char valType, void* valPointer, 
                              Debugger debugger, int line)
   :delay(delay), valType(valType), valPointer(valPointer), statement(statement),
    line(line), debugger(debugger)
@@ -35,7 +35,7 @@ debugger_task::debugger_task(int delay, const char* statement, char valType, voi
 Prints a basic statement, then waits [delay] miliseconds before returning.
 Checks for a value type; prints value as well if valType != 'n'.
 */
-void debugger_task::print(){
+void debugger_util::print(){
   if(valType == 'n') {
     debugger.print(statement, line);
   } else {
@@ -48,7 +48,7 @@ Prints the basic statement, if the current value is outside of a given acceptabl
 range compared to the previous value; then waits [delay] miliseconds before returning.
 Can only take input of types double, int.
 */
-void debugger_task::printIfDiff(){
+void debugger_util::printIfDiff(){
   double val = 0;
   switch(valType){
     case 'i':
@@ -74,6 +74,6 @@ Sets the acceptable range of a value difference to valDiffIn;
 When calling printIfDiff(), the previous value + and - the valDiff is compared to the
 current value, and if it is on the boundary of or outside that range, it will be posted.
 */
-void debugger_task::setValDiff(double valDiffIN){
+void debugger_util::setValDiff(double valDiffIN){
   valDiff = valDiffIN;
 }
