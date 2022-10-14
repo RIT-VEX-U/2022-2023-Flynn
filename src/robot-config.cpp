@@ -29,9 +29,6 @@ FeedForward::ff_config_t flywheel_ff={
 };
 
 
-
-
-
 motor rf(PORT3);
 motor rm(PORT5); 
 motor rr(PORT4, true); // yes, cable is sketchy

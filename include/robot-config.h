@@ -13,6 +13,7 @@ extern motor indexer, intake;
 
 
 // ======== INPUTS ========
+extern limit shoot_limit;
 
 // ======== SUBSYSTEMS ========
 extern PID::pid_config_t flywheel_pid;
