@@ -8,8 +8,8 @@ controller main_controller;
 
 // ======== OUTPUTS ========
 
-motor indexer(PORT9);
-motor intake(PORT10);
+motor indexer(PORT10, true); //forward motion shoots
+motor intake(PORT9);
 
 // ======== INPUTS ========
 limit shoot_limit(Brain.ThreeWirePort.B);
@@ -27,6 +27,14 @@ FeedForward::ff_config_t flywheel_ff={
   .kA = 0.0, 
   .kG = 0.0, // no gravity - hopefully
 };
+double TBH_gain = 0.00001;
+motor fw_top(PORT1);
+motor fw_bot(PORT2, true);
+motor_group fw_group(fw_top, fw_bot);
+Flywheel flywheel(fw_group, TBH_gain, 18);
+
+digital_out drop_down_arm(Brain.ThreeWirePort.A);
+Shooter shooter(&flywheel, shoot_limit, indexer, drop_down_arm, intake);
 
 
 motor rf(PORT3);
@@ -73,11 +81,6 @@ robot_specs_t specs = {
 OdometryTank odom(drive_left, drive_right, specs);
 TankDrive drive_sys(drive_left, drive_right, specs);
 
-// TODO: add Flywheel class
-motor fw_top(PORT1);
-motor fw_bot(PORT2, true);
-motor_group fw_group(fw_top, fw_bot);
-Flywheel flywheel(fw_group, flywheel_pid, flywheel_ff, 18);
 
 
 // ======== UTILS ========

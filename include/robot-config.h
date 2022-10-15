@@ -17,6 +17,13 @@ extern limit shoot_limit;
 
 // ======== SUBSYSTEMS ========
 extern PID::pid_config_t flywheel_pid;
+extern motor fw_top, fw_bot;
+extern motor_group fw_group;
+extern Flywheel flywheel;
+extern Shooter shooter;
+
+
+
 extern motor_group drive_right;
 extern motor rf, rm, rr;
 
@@ -26,10 +33,6 @@ extern motor lf, lm, lr;
 extern OdometryTank odom;
 extern TankDrive drive_sys;
 
-// TODO: add Flywheel class
-extern motor fw_top, fw_bot;
-extern motor_group fw_group;
-extern Flywheel flywheel;
 
 
 // ======== UTILS ========
