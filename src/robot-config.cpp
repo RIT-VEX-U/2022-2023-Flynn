@@ -4,26 +4,41 @@ using namespace vex;
 
 // A global instance of brain used for printing to the V5 brain screen
 brain Brain;
+controller main_controller;
 
 // ======== OUTPUTS ========
 
 motor indexer(PORT9);
 motor intake(PORT10);
 
-
 // ======== INPUTS ========
+limit shoot_limit(Brain.ThreeWirePort.B);
 
 // ======== SUBSYSTEMS ========
+PID::pid_config_t flywheel_pid={
+  .p = 0.00005,
+  .i = 0.0000,
+  .d = 0.0,
+};
 
-motor rf(PORT7);
-motor rm(PORT6);
-motor rr(PORT8);
+FeedForward::ff_config_t flywheel_ff={
+  .kS = .01, // measured
+  .kV = 0.00025, // tested
+  .kA = 0.0, 
+  .kG = 0.0, // no gravity - hopefully
+};
+
+
+motor rf(PORT3);
+motor rm(PORT5); 
+motor rr(PORT4, true); // yes, cable is sketchy
 motor_group drive_right(rf, rm, rr);
 
-motor lf(PORT3);
-motor lm(PORT5);
-motor lr(PORT4);
+motor lf(PORT7, true);
+motor lm(PORT6, true);
+motor lr(PORT8);
 motor_group drive_left(lf, lm, lr);
+
 
 // WARNING: DUMMY VALUES, TO BE REPLACED
 robot_specs_t specs = {
@@ -60,7 +75,9 @@ TankDrive drive_sys(drive_left, drive_right, specs);
 
 // TODO: add Flywheel class
 motor fw_top(PORT1);
-motor fw_bot(PORT2);
+motor fw_bot(PORT2, true);
+motor_group fw_group(fw_top, fw_bot);
+Flywheel flywheel(fw_group, flywheel_pid, flywheel_ff, 18);
 
 
 // ======== UTILS ========
