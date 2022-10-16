@@ -19,6 +19,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <atomic>
 
 using namespace vex;
 using namespace std;
@@ -53,29 +54,9 @@ valType -- type of object or primitive in the value. Key is as follows:
       4. b  -- boolean
       5. u  -- unsigned int
 */
-void Debugger::printVal(const char* statement, void* valPointer, char valType, int line){
+template <typename T>
+void Debugger::printVal(const char* statement, std::atomic<T> &val, int line){
   std::ostringstream os;
-  switch(valType) {
-    case 'i':
-      os << *((int*) valPointer);
-      break;
-    case 'd':
-      os << *((double*) valPointer);
-      break;
-    case 'c':
-      os << *((char*) valPointer);
-      break;
-    case 'b':
-      if((bool*) valPointer){ os << "True";
-      } else { os << "False"; }
-      break;
-    case 'u':
-      os << *((unsigned int*) valPointer);
-      break;
-    default:
-      os << "INVALID DATA TYPE";
-      break;
-  }
   const char* newStatement = (statement + os.str()).c_str();
   this->print(newStatement, line);
 }
@@ -118,11 +99,12 @@ valType   --  same as print, but 'n' if no value should be printed;
               not sure why it'd ever come up but it's here if it's needed.
 returns true if the task has been started, false if it hasn't
 */
+template <typename T>
 bool Debugger::printAsyncPeriodic(const char* statement, int delay, 
-                                  void* valPointer, char valType, 
+                                  std::atomic<T> &val,
                                   int line){
   if(taskRunning) return false;
-  debugger_util debugTaskUtil(delay, statement, valType, valPointer, *this, line);
+  debugger_util debugTaskUtil(delay, statement, val, *this, line);
   debugTask = task(debugTaskFunctionPeriodic, (void*) &debugTaskUtil);
   taskRunning = true;
   return true;

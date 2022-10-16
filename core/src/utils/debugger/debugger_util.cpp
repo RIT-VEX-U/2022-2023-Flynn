@@ -13,6 +13,7 @@
 
 #include "vex.h"
 #include "../core/include/utils/debugger_util.h"
+#include <atomic>
 
 using namespace vex;
 
@@ -25,9 +26,9 @@ valType     --  type of value being posted; 'i' for int, 'd' for double, 'n' for
 debugger    --  the debugger that called it; summoned in order to post the statement.
 line        --  line on the controller to post the output to; -1 if to terminal.
 */
-debugger_util::debugger_util(int delay, const char* statement, char valType, void* valPointer, 
+debugger_util::debugger_util(int delay, const char* statement, std::atomic<T> &val,
                              Debugger debugger, int line)
-  :delay(delay), valType(valType), valPointer(valPointer), statement(statement),
+  :delay(delay), val(val), statement(statement),
    line(line), debugger(debugger)
   { };
 

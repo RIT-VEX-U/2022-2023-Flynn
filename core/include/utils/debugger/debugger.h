@@ -16,6 +16,7 @@
 *********************************************************/
 
 #include "vex.h"
+#include <atomic>
 
 using namespace vex;
 
@@ -42,7 +43,8 @@ class Debugger{
                 4. b  -- boolean
                 5. u  -- unsigned int
     */
-    void printVal(const char* statement, void* valPointer, char valType='i', int line=-1);
+    template <typename T>
+    void printVal(const char* statement, std::atomic<T> &val_ref, int line=-1);
 
     // ====== ASYNC MANAGEMENT ======
 
@@ -60,16 +62,17 @@ class Debugger{
                   not sure why it'd ever come up but it's here if it's needed.
     returns true if the task has been started, false if it hasn't
     */
+    template <typename T>
     bool printAsyncPeriodic(const char* statement, int delay=20, 
-                            void* valPointer=0, char valType='n', 
-                            int line=-1);
+                            std::atomic<T> &val=nullptr, int line=-1);
     
     /*
     Prints a value whenever it changes to a different value outside of a certain range.
     Can only take input of types double and int; prints invalidity otherwise.
     diffMin -- minimum difference in values for value to be printed; acceptable range.
     */
-    bool printAsyncValueChange(const char* statement, void* valPointer, char valType='d',
+    template <typename T>
+    bool printAsyncValueChange(const char* statement, std::atomic<T> &val=nullptr,
                               int line=-1, double diffMin=0.0, int delay = 0);
 
   private:

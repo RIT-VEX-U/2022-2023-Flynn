@@ -14,10 +14,12 @@
 
 #include "vex.h"
 #include "../core/include/utils/debugger.h"
+#include <atomic>
 
 using namespace vex;
 
-class debugger_util{
+template <typename T>
+class debugger_util {
   public:
     /*
     CONSTRUCTOR:
@@ -28,7 +30,7 @@ class debugger_util{
     debugger    --  the debugger that called it; summoned in order to post the statement.
     line        --  line on the controller to post the output to; -1 if to terminal.
     */
-    debugger_util(int delay, const char* statement, char valType, void* valPointer, 
+    debugger_util(int delay, const char* statement, std::atomic<T> &val, 
                   Debugger debugger, int line=-1);
 
     /*
@@ -50,15 +52,46 @@ class debugger_util{
     current value, and if it is on the boundary of or outside that range, it will be posted.
     */
     void setValDiff(double valDiffIN);
-
+  
   private:
-
     int delay;                // time in MS between posts or checks
-    char valType;             // type of value to be posted; 'n' if no value to post.
-    void* valPointer;         // pointer to a value to post; 0 if no value
+    std::atomic<T> &val;      
     const char* statement;    // statement to post, comes before the value, if one exists.
     double valDiff=0.0;       // the minimum difference between a current val and the previous val for it to be deemed post worthy.
     double valPrevious=-1.0;  // previous value of the val; defaults to -1.
     int line;                 // line to print on, -1 if told to print to terminal
     Debugger debugger;        // the debugger that summoned the task
+};
+
+template<int N>
+struct select_type;
+
+template<>
+struct select_type<1> {
+  typedef int type;
+};
+
+template<>
+struct select_type<2> {
+  typedef float type;
+};
+
+template<>
+struct select_type<3> {
+  typedef double type;
+};
+
+template<>
+struct select_type<4> {
+  typedef long type;
+};
+
+template<>
+struct select_type<5> {
+  typedef char type;
+};
+
+template<>
+struct select_type<6> {
+  typedef float type;
 };
