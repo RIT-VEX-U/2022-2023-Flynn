@@ -20,6 +20,7 @@ extern PID::pid_config_t flywheel_pid;
 extern motor fw_top, fw_bot;
 extern motor_group fw_group;
 extern Flywheel flywheel;
+extern digital_out pressure_bar;
 extern Shooter shooter;
 
 

@@ -31,10 +31,10 @@ double TBH_gain = 0.00001;
 motor fw_top(PORT1);
 motor fw_bot(PORT2, true);
 motor_group fw_group(fw_top, fw_bot);
-Flywheel flywheel(fw_group, TBH_gain, 18);
+Flywheel flywheel(fw_group, flywheel_pid, flywheel_ff, 18);
 
-digital_out drop_down_arm(Brain.ThreeWirePort.A);
-Shooter shooter(&flywheel, shoot_limit, indexer, drop_down_arm, intake);
+digital_out pressure_bar(Brain.ThreeWirePort.A);
+Shooter shooter(&flywheel, shoot_limit, indexer, pressure_bar, intake);
 
 
 motor rf(PORT3);

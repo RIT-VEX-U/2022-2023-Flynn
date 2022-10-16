@@ -2,7 +2,7 @@
 
 class Shooter{
   public:
-  Shooter(Flywheel *flywheel, limit &trigger_limit, motor &trigger_motor, digital_out &drop_down_arm_piston, motor &intake_motor);
+  Shooter(Flywheel *flywheel, limit &indexer_limit, motor &indexer_motor, digital_out &pressure_bar, motor &intake_motor);
 
   void Fire();
   void stop_firing();
@@ -11,22 +11,25 @@ class Shooter{
   void SpinAt(double RPM);
   void StopSpinning();
   double targetRPM();
+  double getRPM();
+
+  void applyPressure();
+  void releasePressure();
 
   bool getJustFired();
   void setJustFired(bool);
 
-  limit * getTriggerLimit();
-
+  bool indexer_switch_state();
   private:
   void stop_watching_trigger();
 
   //Shooty wheels
   Flywheel *flywheel;
   //Shooty trigger
-  limit &trigger_limit;
-  motor &trigger_motor;
+  limit &indexer_limit;
+  motor &indexer_motor;
   //Shooty drop down arm
-  digital_out drop_down_arm_piston;
+  digital_out pressure_bar;
   //Brushes
   motor &intake_motor;
 
