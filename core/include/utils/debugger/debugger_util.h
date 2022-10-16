@@ -13,7 +13,7 @@
 *********************************************************/
 
 #include "vex.h"
-#include "../core/include/utils/debugger.h"
+#include "../core/include/utils/debugger/debugger.h"
 #include <atomic>
 
 using namespace vex;

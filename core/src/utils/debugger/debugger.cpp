@@ -14,8 +14,8 @@
 *********************************************************/
 
 #include "vex.h"
-#include "../core/include/utils/debugger.h"
-#include "../core/include/utils/debugger_util.h"
+#include "../core/include/utils/debugger/debugger.h"
+#include "../core/include/utils/debugger/debugger_util.h"
 #include <string>
 #include <iostream>
 #include <sstream>
