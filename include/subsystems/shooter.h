@@ -4,12 +4,12 @@ class Shooter{
   public:
   Shooter(Flywheel *flywheel, limit &indexer_limit, motor &indexer_motor, digital_out &pressure_bar, motor &intake_motor);
 
-  void Fire();
+  void fire();
   void stop_firing();
-  void StartIntaking();
-  void StopIntaking();
-  void SpinAt(double RPM);
-  void StopSpinning();
+  void startIntaking();
+  void stopIntaking();
+  void spinAt(double RPM);
+  void stopSpinning();
   double targetRPM();
   double getRPM();
 
@@ -20,8 +20,17 @@ class Shooter{
   void setJustFired(bool);
 
   bool indexer_switch_state();
+  double getDesiredRPM();
+  void shootAllRPM(int RPM);
+
+  void startWatchingTrigger();
+  void stopWatchingTrigger();
+  void stopShootAll();
+  void setFireRunning(bool val);
+  void resetIndexer();
+  bool inAcceptableRPMRange();
+
   private:
-  void stop_watching_trigger();
 
   //Shooty wheels
   Flywheel *flywheel;
@@ -35,5 +44,7 @@ class Shooter{
 
   bool just_fired = true; //whether or not the command to fire has been dealt with
   bool trigger_watcher_running = false;
+  bool fire_all_running = false;
   task trigger_watcher_task;
+  task fire_task;
 };

@@ -7,6 +7,7 @@
 void opcontrol()
 {
   // Initialization
+  /*
   main_controller.ButtonR1.pressed([](){shooter.Fire();});
 
   main_controller.ButtonR2.pressed([](){shooter.StartIntaking();});
@@ -23,13 +24,25 @@ void opcontrol()
   
 
   main_controller.Screen.clearScreen();
+  */
   // Periodic
-  
+  while(!shooter.indexer_switch_state()){
+    indexer.spin(directionType::fwd, 3, voltageUnits::volt);
+    vexDelay(10);
+  }
   
   while(true)
   {
     // ========== DRIVING CONTROLS ==========
+    if(main_controller.ButtonR2.pressing()){
+      shooter.shootAllRPM(2500);
+    }
 
+    if(main_controller.ButtonL2.pressing()){
+      shooter.stopSpinning();
+    }
+
+    
     // ========== MANIPULATING CONTROLS ==========
 
     // ========== SECONDARY REMOTE ==========
