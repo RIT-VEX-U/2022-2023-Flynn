@@ -101,7 +101,7 @@ class MotionController : public Feedback
      */
     static FeedForward::ff_config_t tune_feedforward(TankDrive &drive, OdometryTank &odometry, double pct=0.6, double duration=2);
 
-    private: 
+    public: 
 
     m_profile_cfg_t config;
 

@@ -38,6 +38,7 @@ double MotionController::update(double sensor_val)
 {
     motion_t motion = profile.calculate(tmr.time(timeUnits::sec));
     pid.set_target(motion.pos);
+    
     pid.update(sensor_val);
 
     out = pid.get() +  ff.calculate(motion.vel, motion.accel);
@@ -53,6 +54,7 @@ double MotionController::update(double sensor_val)
  */
 double MotionController::get()
 {
+      
     return out;
 }
 
@@ -103,6 +105,8 @@ FeedForward::ff_config_t MotionController::tune_feedforward(TankDrive &drive, Od
     position_t start_pos = odometry.get_position();
 
     // ========== kS Tuning =========
+    printf("kS\n");fflush(stdout);
+
     // Start at 0 and slowly increase the power until the robot starts moving
     double power = 0;
     while(odometry.pos_diff(start_pos, odometry.get_position()) < 0.05)
@@ -116,7 +120,7 @@ FeedForward::ff_config_t MotionController::tune_feedforward(TankDrive &drive, Od
 
 
     // ========== kV / kA Tuning =========
-
+    printf("kV, kA\n");fflush(stdout);
     std::vector<std::pair<double, double>> vel_data_points; // time, velocity
     std::vector<std::pair<double, double>> accel_data_points; // time, accel
 
@@ -128,6 +132,7 @@ FeedForward::ff_config_t MotionController::tune_feedforward(TankDrive &drive, Od
     MovingAverage accel_ma(3);
 
     // Move the robot forward at a fixed percentage for X seconds while taking velocity and accel measurements
+    drive.drive_tank(pct, pct, 1);
     do
     {
         time = tmr.time(sec);

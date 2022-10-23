@@ -15,6 +15,8 @@ extern controller main_controller;
 
 // ======== UTILS ========
 extern robot_specs_t config;
+extern OdometryTank odom;
+extern TankDrive drive_sys;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

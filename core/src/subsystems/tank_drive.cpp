@@ -175,6 +175,7 @@ bool TankDrive::turn_degrees(double degrees, double max_speed)
   return true;
 }
 
+
 /**
   * Use odometry to automatically drive the robot to a point on the field.
   * X and Y is the final point we want the robot.
@@ -183,6 +184,7 @@ bool TankDrive::turn_degrees(double degrees, double max_speed)
   */
 bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedback &feedback, double max_speed)
 {
+  static double time = 0;
   // We can't run the auto drive function without odometry
   if(odometry == NULL)
   {
@@ -193,7 +195,7 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   
   if(!func_initialized)
   {
-    
+    time = 0;
     double initial_dist = OdometryBase::pos_diff(odometry->get_position(), {.x=x, .y=y});
 
     // Reset the control loops
@@ -205,6 +207,7 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
 
     func_initialized = true;
   }
+  printf("%.3f\t", time);
 
   // Store the initial position of the robot
   position_t current_pos = odometry->get_position();
@@ -221,7 +224,8 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
 
   // Get the distance between 2 points
   double dist_left = OdometryBase::pos_diff(current_pos, end_pos);
-  
+  //dist_left = end_pos.y - current_pos.y;  
+  double unmodified_dist_left = dist_left;
   int sign = 1;
 
   // Make an imaginary perpendicualar line to that between the bot and the point. If the point is behind that line,
@@ -235,10 +239,14 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   if (angle < 0) angle += 360; 
 
   // If the angle is behind the robot, report negative.
-  if (dir == directionType::fwd && angle > 90 && angle < 270)
+  if (dir == directionType::fwd && angle > 90 && angle < 270){
     sign = -1;
-  else if(dir == directionType::rev && (angle < 90 || angle > 270))
+    //printf("\n====\ndirtype_fwd\n====\n");
+
+  }else if(dir == directionType::rev && (angle < 90 || angle > 270)){
     sign = -1;
+    //printf("\n====\ndirtype_rev\n====\n");
+  }
 
   if (fabs(dist_left) < config.drive_correction_cutoff) 
   {
@@ -259,7 +267,10 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
     delta_heading = OdometryBase::smallest_angle(current_pos.rot - 180, heading);
 
   // Update the PID controllers with new information
+  //printf("deltaHeading: %f\t", delta_heading);
+  //printf("Heading\t");
   correction_pid.update(delta_heading);
+  //printf("Driving\t");
   feedback.update(sign * -1 * dist_left);
 
   // Disable correction when we're close enough to the point
@@ -269,10 +280,12 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
 
   // Reverse the drive_pid output if we're going backwards
   double drive_pid_rval;
-  if(dir == directionType::rev)
+  if(dir == directionType::rev){
     drive_pid_rval = feedback.get() * -1;
-  else
+  }else{
     drive_pid_rval = feedback.get();
+  }
+  //printf("%.3f\t", drive_pid_rval*50);
 
   // Combine the two pid outputs
   double lside = drive_pid_rval + correction;
@@ -283,10 +296,28 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   rside = clamp(rside, -1, 1);
 
   drive_tank(lside, rside);
+  time += .02;
+
+  //printf("%.3f\t", unmodified_dist_left*sign);
+  //printf("%.3f\t", dist_left*sign);
+
+  printf("%.3f\t", current_pos.x);
+  printf("%.3f\t", current_pos.y);
+  printf("%.3f\t", x);
+  printf("%.3f\t", y);
+  printf("%.3f\t", correction);
+  printf("%d", sign);
+
+
+  //printf("%.3f\t", end_pos.y);
+  //printf("%.3f\t", angle/10);
+
+  printf("\n\r");fflush(stdout);
 
   // Check if the robot has reached it's destination
   if(feedback.is_on_target())
   {
+    printf("\n======\nfinished dist_left: %f\n", dist_left);fflush(stdout);
     stop();
     func_initialized = false;
     return true;
@@ -372,8 +403,6 @@ bool TankDrive::pure_pursuit(std::vector<PurePursuit::hermite_point> path, direc
   std::vector<Vector2D::point_t> smoothed_path = PurePursuit::smooth_path_hermite(path, res);
 
   Vector2D::point_t lookahead = PurePursuit::get_lookahead(smoothed_path, {odometry->get_position().x, odometry->get_position().y}, radius);
-  //printf("%f\t%f\n", odometry->get_position().x, odometry->get_position().y); 
-  //printf("%f\t%f\n", lookahead.x, lookahead.y);
   bool is_last_point = (path.back().x == lookahead.x) && (path.back().y == lookahead.y);
 
   if(is_last_point)

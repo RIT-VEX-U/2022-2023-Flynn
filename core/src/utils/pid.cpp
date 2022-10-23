@@ -1,4 +1,5 @@
 #include "../core/include/utils/pid.h"
+#include "C:/Users/richi/VEX/2022-2023-Flynn/include/robot-config.h"
 
 /**
  * Create the PID object
@@ -21,7 +22,10 @@ void PID::init(double start_pt, double set_pt)
  */
 double PID::update(double sensor_val)
 {
-
+  //dont print if we're not drivetrain
+  if(config.deadband==0){
+    //printf("corr %.3f\t%.3f\t%.3f\t", target,  get_error(), sensor_val);
+  }
   this->sensor_val = sensor_val;
 
   double time_delta = pid_timer.value() - last_time;
@@ -33,10 +37,8 @@ double PID::update(double sensor_val)
   else if(last_time != 0)
     printf("(pid.cpp): Warning - running PID without a delay is just a P loop!\n");
 
-
   // P and D terms
   out = (config.p * get_error()) + d_term;
-
   bool limits_exist = lower_limit != 0 || upper_limit != 0;
 
   // Only add to the accumulated error if the output is not saturated
@@ -46,6 +48,7 @@ double PID::update(double sensor_val)
   
   // I term
   out += config.i * accum_error;
+
 
   last_time = pid_timer.value();
   last_error = get_error();

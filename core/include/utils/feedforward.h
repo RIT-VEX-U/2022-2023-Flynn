@@ -1,5 +1,5 @@
 #pragma once
-
+#include <stdio.h>
 /**
  * FeedForward
  * 
@@ -49,9 +49,10 @@ class FeedForward
      * @param a Requested acceleration of system
      * @return A feedforward that should closely represent the system if tuned correctly
      */
+    
     double calculate(double v, double a)
     {
-        return (cfg.kS * (v > 0 ? 1 : v < 0 ? -1 : 0)) + (cfg.kV * v) + (cfg.kA * a) + cfg.kG;
+      return (cfg.kS * (v > 0 ? 1 : v < 0 ? -1 : 0)) + (cfg.kV * v) + (cfg.kA * a) + cfg.kG;
     }
 
     private:

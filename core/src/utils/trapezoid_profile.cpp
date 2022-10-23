@@ -1,6 +1,6 @@
 #include "../core/include/utils/trapezoid_profile.h"
 #include <cmath>
-
+#include <stdio.h>
 /**
  * @brief Construct a new Trapezoid Profile object
  * 
@@ -76,9 +76,12 @@ motion_t TrapezoidProfile::calculate(double time_s)
     // Handle after the setpoint is reached
     if (time_s > 2*accel_time + max_vel_time)
     {
+
         out.pos = end;
         out.vel = 0;
         out.accel = 0;
+        //printf("%.3f\t%.3f\t%.3f\t",-out.pos, out.vel, out.accel);
+
         return out;
     }
 
@@ -87,9 +90,12 @@ motion_t TrapezoidProfile::calculate(double time_s)
     // Displacement from initial acceleration
     if(time_s < accel_time)
     {
+
         out.pos = start + CALC_POS(time_s, accel_local, 0, 0);
         out.vel = CALC_VEL(time_s, accel_local, 0);
         out.accel = accel_local;
+        //printf("%.3f\t%.3f\t%.3f\t",-out.pos, out.vel, out.accel);
+
         return out;
     }
 
@@ -98,9 +104,12 @@ motion_t TrapezoidProfile::calculate(double time_s)
     // Displacement during maximum velocity
     if (time_s < accel_time + max_vel_time)
     {
+
         out.pos = start + CALC_POS(time_s - accel_time, 0, max_v_local, s_accel);
         out.vel = max_v;
         out.accel = 0;
+        //printf("%.3f\t%.3f\t%.3f\t",-out.pos, out.vel, out.accel);
+
         return out;
     }
 
@@ -110,6 +119,8 @@ motion_t TrapezoidProfile::calculate(double time_s)
     out.pos = start + CALC_POS(time_s - (2*accel_time) - max_vel_time, -accel_local, 0, s_accel + s_max_vel);
     out.vel = CALC_VEL(time_s - accel_time - max_vel_time, -accel_local, max_v_local);
     out.accel = -accel_local;
+    //printf("%.3f\t%.3f\t%.3f\t",-out.pos, out.vel, out.accel);
+
     return out;
 
 }
