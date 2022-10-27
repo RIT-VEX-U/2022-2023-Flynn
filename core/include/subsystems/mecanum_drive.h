@@ -2,6 +2,7 @@
 
 #include "vex.h"
 #include "../core/include/utils/pid.h"
+#include "../core/include/drive_system.h"
 
 #ifndef PI
 #define PI 3.141592654
@@ -11,7 +12,7 @@
   * A class representing the Mecanum drivetrain.
   * Contains 4 motors, a possible IMU (intertial), and a possible undriven perpendicular wheel.
   */
-class MecanumDrive
+class MecanumDrive: public DriveSystem
 {
 
   public:
@@ -42,6 +43,10 @@ class MecanumDrive
   */
   MecanumDrive(vex::motor &left_front, vex::motor &right_front, vex::motor &left_rear, vex::motor &right_rear, 
                vex::rotation *lateral_wheel=NULL, vex::inertial *imu=NULL, mecanumdrive_config_t *config=NULL);
+
+  void stop() override;
+
+  void op_drive(double axis1, double axis2, double axis3, double axis4, DriveSystem::OpStyle style, int power = 1) override;
 
   /**
   * Drive the robot using vectors. This handles all the math required for mecanum control.

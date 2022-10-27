@@ -10,10 +10,11 @@
 #include "../core/include/robot_specs.h"
 #include <vector>
 #include "../core/src/utils/pure_pursuit.cpp"
+#include "../core/include/drive_system.h"
 
 using namespace vex;
 
-class TankDrive
+class TankDrive: public DriveSystem
 {
 public:
 
@@ -25,7 +26,9 @@ public:
   /**
    * Stops rotation of all the motors using their "brake mode"
    */
-  void stop();
+  void stop() override;
+
+  void op_drive(double axis1, double axis2, double axis3, double axis4, OpStyle style, int power = 1) override;
 
   /**
    * Drive the robot using differential style controls. left_motors controls the left motors,
@@ -60,19 +63,19 @@ public:
    * 
    * Uses a PID loop for it's control.
    */
-  bool turn_degrees(double degrees, double percent_speed);
+  bool turn_degrees(double degrees, double percent_speed) override;
 
   /**
    * Use odometry to automatically drive the robot to a point on the field.
    * X and Y is the final point we want the robot.
    */
-  bool drive_to_point(double x, double y, double speed, double correction_speed, vex::directionType direction=vex::directionType::fwd);
+  bool drive_to_point(double x, double y, double speed, double correction_speed, vex::directionType direction=vex::directionType::fwd) override;
 
   /**
    * Turn the robot in place to an exact heading relative to the field.
    * 0 is forward, and 0->360 is clockwise.
    */
-  bool turn_to_heading(double heading_deg, double speed);
+  bool turn_to_heading(double heading_deg, double speed) override;
 
   /**
    * Reset the initialization for autonomous drive functions

@@ -64,6 +64,21 @@ void TankDrive::drive_arcade(double forward_back, double left_right, int power)
   right_motors.spin(directionType::fwd, right * 12, voltageUnits::volt);
 }
 
+void TankDrive::op_drive(double axis1, double axis2, double axis3, double axis4, DriveSystem::OpStyle style, int power) 
+{
+  switch (style) {
+    case DriveSystem::OpStyle::arcade :
+      TankDrive::drive_arcade(axis3, axis1, power);
+      break;
+    case DriveSystem::OpStyle::tank :
+      TankDrive::drive_tank(axis3, axis2);
+      break;
+    default:
+      TankDrive::drive_tank(axis3, axis2);
+  }
+
+}
+
 /**
  * Autonomously drive forward or backwards, X inches infront or behind the robot's current position.
  * This driving method is relative, so excessive use may cause the robot to get off course!
