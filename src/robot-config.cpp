@@ -71,7 +71,7 @@ robot_specs_t specs = {
 };
 
 OdometryTank odom(drive_left, drive_right, specs);
-TankDrive drive_sys(drive_left, drive_right, specs);
+TankDrive drive_sys(drive_left, drive_right, specs, TankDrive::OpStyle::tank);
 
 // TODO: add Flywheel class
 motor fw_top(PORT1);
