@@ -1,6 +1,6 @@
 #include "../core/include/subsystems/tank_drive.h"
 
-TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, OdometryTank *odom)
+TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, OpStyle style, OdometryTank *odom)
     : left_motors(left_motors), right_motors(right_motors),
      drive_pid(config.drive_pid), turn_pid(config.turn_pid), correction_pid(config.correction_pid), odometry(odom), config(config)
 {
@@ -64,13 +64,13 @@ void TankDrive::drive_arcade(double forward_back, double left_right, int power)
   right_motors.spin(directionType::fwd, right * 12, voltageUnits::volt);
 }
 
-void TankDrive::op_drive(double axis1, double axis2, double axis3, double axis4, DriveSystem::OpStyle style, int power) 
+void TankDrive::op_drive(double axis1, double axis2, double axis3, double axis4, int power) 
 {
   switch (style) {
-    case DriveSystem::OpStyle::arcade :
+    case OpStyle::arcade :
       TankDrive::drive_arcade(axis3, axis1, power);
       break;
-    case DriveSystem::OpStyle::tank :
+    case OpStyle::tank :
       TankDrive::drive_tank(axis3, axis2);
       break;
     default:

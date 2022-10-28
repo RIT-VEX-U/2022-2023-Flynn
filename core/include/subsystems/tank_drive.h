@@ -18,17 +18,19 @@ class TankDrive: public DriveSystem
 {
 public:
 
+  enum OpStyle { tank, arcade };
+
   /**
    * Create the TankDrive object 
    */
-  TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, OdometryTank *odom=NULL);
+  TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, OpStyle style, OdometryTank *odom=NULL);
 
   /**
    * Stops rotation of all the motors using their "brake mode"
    */
   void stop() override;
 
-  void op_drive(double axis1, double axis2, double axis3, double axis4, OpStyle style, int power = 1) override;
+  void op_drive(double axis1, double axis2, double axis3, double axis4, int power = 1) override;
 
   /**
    * Drive the robot using differential style controls. left_motors controls the left motors,
@@ -101,6 +103,8 @@ public:
 private:
   motor_group &left_motors;
   motor_group &right_motors;
+
+  OpStyle style;
 
   PID drive_pid;
   PID turn_pid;

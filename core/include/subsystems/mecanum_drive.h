@@ -46,7 +46,7 @@ class MecanumDrive: public DriveSystem
 
   void stop() override;
 
-  void op_drive(double axis1, double axis2, double axis3, double axis4, DriveSystem::OpStyle style, int power = 1) override;
+  void op_drive(double axis1, double axis2, double axis3, double axis4, int power = 1) override;
 
   /**
   * Drive the robot using vectors. This handles all the math required for mecanum control.
