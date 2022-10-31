@@ -7,14 +7,8 @@
  * @param imu The robot's inertial sensor. If not included, rotation is calculated from the encoders.
  */
 OdometryTank::OdometryTank(vex::motor_group &left_side, vex::motor_group &right_side, robot_specs_t &config, vex::inertial *imu, bool is_async)
-: left_side(&left_side), right_side(&right_side), left_enc(NULL), right_enc(NULL), imu(imu), config(config)
+: OdometryBase(is_async), left_side(&left_side), right_side(&right_side), left_enc(NULL), right_enc(NULL), imu(imu), config(config)
 {
-    // Make sure the last known info starts zeroed
-    memset(&current_pos, 0, sizeof(position_t));
-
-    // Start the asynchronous background thread
-    if (is_async)
-        handle = new vex::task(background_task, this);
 }
 
 /**
@@ -24,14 +18,8 @@ OdometryTank::OdometryTank(vex::motor_group &left_side, vex::motor_group &right_
  * @param imu The robot's inertial sensor. If not included, rotation is calculated from the encoders.
  */
 OdometryTank::OdometryTank(CustomEncoder &left_enc, CustomEncoder &right_enc, robot_specs_t &config, vex::inertial *imu, bool is_async)
-: left_side(NULL), right_side(NULL), left_enc(&left_enc), right_enc(&right_enc), imu(imu), config(config)
+: OdometryBase(is_async), left_side(NULL), right_side(NULL), left_enc(&left_enc), right_enc(&right_enc), imu(imu), config(config)
 {
-    // Make sure the last known info starts zeroed
-    memset(&current_pos, 0, sizeof(position_t));
-
-    // Start the asynchronous background thread
-    if (is_async)
-        handle = new vex::task(background_task, this);
 }
 
 /**
@@ -43,22 +31,6 @@ void OdometryTank::set_position(const position_t &newpos)
   rotation_offset = newpos.rot - (current_pos.rot - rotation_offset);
 
   OdometryBase::set_position(newpos);
-}
-
-/**
- * The background task constantly polling the motors and updating the position.
- */
-int background_task(void* odom_obj)
-{
-    OdometryTank &odom = *((OdometryTank*) odom_obj);
-    while(!odom.end_task)
-    {
-        odom.update();
-
-        vexDelay(DOWNTIME);
-    }
-
-    return 0;
 }
 
 /**
