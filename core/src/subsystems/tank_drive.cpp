@@ -92,7 +92,7 @@ bool TankDrive::drive_forward(double inches, double speed, double correction, di
     drive_pid.reset();
 
     // Use vector math to get an X and Y
-    Vector2D current_pos({saved_pos.x , saved_pos.y});
+    Vector2D current_pos({.x=saved_pos.x , .y=saved_pos.y});
     Vector2D delta_pos(deg2rad(saved_pos.rot), inches);
     Vector2D setpt_vec = current_pos + delta_pos;
 

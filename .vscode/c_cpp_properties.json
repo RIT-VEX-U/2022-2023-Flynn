@@ -10,7 +10,6 @@
 			"${vex_sdkPath}/gcc/include/newlib-nano/**",
 			"${vex_sdkPath}/gcc/include/sys/**",
 			"${vex_sdkPath}/clang/8.0.0/include/**",
-			"${vex_gcc}/",
 			"${workspaceFolder}/include/**",
 			"${workspaceFolder}/src/**"
 		]
@@ -41,10 +40,10 @@
 			"includePath": [
 				"${vex_sdkIncludes}"
 			],
-			"compilerPath": "",
+			"compilerPath": "${vex_compilerPath}/clang",
 			"cStandard": "gnu99",
-			"cppStandard": "gnu++11",
-			"intelliSenseMode": "linux-clang-x86"
+			"cppStandard": "gnu++17",
+			"intelliSenseMode": "linux-gcc-arm64"
 		}
 	],
 	"version": 4
