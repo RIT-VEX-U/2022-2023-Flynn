@@ -7,6 +7,7 @@
 #include "../core/include/subsystems/lift.h"
 #include "../core/include/subsystems/mecanum_drive.h"
 #include "../core/include/subsystems/tank_drive.h"
+#include "../core/include/subsystems/flywheel.h"
 
 // Utils
 #include "../core/include/utils/auto_chooser.h"
