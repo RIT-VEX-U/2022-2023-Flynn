@@ -14,6 +14,10 @@ motor intake(PORT10);
 // ======== INPUTS ========
 limit shoot_limit(Brain.ThreeWirePort.B);
 
+CustomEncoder lside(Brain.ThreeWirePort.A, 2048);
+CustomEncoder rside(Brain.ThreeWirePort.C, 2048);
+CustomEncoder offaxis(Brain.ThreeWirePort.E, 2048);
+
 // ======== SUBSYSTEMS ========
 PID::pid_config_t flywheel_pid={
   .p = 0.00005,
@@ -69,6 +73,14 @@ robot_specs_t specs = {
     .d=0.01
   }
 };
+
+Odometry3Wheel::odometry3wheel_cfg_t odometry3wheel_cfg = {
+  .wheel_diam = 2.45,
+  .wheelbase_dist = 12,
+  .off_axis_center_dist = 6
+};
+
+Odometry3Wheel odometry3wheel(lside, rside, offaxis, odometry3wheel_cfg);
 
 OdometryTank odom(drive_left, drive_right, specs);
 TankDrive drive_sys(drive_left, drive_right, specs);
