@@ -56,7 +56,7 @@ position_t Odometry3Wheel::calculate_new_pos(double lside_delta_deg, double rsid
     double offax_dist = (cfg.wheel_diam / 2.0) * deg2rad(offax_delta_deg);
     
     // Inverse arclength formula for arc distance driven -> robot angle
-    double delta_angle_rad = 2 * (rside_dist - lside_dist) / cfg.wheelbase_dist;
+    double delta_angle_rad = (rside_dist - lside_dist) / cfg.wheelbase_dist;
     double delta_angle_deg = rad2deg(delta_angle_rad);
 
     // Distance along the robot's local Y axis (forward/backward)
@@ -81,4 +81,98 @@ position_t Odometry3Wheel::calculate_new_pos(double lside_delta_deg, double rsid
     retval.rot = fmod(old_pos.rot + delta_angle_deg, 360);
     
     return retval;
+}
+
+/**
+ * A guided tuning process to automatically find tuning parameters.
+ * This method is blocking, and returns when tuning has finished. Follow
+ * the instructions on the controller to complete the tuning process
+ * 
+ * It is assumed the gear ratio and encoder PPR have been set correctly
+ * 
+ * @param con Controller reference, for screen and button control
+ * @param drive Drivetrain reference for robot control
+ */
+void Odometry3Wheel::tune(vex::controller &con, TankDrive &drive)
+{
+
+    // TODO check if all the messages fit on the controller screen
+    // STEP 1: Align robot and reset odometry
+    con.Screen.clearScreen();
+    con.Screen.setCursor(1,1);
+    con.Screen.print("Wheel Diameter Test");
+    con.Screen.newLine();
+    con.Screen.print("Align robot with ref");
+    con.Screen.newLine();
+    con.Screen.newLine();
+    con.Screen.print("Press A to continue");
+    while(!con.ButtonA.pressing()) { vexDelay(20); }
+
+    double old_lval = lside_fwd.position(deg);
+    double old_rval = rside_fwd.position(deg);
+
+    // Step 2: Drive robot a known distance
+    con.Screen.clearLine(2);
+    con.Screen.setCursor(2,1);
+    con.Screen.print("Drive or Push robot");
+    con.Screen.newLine();
+    con.Screen.print("10 feet (5 tiles)");
+    con.Screen.newLine();
+    con.Screen.print("Press A to continue");
+    while(!con.ButtonA.pressing())
+    {
+        drive.drive_arcade(con.Axis3.position() / 100.0, con.Axis1.position() / 100.0);
+        vexDelay(20);
+    }
+
+    // Wheel diameter is ratio of expected distance / measured distance
+    double avg_deg = ((lside_fwd.position(deg) - old_lval) + (rside_fwd.position(deg) - old_rval)) / 2.0;
+    double measured_dist = 0.5 * deg2rad(avg_deg); // Simulate diam=1", radius=1/2"
+    double found_diam = 120.0 / measured_dist; 
+
+    // Step 3: Reset alignment for turning test
+    con.Screen.clearScreen();
+    con.Screen.setCursor(1,1);
+    con.Screen.print("Wheelbase Test");
+    con.Screen.newLine();
+    con.Screen.print("Align robot with ref");
+    con.Screen.newLine();
+    con.Screen.newLine();
+    con.Screen.print("Press A to continue");
+    while(!con.ButtonA.pressing()) { vexDelay(20); }
+    
+    old_lval = lside_fwd.position(deg);
+    old_rval = rside_fwd.position(deg);
+    double old_offax = off_axis.position(deg);
+
+    con.Screen.setCursor(2,1);
+    con.Screen.clearLine();
+    con.Screen.print("Turn robot 10");
+    con.Screen.newLine();
+    con.Screen.print("times in place");
+    con.Screen.newLine();
+    con.Screen.print("Press A to continue");
+    while(!con.ButtonA.pressing())
+    {
+        drive.drive_arcade(0, con.Axis1.position() / 100.0);
+        vexDelay(20);
+    }
+
+    double lside_dist = deg2rad(lside_fwd.position(deg) - old_lval) * (found_diam / 2.0);
+    double rside_dist = deg2rad(rside_fwd.position(deg) - old_rval) * (found_diam / 2.0);
+    double offax_dist = deg2rad(off_axis.position(deg) - old_offax) * (found_diam / 2.0);
+
+    double expected_angle = 10 * (2*PI);
+    double found_wheelbase = fabs(rside_dist - lside_dist) / expected_angle;
+    double found_offax_center_dist = offax_dist / expected_angle;
+
+    con.Screen.clearScreen();
+    con.Screen.setCursor(1,1);
+    con.Screen.print("Diam: %f", found_diam);
+    con.Screen.newLine();
+    con.Screen.print("whlbase: %f", found_wheelbase);
+    con.Screen.newLine();
+    con.Screen.print("offax: %f", found_offax_center_dist);
+
+    printf("Tuning completed.\n  Wheel Diameter: %f\n  Wheelbase: %f\n  Off Axis Distance: %f\n");
 }

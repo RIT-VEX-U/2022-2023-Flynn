@@ -1,5 +1,6 @@
 #pragma once
 #include "../core/include/subsystems/odometry/odometry_base.h"
+#include "../core/include/subsystems/tank_drive.h"
 #include "../core/include/subsystems/custom_encoder.h"
 
 /**
@@ -56,6 +57,16 @@ class Odometry3Wheel : public OdometryBase
      * @return the robot's updated position
      */
     position_t update() override;
+
+    /**
+     * A guided tuning process to automatically find tuning parameters.
+     * This method is blocking, and returns when tuning has finished. Follow
+     * the instructions on the controller to complete the tuning process
+     * 
+     * @param con Controller reference, for screen and button control
+     * @param drive Drivetrain reference for robot control
+     */
+    void tune(vex::controller &con, TankDrive &drive);
 
     private:
 
