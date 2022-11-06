@@ -1,11 +1,10 @@
 #include "../core/include/subsystems/tank_drive.h"
 
-TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, OpStyle style, OdometryTank *odom)
+TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, ControlOptions option/*, OdometryTank *odom*/)
     : left_motors(left_motors), right_motors(right_motors),
-     drive_pid(config.drive_pid), turn_pid(config.turn_pid), correction_pid(config.correction_pid), odometry(odom), config(config)
-{
-
-}
+     drive_pid(config.drive_pid), turn_pid(config.turn_pid), correction_pid(config.correction_pid), /*odometry(odom),*/ config(config),
+     DriveSystem(new OdometryTank(left_motors, right_motors, config))
+{}
 
 /**
  * Reset the initialization for autonomous drive functions
@@ -66,11 +65,11 @@ void TankDrive::drive_arcade(double forward_back, double left_right, int power)
 
 void TankDrive::op_drive(double axis1, double axis2, double axis3, double axis4, int power) 
 {
-  switch (style) {
-    case OpStyle::arcade :
+  switch (option) {
+    case ControlOptions::arcade :
       TankDrive::drive_arcade(axis3, axis1, power);
       break;
-    case OpStyle::tank :
+    case ControlOptions::tank :
       TankDrive::drive_tank(axis3, axis2);
       break;
     default:

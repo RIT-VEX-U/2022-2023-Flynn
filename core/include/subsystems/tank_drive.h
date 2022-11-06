@@ -17,19 +17,29 @@ using namespace vex;
 class TankDrive: public DriveSystem
 {
 public:
-
-  enum OpStyle { tank, arcade };
+  /** 
+   * The options for op drive controls:
+   *  Tank - left joystick (axis2) controls the left side of the drive,
+   *         right joystick (axis3) controls the right side of the drive
+   *  Aracade - left joystcik (axis2) controls foreward/backward movement,
+   *            right joystick (axis4) controls turning
+   */  
+  enum ControlOptions { tank, arcade };
 
   /**
    * Create the TankDrive object 
    */
-  TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, OpStyle style, OdometryTank *odom=NULL);
+  TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, ControlOptions option/*, OdometryTank *odom=NULL*/);
 
   /**
    * Stops rotation of all the motors using their "brake mode"
    */
   void stop() override;
 
+  /**
+   * Use the controller input to manually drive the robot
+   * Chooses control style (tank/arcade) based on `option` attribute
+   */
   void op_drive(double axis1, double axis2, double axis3, double axis4, int power = 1) override;
 
   /**
@@ -104,7 +114,8 @@ private:
   motor_group &left_motors;
   motor_group &right_motors;
 
-  OpStyle style;
+  // Sets control style (tank/arcade)
+  ControlOptions option;
 
   PID drive_pid;
   PID turn_pid;
