@@ -40,19 +40,19 @@ MotionController::m_profile_cfg_t mprof_drive_normal_cfg =
 // -------- Default Turn Motion Profile --------
 MotionController::m_profile_cfg_t mprof_turn_normal_cfg = 
 {
-    .max_v = 550,
-    .accel = 330,
+    .max_v = 300,
+    .accel = 600,
     .pid_cfg = (PID::pid_config_t) {
-        .p = .0025,
-        .i = 0.0,
+        .p = .05,
+        .i = 0.0,//4,
         .d = 0,
         .deadband = .1,
     },
     .ff_cfg = (FeedForward::ff_config_t)
     {
-        .kS = .0,
-        .kV = .0,
-        .kA = 0
+        .kS = 0.0,
+        .kV = 0.0,
+        .kA = 0.0
     }
 };
 
