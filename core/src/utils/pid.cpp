@@ -53,6 +53,9 @@ double PID::update(double sensor_val)
   last_time = pid_timer.value();
   last_error = get_error();
 
+  printf("e%.3f\t", get_error());
+
+
   // Enable clamping if the limit is not 0
   if (limits_exist)
     out = (out < lower_limit) ? lower_limit : (out > upper_limit) ? upper_limit : out;
