@@ -330,7 +330,7 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
 
   // Get the difference between the new heading and the current, and decide whether to turn left or right.
   double delta_heading = OdometryBase::smallest_angle(odometry->get_position().rot, heading_deg);
-  feedback.update(delta_heading);
+  feedback.update(-delta_heading);
 
   fflush(stdout);
 
