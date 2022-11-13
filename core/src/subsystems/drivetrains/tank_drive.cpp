@@ -146,7 +146,7 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
 
 /**
   * Use odometry to automatically drive the robot to a point on the field.
-  * X and Y is the final point we want the robot.
+  * X and Y is the final point we want the robot. Units are in inches.
   *
   * Returns whether or not the robot has reached it's destination.
   */
