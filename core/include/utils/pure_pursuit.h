@@ -11,16 +11,16 @@ namespace PurePursuit {
    * Represents a piece of a cubic spline with s(x) = a(x-xi)^3 + b(x-xi)^2 + c(x-xi) + d
    * The x_start and x_end shows where the equation is valid.
    */
-  struct spline
+  typedef struct
   {
     double a, b, c, d, x_start, x_end; 
 
     double getY(double x) {
       return a * pow((x - x_start), 3) + b * pow((x - x_start), 2) + c * (x - x_start) + d;
     }
-  };
+  }spline;
 
-  struct hermite_point
+  typedef struct
   {
     double x;
     double y;
@@ -34,7 +34,7 @@ namespace PurePursuit {
     Vector2D getTangent() {
       return Vector2D(dir, mag);
     }
-  };
+  }hermite_point;
 
   /**
     * Returns points of the intersections of a line segment and a circle. The line 

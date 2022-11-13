@@ -22,13 +22,13 @@ class Lift
 {
   public:
 
-  struct lift_cfg_t
+  typedef struct
   {
     double up_speed, down_speed;
     double softstop_up, softstop_down;
 
     PID::pid_config_t lift_pid_cfg;
-  };
+  }lift_cfg_t;
 
   /**
     * Construct the Lift object and begin the background task that controls the lift.

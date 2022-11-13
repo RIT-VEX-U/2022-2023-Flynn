@@ -13,7 +13,7 @@ public:
     /**
      * Data structure representing an X,Y coordinate
      */
-    struct point_t
+    typedef struct point_t
     {
         double x, y;
 
@@ -43,7 +43,7 @@ public:
           };
           return p;
         }
-    };
+    }point_t;
 
     /**
      * Construct a vector object.

@@ -13,11 +13,11 @@ class AutoChooser
 
   protected:
 
-  struct entry_t
+  typedef struct
   {
     int x, y, width, height;
     std::string name;
-  };
+  }entry_t;
 
   void render(entry_t *selected);
   std::string choice;

@@ -19,7 +19,7 @@ class MecanumDrive
   /**
     * Configure the Mecanum drive PID tunings and robot configurations
     */
-  struct mecanumdrive_config_t
+  typedef struct
   {
     // PID configurations for autonomous driving
     PID::pid_config_t drive_pid_conf;
@@ -35,7 +35,7 @@ class MecanumDrive
     // Width between the center of the left and right wheels
     double wheelbase_width;
 
-  };
+  }mecanumdrive_config_t;
 
   /**
   * Create the Mecanum drivetrain object

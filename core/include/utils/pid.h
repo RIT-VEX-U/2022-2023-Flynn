@@ -8,11 +8,11 @@ using namespace vex;
 class PID
 {
 public:
-  struct pid_config_t
+  typedef struct
   {
     double p, i, d, f, k;
     double deadband, on_target_time;
-  };
+  }pid_config_t;
 
   /**
    * Create the PID object
