@@ -105,7 +105,7 @@ private:
 
   OdometryTank *odometry;
 
-  position_t saved_pos;
+  position_config_t saved_pos;
 
   robot_specs_t &config;
 

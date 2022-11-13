@@ -28,7 +28,7 @@ class Lift
     double softstop_up, softstop_down;
 
     PID::pid_config_t lift_pid_cfg;
-  }lift_cfg_t;
+  }lift_config_t;
 
   /**
     * Construct the Lift object and begin the background task that controls the lift.
@@ -51,7 +51,7 @@ class Lift
     * @param setpoint_map
     *   A map of enum type T, in which each enum entry corresponds to a different lift height
     */
-  Lift(motor_group &lift_motors, lift_cfg_t &lift_cfg, map<T, double> &setpoint_map, limit *homing_switch=NULL)
+  Lift(motor_group &lift_motors, lift_config_t &lift_cfg, map<T, double> &setpoint_map, limit *homing_switch=NULL)
   : lift_motors(lift_motors), cfg(lift_cfg), lift_pid(cfg.lift_pid_cfg), setpoint_map(setpoint_map), homing_switch(homing_switch)
   {
 
@@ -325,7 +325,7 @@ class Lift
   private:
 
   motor_group &lift_motors;
-  lift_cfg_t &cfg;
+  lift_config_t &cfg;
   PID lift_pid;
   map<T, double> &setpoint_map;
   limit *homing_switch;

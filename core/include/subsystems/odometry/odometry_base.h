@@ -15,7 +15,7 @@ typedef struct
     double x;
     double y;
     double rot;
-} position_t;
+} position_config_t;
 
 /**
  * Base odometry class to simplify implementations of multiple drivetrains.
@@ -26,17 +26,17 @@ public:
     /**
     * Gets the current position and rotation
     */
-    position_t get_position(void);
+    position_config_t get_position(void);
 
     /**
      * Sets the current position of the robot
      */
-    virtual void set_position(const position_t &newpos=zero_pos);
+    virtual void set_position(const position_config_t &newpos=zero_pos);
 
     /**
      * Update the current position on the field based on the sensors
      */
-    virtual position_t update() = 0;
+    virtual position_config_t update() = 0;
 
     /**
      * End the background task. Cannot be restarted.
@@ -48,12 +48,12 @@ public:
     /**
      * Get the distance between two points
      */
-    static double pos_diff(position_t pos1, position_t pos2);
+    static double pos_diff(position_config_t pos1, position_config_t pos2);
 
     /**
      * Get the change in rotation between two points
      */
-    static double rot_diff(position_t &pos1, position_t &pos2);
+    static double rot_diff(position_config_t &pos1, position_config_t &pos2);
 
     /**
      * Get the smallest difference in angle between a start heading and end heading.
@@ -64,10 +64,10 @@ public:
 
     bool end_task = false;
 
-    inline static constexpr position_t zero_pos = {.x=0, .y=0, .rot=90};
+    inline static constexpr position_config_t zero_pos = {.x=0, .y=0, .rot=90};
 
 protected:
     vex::task *handle;
     vex::mutex mut;
-    position_t current_pos;
+    position_config_t current_pos;
 };

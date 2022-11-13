@@ -17,7 +17,7 @@ Vector2D::Vector2D(double dir, double mag)
  * 
  * @param p point_t.x , point_t.y
  */
-Vector2D::Vector2D(point_t &p)
+Vector2D::Vector2D(point_config_t &p)
 {
     this->dir = atan2(p.y, p.x);
     this->mag = sqrt( (p.x*p.x) + (p.y*p.y) );
@@ -63,9 +63,9 @@ Vector2D Vector2D::normalize()
 /**
  * Returns a point from the vector
 */
-Vector2D::point_t Vector2D::point()
+Vector2D::point_config_t Vector2D::point()
 {
-  point_t p = 
+  point_config_t p = 
   {
     .x = this->mag * cos(this->dir),
     .y = this->mag * sin(this->dir)
@@ -78,7 +78,7 @@ Vector2D::point_t Vector2D::point()
  */
 Vector2D Vector2D::operator+(const Vector2D &other)
 {
-    point_t p = 
+    point_config_t p = 
     {
         .x = this->get_x() + other.get_x(),
         .y = this->get_y() + other.get_y()
@@ -92,7 +92,7 @@ Vector2D Vector2D::operator+(const Vector2D &other)
  */
 Vector2D Vector2D::operator-(const Vector2D &other)
 {
-    point_t p = 
+    point_config_t p = 
     {
         .x = this->get_x() - other.get_x(),
         .y = this->get_y() - other.get_y()
