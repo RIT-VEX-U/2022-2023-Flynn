@@ -18,7 +18,7 @@ public:
    * Create the PID object
    */
   PID(pid_config_t &config);
-  PID(pid_config_t &config, double (*calculate_error)(double, double));
+  PID(pid_config_t &config, double (*calculate_error)(double target, double sensor_val));
 
   /**
    * Update the PID loop by taking the time difference from last update,

@@ -43,6 +43,7 @@ class MotionController : public Feedback
      * @param ff_cfg Definitions of kS, kV, and kA
      */
     MotionController(m_profile_cfg_t &config);
+    MotionController(m_profile_cfg_t &config, double (*calcualte_error)(double target, double sensor_val));
 
     /**
      * @brief Initialize the motion profile for a new movement

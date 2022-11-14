@@ -10,7 +10,7 @@ PID::PID(pid_config_t &config)  : config(config), calculate_error(NULL)
 /**
    * Create the PID object
    */
-PID::PID(pid_config_t &config, double (*calculate_error)(double a, double b)) : config(config), calculate_error(calculate_error)
+PID::PID(pid_config_t &config, double (*calculate_error)(double target, double sensor_val)) : config(config), calculate_error(calculate_error)
 {
   pid_timer.reset();
 }
