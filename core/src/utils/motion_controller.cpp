@@ -41,7 +41,23 @@ double MotionController::update(double sensor_val)
     printf("targetP: %f\ttargetV: %f\t", motion.pos, motion.vel);
     pid.set_target(motion.pos);
     
-    pid.update(sensor_val);
+    
+    /*
+
+
+    */
+
+    double naive_error = motion.pos - sensor_val;
+    double actual_error = OdometryBase::smallest_angle(motion.pos, sensor_val);
+    if (!(fabs(naive_error - actual_error)<.001)){
+      //pid error and our error dont agree
+      if (sensor_val<0){
+        sensor_val +=360;
+      } else {
+        sensor_val -= 360;
+      }
+      pid.update(sensor_val);
+    }
 
     out = pid.get() +  ff.calculate(motion.vel, motion.accel);
 

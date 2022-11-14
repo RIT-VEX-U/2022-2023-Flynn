@@ -155,6 +155,8 @@ void opcontrol()
   
   
 
+  
+
 
   if (1){
     //test_rot_speed();
@@ -162,7 +164,7 @@ void opcontrol()
     //printf("output: kS %f, kV %f, kA %f\n", f.kS, f.kV, f.kA);fflush(stdout);
   
     
-    while (main_controller.ButtonA.pressing() && !drive_sys.turn_to_heading(-90)){
+    while (main_controller.ButtonA.pressing() && !drive_sys.turn_to_heading(270)){
       position_t pos = odom.get_position();
       printf("time: %f\tactual position: %f\n", time, pos.rot);fflush(stdout);
       time+=.02;
@@ -179,8 +181,10 @@ void opcontrol()
   {
     drive_sys.drive_tank(main_controller.Axis2.value()*.015,main_controller.Axis3.value()*.015);
     auto pos = odom.get_position();
-    //printf("%f\t%f\n", pos.rot, 90+imu.heading());fflush(stdout);
-     // ========== DRIVING CONTROLS ==========
+    if (main_controller.ButtonB.pressing()){
+      printf("%f\n", pos.rot);fflush(stdout);
+    }
+    // ========== DRIVING CONTROLS ==========
 
     // ========== MANIPULATING CONTROLS ==========
 

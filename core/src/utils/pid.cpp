@@ -1,5 +1,5 @@
 #include "../core/include/utils/pid.h"
-#include "C:/Users/richi/VEX/2022-2023-Flynn/include/robot-config.h"
+#include "../include/robot-config.h"
 
 /**
  * Create the PID object
@@ -92,7 +92,7 @@ double PID::get()
  */
 double PID::get_error()
 {
-  return target - sensor_val;
+  return target-sensor_val;
 }
 
 double PID::get_target()
