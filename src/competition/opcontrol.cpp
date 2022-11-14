@@ -21,13 +21,17 @@ void test_speed(){
 
     position_t start_position = odom.get_position();
     position_t position = odom.get_position();
-    
+    printf("P");fflush(stdout);
     while (time<accel_time + decell_time && main_controller.ButtonA.pressing()){
 
         if (time<accel_time){
             drive_sys.drive_tank(1, 1);
+                printf("P");fflush(stdout);
+
         } else {
             drive_sys.drive_tank(-0.1, -0.1);
+            printf("NP");fflush(stdout);
+
         }
         position = odom.get_position();
         
@@ -36,12 +40,12 @@ void test_speed(){
         pos_avg->add_entry(displacement);
         displacement = pos_avg->get_average();
         
-        velocity = (displacement - last_displacement)/dt;
+        velocity = odom.get_speed();
         vel_avg->add_entry(velocity);
 
         velocity = vel_avg->get_average();
 
-        acceleration = (velocity - last_velocity)/dt;
+        acceleration = odom.get_accel();
         acc_avg->add_entry(acceleration);
         acceleration = acc_avg->get_average();
 
@@ -77,6 +81,16 @@ void test_rot_speed(){
     
     double full_rotation = 0;
     double last_raw_rotation = 0;
+    while (time<.2){
+      printf("⏸️");fflush(stdout);
+      time+=.02;
+      vexDelay(20);
+    }
+    printf("✅\n");
+        
+    main_controller.Screen.clearScreen();
+
+    double last_vel_time = 0;
     while (time<accel_time + decell_time && main_controller.ButtonA.pressing()){
 
         if (time<accel_time){
@@ -94,25 +108,36 @@ void test_rot_speed(){
         pos_avg->add_entry(displacement);
         displacement = pos_avg->get_average();
         
-        velocity = (displacement - last_displacement)/dt;
-        vel_avg->add_entry(velocity);
+        if (time - last_vel_time>.2){
+          double long_dt = time - last_vel_time;
+          velocity = (displacement - last_displacement)/long_dt;
+          acceleration = (velocity - last_velocity)/long_dt;
+          last_velocity = velocity;
 
-        velocity = vel_avg->get_average();
+          vel_avg->add_entry(velocity);
+          velocity = vel_avg->get_average();
+          acc_avg->add_entry(acceleration);
+          acceleration = acc_avg->get_average();
+        }
 
-        acceleration = (velocity - last_velocity)/dt;
-        acc_avg->add_entry(acceleration);
-        acceleration = acc_avg->get_average();
 
 
-        printf("%f\t%f\t%f\t%f\n", time, displacement, velocity, acceleration);
+        printf("%f\t%f\t%f\t%f\t✅\n", time, displacement, velocity, acceleration);
         fflush(stdout);
 
         time += dt;
         vexDelay((int)(dt*1000));
         last_displacement = displacement;
-        last_velocity = velocity;
     }
+
 }
+
+//output: kS 0.072000, kV 0.000103, kA -0.000003
+//output: kS 0.044000, kV 0.000106, kA -0.000003
+//output: kS 0.005000, kV 0.000111, kA -0.000003
+//output: kS 0.052000, kV 0.000105, kA -0.000003
+//output: kS 0.002500, kV 0.000111, kA -0.000010
+//output: kS 0.076500, kV 0.000051, kA -0.000005
 
 
 /**
@@ -128,15 +153,25 @@ void opcontrol()
   }
   printf("🍞\n");fflush(stdout);
   
+  
+
 
   if (1){
-    while (!drive_sys.turn_to_heading(0) && main_controller.ButtonA.pressing()){
+    //test_rot_speed();
+    //FeedForward::ff_config_t f = MotionController::tune_feedforward_turning(drive_sys, odom, 1, 2);
+    //printf("output: kS %f, kV %f, kA %f\n", f.kS, f.kV, f.kA);fflush(stdout);
+  
+    
+    while (main_controller.ButtonA.pressing() && !drive_sys.turn_to_heading(-90)){
       position_t pos = odom.get_position();
-      printf("%f\t%f\n", time, pos.rot);fflush(stdout);
-      time+=.02;  
+      printf("time: %f\tactual position: %f\n", time, pos.rot);fflush(stdout);
+      time+=.02;
 
       vexDelay(20);
     }
+    
+    
+    
   }
   
   // Periodic
@@ -144,7 +179,7 @@ void opcontrol()
   {
     drive_sys.drive_tank(main_controller.Axis2.value()*.015,main_controller.Axis3.value()*.015);
     auto pos = odom.get_position();
-    //printf("(%f)\n", pos.rot);fflush(stdout);
+    //printf("%f\t%f\n", pos.rot, 90+imu.heading());fflush(stdout);
      // ========== DRIVING CONTROLS ==========
 
     // ========== MANIPULATING CONTROLS ==========

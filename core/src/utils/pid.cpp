@@ -53,7 +53,8 @@ double PID::update(double sensor_val)
   last_time = pid_timer.value();
   last_error = get_error();
 
-  printf("e%.3f\t", get_error());
+
+  printf("error: %.3f%s%s\t", get_error(), fabs(get_error()) < 3 ? "✅" : (fabs(get_error())<10 ? "⚠️" : "❌"), get_error() > 0 ? "⬆️" : "⬇️");
 
 
   // Enable clamping if the limit is not 0

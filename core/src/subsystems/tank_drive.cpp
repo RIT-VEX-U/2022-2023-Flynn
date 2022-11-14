@@ -150,7 +150,7 @@ bool TankDrive::turn_degrees(double degrees, Feedback &feedback, double max_spee
   }
   double heading = odometry->get_position().rot - saved_pos.rot;
   double delta_heading = OdometryBase::smallest_angle(heading, degrees);
-  feedback.update(delta_heading);
+  feedback.update(-delta_heading);
 
   drive_tank(feedback.get(), -feedback.get());
 
@@ -349,7 +349,7 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
     fflush(stderr);
     return true;
   }
-
+  static position_t last_pos = odometry->get_position(); 
   if(!func_initialized)
   {
     double initial_delta = OdometryBase::smallest_angle(odometry->get_position().rot, heading_deg);
@@ -362,10 +362,19 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
   // Get the difference between the new heading and the current, and decide whether to turn left or right.
   double delta_heading = OdometryBase::smallest_angle(odometry->get_position().rot, heading_deg);
   feedback.update(-delta_heading);
+  printf("dh: %f\t", delta_heading);
 
+  double vel = OdometryBase::smallest_angle(last_pos.rot, odometry->get_position().rot)/.02;
+  printf("vel: %f\t", vel);
+  
+
+
+  last_pos = odometry->get_position();
 
 
   fflush(stdout);
+
+  printf("out: %f\t", feedback.get());
 
   drive_tank(feedback.get(), -feedback.get());
 
