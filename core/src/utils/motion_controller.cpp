@@ -14,6 +14,9 @@
 MotionController::MotionController(m_profile_cfg_t &config)
 : config(config), pid(config.pid_cfg), ff(config.ff_cfg), profile(config.max_v, config.accel)
 {}
+MotionController::MotionController(m_profile_cfg_t &config, double (*calculate_error)(double target, double sensor_val))
+: config(config), pid(config.pid_cfg, calculate_error), ff(config.ff_cfg), profile(config.max_v, config.accel)
+{}
 
 /**
  * @brief Initialize the motion profile for a new movement

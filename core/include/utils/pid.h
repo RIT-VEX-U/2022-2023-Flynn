@@ -33,6 +33,8 @@ public:
    * Create the PID object
    */
   PID(pid_config_t &config);
+  PID(pid_config_t &config, double (*calculate_error)(double target, double sensor_val));
+
 
   /**
    * Inherited from Feedback for interoperability.
@@ -87,6 +89,8 @@ public:
 
 private:
   pid_config_t &config;
+  double (*calculate_error)(double target, double sensor_val);
+
 
   double last_error = 0, accum_error = 0;
   double last_time = 0, on_target_last_time = 0;

@@ -8,6 +8,10 @@ PID::PID(pid_config_t &config)
 {
   pid_timer.reset();
 }
+PID::PID(pid_config_t &config, double (*calculate_error)(double a, double b)) : config(config), calculate_error(calculate_error)
+{
+  pid_timer.reset();
+}
 
 void PID::init(double start_pt, double set_pt)
 {
