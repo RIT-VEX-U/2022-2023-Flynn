@@ -43,7 +43,7 @@ class MotionController : public Feedback
      * @param ff_cfg Definitions of kS, kV, and kA
      */
     MotionController(m_profile_cfg_t &config);
-    MotionController(m_profile_cfg_t &config, double (*calcualte_error)(double target, double sensor_val));
+    MotionController(m_profile_cfg_t &config, double (*calculate_error)(double target, double sensor_val));
 
     /**
      * @brief Initialize the motion profile for a new movement
@@ -101,9 +101,8 @@ class MotionController : public Feedback
      * @return A tuned feedforward object
      */
     static FeedForward::ff_config_t tune_feedforward(TankDrive &drive, OdometryTank &odometry, double pct=0.6, double duration=2);
-    static FeedForward::ff_config_t tune_feedforward_turning(TankDrive &drive, OdometryTank &odometry, double pct, double duration);
 
-    public: 
+    private: 
 
     m_profile_cfg_t config;
 

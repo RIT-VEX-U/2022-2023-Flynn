@@ -164,12 +164,12 @@ void opcontrol()
     //printf("output: kS %f, kV %f, kA %f\n", f.kS, f.kV, f.kA);fflush(stdout);
   
     
-    while (main_controller.ButtonA.pressing() && !drive_sys.turn_to_heading(270)){
+    while (main_controller.ButtonA.pressing() && !drive_sys.turn_to_heading(0)){
       position_t pos = odom.get_position();
       printf("time: %f\tactual position: %f\n", time, pos.rot);fflush(stdout);
       time+=.02;
 
-      vexDelay(20);
+      vexDelay(30);
     }
     
     
@@ -182,7 +182,7 @@ void opcontrol()
     drive_sys.drive_tank(main_controller.Axis2.value()*.015,main_controller.Axis3.value()*.015);
     auto pos = odom.get_position();
     if (main_controller.ButtonB.pressing()){
-      printf("%f\n", pos.rot);fflush(stdout);
+      printf("(%f, %f) %f\n",pos.x, pos.y, pos.rot);fflush(stdout);
     }
     // ========== DRIVING CONTROLS ==========
 

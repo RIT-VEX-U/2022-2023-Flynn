@@ -5,7 +5,7 @@ using namespace vex;
 // A global instance of brain used for printing to the V5 brain screen
 brain Brain;
 controller main_controller;
-inertial imu(PORT11);
+inertial imu(PORT20);
 
 // ======== OUTPUTS ========
 
@@ -73,6 +73,10 @@ PID::pid_config_t correction_pid = (PID::pid_config_t) {
         .d = 0,
     };
 
+
+double calculate_circular_error (double target, double sensor_val){
+  return OdometryBase::smallest_angle(target, sensor_val);
+}
 // WARNING: DUMMY VALUES, TO BE REPLACED
 robot_specs_t specs = {
   .robot_radius = 7.5,
@@ -81,12 +85,12 @@ robot_specs_t specs = {
   .dist_between_wheels = 8.5,
   .drive_correction_cutoff = 3.0,
   .drive_feedback = new MotionController(mprof_drive_normal_cfg),
-  .turn_feedback = new MotionController(mprof_turn_normal_cfg),
+  .turn_feedback = new MotionController(mprof_turn_normal_cfg, calculate_circular_error),
   .correction_pid = correction_pid,
 
 };
 
-OdometryTank odom(drive_left, drive_right, specs);
+OdometryTank odom(drive_left, drive_right, specs, &imu);
 TankDrive drive_sys(drive_left, drive_right, specs, &odom);
 
 

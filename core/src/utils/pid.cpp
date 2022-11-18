@@ -1,30 +1,37 @@
 #include "../core/include/utils/pid.h"
 
 /**
-   * Create the PID object
-   */
-PID::PID(pid_config_t &config)  : config(config), calculate_error(NULL)
+ * Create the PID object
+ */
+PID::PID(pid_config_t &config)
+    : config(config)
 {
   pid_timer.reset();
 }
-/**
-   * Create the PID object
-   */
-PID::PID(pid_config_t &config, double (*calculate_error)(double target, double sensor_val)) : config(config), calculate_error(calculate_error)
+PID::PID(pid_config_t &config, double (*calculate_error)(double a, double b)) : config(config), calculate_error(calculate_error)
 {
   pid_timer.reset();
 }
 
+void PID::init(double start_pt, double set_pt)
+{
+  set_target(set_pt);
+  reset();
+}
+
 /**
-   * Update the PID loop by taking the time difference from last update,
-   * and running the PID formula with the new sensor data
-   */
-void PID::update(double sensor_val)
+ * Update the PID loop by taking the time difference from last update,
+ * and running the PID formula with the new sensor data
+ */
+double PID::update(double sensor_val)
 {
 
   this->sensor_val = sensor_val;
 
   double time_delta = pid_timer.value() - last_time;
+
+  printf("error: %.3f%s%s\t", get_error(), fabs(get_error()) < 3 ? "✅" : (fabs(get_error())<10 ? "⚠️" : "❌"), get_error() > 0 ? "⬆️" : "⬇️");
+
 
   // Avoid a divide by zero error
   double d_term = 0;
@@ -33,15 +40,9 @@ void PID::update(double sensor_val)
   else if(last_time != 0)
     printf("(pid.cpp): Warning - running PID without a delay is just a P loop!\n");
 
-  double k_term = 0;
-  if(get_error() > 0)
-    k_term = config.k;
-  else if(get_error() < 0)
-    k_term = -config.k;
 
-
-  // F, P, D and K terms
-  out = (config.f * target) + (config.p * get_error()) + d_term + k_term;
+  // P and D terms
+  out = (config.p * get_error()) + d_term;
 
   bool limits_exist = lower_limit != 0 || upper_limit != 0;
 
@@ -56,15 +57,18 @@ void PID::update(double sensor_val)
   last_time = pid_timer.value();
   last_error = get_error();
 
+
+
   // Enable clamping if the limit is not 0
   if (limits_exist)
     out = (out < lower_limit) ? lower_limit : (out > upper_limit) ? upper_limit : out;
 
+  return out;
 }
 
 /**
-   * Reset the PID loop by resetting time since 0 and accumulated error.
-   */
+ * Reset the PID loop by resetting time since 0 and accumulated error.
+ */
 void PID::reset()
 {
   pid_timer.reset();
@@ -78,16 +82,16 @@ void PID::reset()
 }
 
 /**
-   * Gets the current PID out value, from when update() was last run
-   */
+ * Gets the current PID out value, from when update() was last run
+ */
 double PID::get()
 {
   return out;
 }
 
 /**
-   * Get the delta between the current sensor data and the target
-   */
+ * Get the delta between the current sensor data and the target
+ */
 double PID::get_error()
 {
   if (calculate_error==NULL){
@@ -102,17 +106,17 @@ double PID::get_target()
 }
 
 /**
-   * Set the target for the PID loop, where the robot is trying to end up
-   */
+ * Set the target for the PID loop, where the robot is trying to end up
+ */
 void PID::set_target(double target)
 {
   this->target = target;
 }
 
 /**
-   * Set the limits on the PID out. The PID out will "clip" itself to be 
-   * between the limits.
-   */
+ * Set the limits on the PID out. The PID out will "clip" itself to be 
+ * between the limits.
+ */
 void PID::set_limits(double lower, double upper)
 {
   lower_limit = lower;
@@ -120,9 +124,9 @@ void PID::set_limits(double lower, double upper)
 }
 
 /**
-   * Returns true if the loop is within [deadband] for [on_target_time]
-   * seconds
-   */
+ * Returns true if the loop is within [deadband] for [on_target_time]
+ * seconds
+ */
 bool PID::is_on_target()
 {
   if (fabs(get_error()) < config.deadband)

@@ -225,7 +225,6 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   // Get the distance between 2 points
   double dist_left = OdometryBase::pos_diff(current_pos, end_pos);
   //dist_left = end_pos.y - current_pos.y;  
-  double unmodified_dist_left = dist_left;
   int sign = 1;
 
   // Make an imaginary perpendicualar line to that between the bot and the point. If the point is behind that line,
@@ -288,8 +287,8 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   //printf("%.3f\t", drive_pid_rval*50);
 
   // Combine the two pid outputs
-  double lside = drive_pid_rval + correction;
-  double rside = drive_pid_rval - correction;
+  double lside = drive_pid_rval - correction;
+  double rside = drive_pid_rval + correction;
 
   // limit the outputs between -1 and +1
   lside = clamp(lside, -1, 1);
@@ -301,12 +300,13 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   //printf("%.3f\t", unmodified_dist_left*sign);
   //printf("%.3f\t", dist_left*sign);
 
-  printf("%.3f\t", current_pos.x);
-  printf("%.3f\t", current_pos.y);
-  printf("%.3f\t", x);
-  printf("%.3f\t", y);
-  printf("%.3f\t", correction);
-  printf("%d", sign);
+  printf("x: %.3f\t", current_pos.x);
+  printf("y: %.3f\t", current_pos.y);
+  printf("rot: %.3f\t", current_pos.rot);
+  printf("targetX: %.3f\t", x);
+  printf("targetY: %.3f\t", y);
+  printf("Correctoin:%.3f\t", correction);
+  
 
 
   //printf("%.3f\t", end_pos.y);
@@ -376,7 +376,7 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
 
   printf("out: %f\t", feedback.get());
 
-  drive_tank(feedback.get(), -feedback.get());
+  drive_tank(-feedback.get(), feedback.get());
 
   // When the robot has reached it's angle, return true.
   if(feedback.is_on_target())
