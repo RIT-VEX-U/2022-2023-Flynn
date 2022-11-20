@@ -137,33 +137,19 @@ bool TankDrive::turn_degrees(double degrees, Feedback &feedback, double max_spee
     return true;
   }
 
-  static position_t saved_pos;
+  static double target_heading = 0;
 
   // On the first run of the funciton, reset the gyro position and PID
   if (!func_initialized)
   {
-    saved_pos = odometry->get_position();
-    feedback.init(-degrees, 0);
-    feedback.set_limits(-fabs(max_speed), fabs(max_speed));
+    double start_heading = odometry->get_position().rot;
+    target_heading = start_heading + degrees;
 
-    func_initialized = true;
-  }
-  double heading = odometry->get_position().rot - saved_pos.rot;
-  double delta_heading = OdometryBase::smallest_angle(heading, degrees);
-  feedback.update(delta_heading);
-
-  drive_tank(feedback.get(), -feedback.get());
-
-  // If the robot is at it's target, return true
-  if (feedback.is_on_target())
-  {
-    drive_tank(0, 0);
-    func_initialized = false;
-    return true;
   }
 
-  return false;
+  return turn_to_heading(target_heading);
 }
+
 
 bool TankDrive::turn_degrees(double degrees, double max_speed)
 {
