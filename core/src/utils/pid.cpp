@@ -8,6 +8,11 @@ PID::PID(pid_config_t &config)
 {
   pid_timer.reset();
 }
+/**
+ * Create the PID object with a custom error calculation function.
+ * Given the target position and where you are currently, return an error value saying how far and in which direction you are off by.
+ * Example: Calculating errors for angles needs to acount for wrapping - you can't just use subtraction
+ */
 PID::PID(pid_config_t &config, double (*calculate_error)(double a, double b)) : config(config), calculate_error(calculate_error)
 {
   pid_timer.reset();

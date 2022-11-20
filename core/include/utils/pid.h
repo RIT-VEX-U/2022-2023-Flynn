@@ -33,6 +33,11 @@ public:
    * Create the PID object
    */
   PID(pid_config_t &config);
+  /**
+   * Create the PID object with a custom error calculation function.
+   * Given the target position and where you are currently, return an error value saying how far and in which direction you are off by.
+   * Example: Calculating errors for angles needs to acount for wrapping - you can't just use subtraction
+   */
   PID(pid_config_t &config, double (*calculate_error)(double target, double sensor_val));
 
 
