@@ -125,7 +125,11 @@ bool TankDrive::drive_forward(double inches, directionType dir, double max_speed
  * Autonomously turn the robot X degrees to the right (negative for left), with a maximum motor speed
  * of percent_speed (-1.0 -> 1.0)
  * 
- * Uses a PID loop for it's control.
+ * Uses a PID loop and Feedforward for it's control.
+ * @param degrees the number of degrees to turn
+ * @param feedback the feedback controller for this movement
+ * @param max_speed the max amount of speed we can turn at
+ * @return true if the movement is finished
  */
 bool TankDrive::turn_degrees(double degrees, Feedback &feedback, double max_speed)
 {
@@ -151,6 +155,13 @@ bool TankDrive::turn_degrees(double degrees, Feedback &feedback, double max_spee
 }
 
 
+/**
+ * Turn Degrees with the default feedback setup
+ * See other turn_degrees()
+ * @param degrees the number of degrees to turn
+ * @param max_speed the max amount of speed we can turn at
+ * @return true if the movement is finished
+ */
 bool TankDrive::turn_degrees(double degrees, double max_speed)
 {
   if(turn_default_feedback != NULL)
