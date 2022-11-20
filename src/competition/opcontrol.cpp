@@ -22,11 +22,16 @@ void opcontrol()
   while(imu.isCalibrating()){
     vexDelay(20);
   }
-  printf("🍞\n");fflush(stdout);
+  printf("Finished Calibrating✅\n");fflush(stdout);
   
 
   if (1){
-    while (main_controller.ButtonA.pressing() && !drive_sys.turn_to_heading(0)){      
+    while (main_controller.ButtonA.pressing() && !drive_sys.turn_degrees(-90)){      //!drive_sys.turn_to_heading(0)){
+      time+=.02;
+      vexDelay(20);
+    }
+
+    while (main_controller.ButtonA.pressing() && !drive_sys.drive_to_point(12, 0, fwd)){      //!drive_sys.turn_to_heading(0)){
       time+=.02;
       vexDelay(20);
     }

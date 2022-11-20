@@ -44,7 +44,7 @@ MotionController::m_profile_cfg_t mprof_turn_normal_cfg =
     .accel = 1200,
     .pid_cfg = (PID::pid_config_t) {
         .p = 0.03,//6,
-        .i = 0.0,
+        .i = 0.01,
         .d = 0.0025,
         .deadband = 1,//degree
     },
@@ -83,14 +83,14 @@ robot_specs_t specs = {
   .odom_wheel_diam = 3.25,
   .odom_gear_ratio = 36.0/60.0,
   .dist_between_wheels = 10.75,
-  .drive_correction_cutoff = 3.0,
+  .drive_correction_cutoff = 2.0,
   .drive_feedback = new MotionController(mprof_drive_normal_cfg),
   .turn_feedback = new MotionController(mprof_turn_normal_cfg, calculate_circular_error),
   .correction_pid = correction_pid,
 
 };
 
-OdometryTank odom(drive_left, drive_right, specs, &imu);
+OdometryTank odom(drive_left, drive_right, specs);
 TankDrive drive_sys(drive_left, drive_right, specs, &odom);
 
 

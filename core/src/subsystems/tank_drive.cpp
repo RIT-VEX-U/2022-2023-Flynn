@@ -137,32 +137,17 @@ bool TankDrive::turn_degrees(double degrees, Feedback &feedback, double max_spee
     return true;
   }
 
-  static position_t saved_pos;
+  static double target_heading = 0;
 
   // On the first run of the funciton, reset the gyro position and PID
   if (!func_initialized)
   {
-    saved_pos = odometry->get_position();
-    feedback.init(-degrees, 0);
-    feedback.set_limits(-fabs(max_speed), fabs(max_speed));
+    double start_heading = odometry->get_position().rot;
+    target_heading = start_heading + degrees;
 
-    func_initialized = true;
-  }
-  double heading = odometry->get_position().rot - saved_pos.rot;
-  double delta_heading = OdometryBase::smallest_angle(heading, degrees);
-  feedback.update(-delta_heading);
-
-  drive_tank(feedback.get(), -feedback.get());
-
-  // If the robot is at it's target, return true
-  if (feedback.is_on_target())
-  {
-    drive_tank(0, 0);
-    func_initialized = false;
-    return true;
   }
 
-  return false;
+  return turn_to_heading(target_heading);
 }
 
 bool TankDrive::turn_degrees(double degrees, double max_speed)
@@ -182,9 +167,9 @@ bool TankDrive::turn_degrees(double degrees, double max_speed)
   *
   * Returns whether or not the robot has reached it's destination.
   */
+
 bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedback &feedback, double max_speed)
 {
-  static double time = 0;
   // We can't run the auto drive function without odometry
   if(odometry == NULL)
   {
@@ -195,7 +180,7 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   
   if(!func_initialized)
   {
-    time = 0;
+    
     double initial_dist = OdometryBase::pos_diff(odometry->get_position(), {.x=x, .y=y});
 
     // Reset the control loops
@@ -207,11 +192,11 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
 
     func_initialized = true;
   }
-  printf("%.3f\t", time);
 
   // Store the initial position of the robot
   position_t current_pos = odometry->get_position();
   position_t end_pos = {.x=x, .y=y};
+  printf("(%f, %f){%f}\t", current_pos.x, current_pos.y, current_pos.y);
 
   // Create a point (and vector) to get the direction
   Vector2D::point_t pos_diff_pt = 
@@ -224,7 +209,7 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
 
   // Get the distance between 2 points
   double dist_left = OdometryBase::pos_diff(current_pos, end_pos);
-  //dist_left = end_pos.y - current_pos.y;  
+  
   int sign = 1;
 
   // Make an imaginary perpendicualar line to that between the bot and the point. If the point is behind that line,
@@ -238,12 +223,10 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   if (angle < 0) angle += 360; 
 
   // If the angle is behind the robot, report negative.
-  if (dir == directionType::fwd && angle > 90 && angle < 270){
+  if (dir == directionType::fwd && angle > 90 && angle < 270)
     sign = -1;
-
-  }else if(dir == directionType::rev && (angle < 90 || angle > 270)){
+  else if(dir == directionType::rev && (angle < 90 || angle > 270))
     sign = -1;
-  }
 
   if (fabs(dist_left) < config.drive_correction_cutoff) 
   {
@@ -264,7 +247,6 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
     delta_heading = OdometryBase::smallest_angle(current_pos.rot - 180, heading);
 
   // Update the PID controllers with new information
-  printf("Heading:\t");
   correction_pid.update(delta_heading);
   feedback.update(sign * -1 * dist_left);
 
@@ -275,42 +257,24 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
 
   // Reverse the drive_pid output if we're going backwards
   double drive_pid_rval;
-  if(dir == directionType::rev){
+  if(dir == directionType::rev)
     drive_pid_rval = feedback.get() * -1;
-  }else{
+  else
     drive_pid_rval = feedback.get();
-  }
 
   // Combine the two pid outputs
-  double lside = drive_pid_rval - correction;
-  double rside = drive_pid_rval + correction;
+  double lside = drive_pid_rval + correction;
+  double rside = drive_pid_rval - correction;
 
   // limit the outputs between -1 and +1
   lside = clamp(lside, -1, 1);
   rside = clamp(rside, -1, 1);
 
   drive_tank(lside, rside);
-  time += .02;
-
-
-
-  //printf("x: %.3f\t", current_pos.x);
-  //printf("y: %.3f\t", current_pos.y);
-  //printf("rot: %.3f\t", current_pos.rot);
-  //printf("targetX: %.3f\t", x);
-  //printf("targetY: %.3f\t", y);
-  //printf("Correctoin:%.3f\t", correction);
-  
-
-
-  //printf("%.3f\t", end_pos.y);
-  //printf("%.3f\t", angle/10);
-
 
   // Check if the robot has reached it's destination
   if(feedback.is_on_target())
   {
-    printf("\n======\nfinished dist_left: %f\n", dist_left);fflush(stdout);
     stop();
     func_initialized = false;
     return true;
@@ -363,6 +327,7 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
 
   fflush(stdout);
 
+  printf("POS: %f\t", odometry->get_position().rot);
   printf("out: %f\t", feedback.get());
 
   drive_tank(-feedback.get(), feedback.get());

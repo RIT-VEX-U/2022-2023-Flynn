@@ -109,16 +109,12 @@ position_t OdometryTank::update()
     angle += rotation_offset;
 
 
-
     //Limit the angle betwen 0 and 360. 
     //fmod (floating-point modulo) gets it between -359 and +359, so tack on another 360 if it's negative.
     angle = fmod(angle, 360.0);
     if(angle < 0)
         angle += 360;
 
-    if (main_controller.ButtonR1.pressing()){
-      printf("LSIDE: %f\tRSIDE: %f\tANGLE: %f\tDIFF: %f\t\n", lside_revs, rside_revs, angle, (rside_revs - lside_revs) * PI * config.odom_wheel_diam);fflush(stdout);
-    }
 
     updated_pos = calculate_new_pos(config, current_pos, lside_revs, rside_revs, angle);
 
@@ -190,6 +186,9 @@ position_t OdometryTank::calculate_new_pos(robot_specs_t &config, position_t &cu
     new_pos.rot = angle_deg;
 
     // Store the left and right encoder values to find the difference in the next iteration
+    if (stored_lside_revs!=lside_revs || stored_rside_revs != rside_revs){
+      printf("LREVS: %f\tRREVS: %f\t\n", lside_revs, rside_revs);
+    }
     stored_lside_revs = lside_revs;
     stored_rside_revs = rside_revs;
 
