@@ -1,4 +1,5 @@
 #include "../core/include/subsystems/odometry/odometry_tank.h"
+#include "C:/Users/richi/VEX/2022-2023-Flynn/include/robot-config.h"
 
 /**
  * Initialize the Odometry module, calculating position from the drive motors.
@@ -11,6 +12,7 @@ OdometryTank::OdometryTank(vex::motor_group &left_side, vex::motor_group &right_
 {
     // Make sure the last known info starts zeroed
     memset(&current_pos, 0, sizeof(position_t));
+    
 
     // Start the asynchronous background thread
     if (is_async)
@@ -74,16 +76,17 @@ position_t OdometryTank::update()
 
     if(left_side != NULL && right_side != NULL)
     {
+      //use motor encoders
       lside_revs = left_side->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
       rside_revs = right_side->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
     }else if(left_enc != NULL && right_enc != NULL)
     {
+      //use external encoders
       lside_revs = left_enc->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
       rside_revs = right_enc->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
     }
 
     double angle = 0;
-
     // If the IMU data was passed in, use it for rotational data
     if(imu == NULL)
     {
@@ -94,7 +97,7 @@ position_t OdometryTank::update()
       double distance_diff = (rside_revs - lside_revs) * PI * config.odom_wheel_diam;
 
       //Use the arclength formula to calculate the angle. Add 90 to make "0 degrees" to starboard
-      angle = -((180.0 / PI) * (distance_diff / config.dist_between_wheels)) + 90;
+      angle = ((180.0 / PI) * (distance_diff / config.dist_between_wheels)) + 90;
 
     } else
     {
@@ -105,11 +108,17 @@ position_t OdometryTank::update()
     // Offset the angle, if we've done a set_position
     angle += rotation_offset;
 
+
+
     //Limit the angle betwen 0 and 360. 
     //fmod (floating-point modulo) gets it between -359 and +359, so tack on another 360 if it's negative.
     angle = fmod(angle, 360.0);
     if(angle < 0)
         angle += 360;
+
+    if (main_controller.ButtonR1.pressing()){
+      printf("LSIDE: %f\tRSIDE: %f\tANGLE: %f\tDIFF: %f\t\n", lside_revs, rside_revs, angle, (rside_revs - lside_revs) * PI * config.odom_wheel_diam);fflush(stdout);
+    }
 
     updated_pos = calculate_new_pos(config, current_pos, lside_revs, rside_revs, angle);
 

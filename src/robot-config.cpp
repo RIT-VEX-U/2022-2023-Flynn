@@ -80,9 +80,9 @@ double calculate_circular_error (double target, double sensor_val){
 // WARNING: DUMMY VALUES, TO BE REPLACED
 robot_specs_t specs = {
   .robot_radius = 7.5,
-  .odom_wheel_diam = 2.75,
-  .odom_gear_ratio = .447,
-  .dist_between_wheels = 8.5,
+  .odom_wheel_diam = 3.25,
+  .odom_gear_ratio = 36.0/60.0,
+  .dist_between_wheels = 10.75,
   .drive_correction_cutoff = 3.0,
   .drive_feedback = new MotionController(mprof_drive_normal_cfg),
   .turn_feedback = new MotionController(mprof_turn_normal_cfg, calculate_circular_error),
