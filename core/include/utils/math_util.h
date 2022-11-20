@@ -22,7 +22,7 @@ double sign(double x);
 /*
 Calculates the variance of  a set of numbers (needed for linear regression)
 https://en.wikipedia.org/wiki/Variance
-@param values   the values for which the covariance is taken
+@param values   the values for which the variance is taken
 @param mean     the average of values
 */
 double variance(std::vector<double> const &values, double mean);
