@@ -36,7 +36,6 @@ double mean(std::vector<double> const &values);
 
 /*
 Calculates the covariance of a set of points (needed for linear regression)
-(refactor to accept to sets of values not a set of points)
 https://en.wikipedia.org/wiki/Covariance
 
 @param points   the points for which the covariance is taken
