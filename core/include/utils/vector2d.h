@@ -13,19 +13,19 @@ public:
     /**
      * Data structure representing an X,Y coordinate
      */
-    struct point_t
+    typedef struct point_config_t
     {
         double x, y;
 
-        double dist(const point_t other)
+        double dist(const point_config_t other)
         {
           return sqrt(pow(this->x - other.x, 2) + pow(this->y - other.y, 2));
         }
 
         // Vector2D addition operation on points
-        point_t operator+(const point_t &other)
+        point_config_t operator+(const point_config_t &other)
         {
-          point_t p 
+          point_config_t p 
           {
             .x = this->x + other.x,
             .y = this->y + other.y
@@ -34,16 +34,16 @@ public:
         }
 
         // Vector2D subtraction operation on points
-        point_t operator-(const point_t &other)
+        point_config_t operator-(const point_config_t &other)
         {
-          point_t p 
+          point_config_t p 
           {
             .x = this->x - other.x,
             .y = this->y - other.y
           };
           return p;
         }
-    };
+    }point_config_t;
 
     /**
      * Construct a vector object.
@@ -56,9 +56,9 @@ public:
     /**
      * Construct a vector object from a cartesian point.
      * 
-     * @param p point_t.x , point_t.y
+     * @param p point_config_t.x , point_config_t.y
      */
-    Vector2D(point_t &p);
+    Vector2D(point_config_t &p);
 
     /**
      * Get the direction of the vector, in radians.
@@ -91,7 +91,7 @@ public:
     /**
     * Returns a point from the vector
     */
-    Vector2D::point_t point();
+    Vector2D::point_config_t point();
 
     Vector2D operator*(const double &x);
     Vector2D operator+(const Vector2D &other);

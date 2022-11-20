@@ -4,12 +4,12 @@
 /**
 * Gets the current position and rotation
 */
-position_t OdometryBase::get_position(void)
+position_config_t OdometryBase::get_position(void)
 {
     mut.lock();
 
     // Create a new struct to pass-by-value
-    position_t out =
+    position_config_t out =
     {
         .x = current_pos.x,
         .y = current_pos.y,
@@ -24,7 +24,7 @@ position_t OdometryBase::get_position(void)
 /**
  * Sets the current position of the robot
  */
-void OdometryBase::set_position(const position_t &newpos)
+void OdometryBase::set_position(const position_config_t &newpos)
 {
     mut.lock();
 
@@ -48,7 +48,7 @@ void OdometryBase::end_async()
 /**
  * Get the distance between two points
  */
-double OdometryBase::pos_diff(position_t start_pos, position_t end_pos)
+double OdometryBase::pos_diff(position_config_t start_pos, position_config_t end_pos)
 {
   // Use the pythagorean theorem
   double retval = sqrt(pow(end_pos.x - start_pos.x, 2) + pow(end_pos.y - start_pos.y, 2));
@@ -59,7 +59,7 @@ double OdometryBase::pos_diff(position_t start_pos, position_t end_pos)
 /**
  * Get the change in rotation between two points
  */
-double OdometryBase::rot_diff(position_t &pos1, position_t &pos2)
+double OdometryBase::rot_diff(position_config_t &pos1, position_config_t &pos2)
 {
   return pos1.rot - pos2.rot;
 }

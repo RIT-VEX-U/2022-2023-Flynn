@@ -13,15 +13,15 @@ class AutoChooser
 
   protected:
 
-  struct entry_t
+  typedef struct
   {
     int x, y, width, height;
     std::string name;
-  };
+  }entry_config_t;
 
-  void render(entry_t *selected);
+  void render(entry_config_t *selected);
   std::string choice;
-  std::vector<entry_t> list;
+  std::vector<entry_config_t> list;
   vex::brain &brain;
 
 

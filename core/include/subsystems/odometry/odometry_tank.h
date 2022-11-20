@@ -31,10 +31,10 @@ public:
     /**
      * Update the current position on the field based on the sensors
      */
-    position_t update() override;
+    position_config_t update() override;
 
 
-    void set_position(const position_t &newpos=zero_pos) override;
+    void set_position(const position_config_t &newpos=zero_pos) override;
 
     double get_speed();
 
@@ -42,7 +42,7 @@ private:
     /**
      * Get information from the input hardware and an existing position, and calculate a new current position
      */
-    static position_t calculate_new_pos(robot_specs_t &config, position_t &stored_info, double lside_diff, double rside_diff, double angle_deg);
+    static position_config_t calculate_new_pos(robot_specs_t &config, position_config_t &stored_info, double lside_diff, double rside_diff, double angle_deg);
 
     vex::motor_group *left_side, *right_side;
     CustomEncoder *left_enc, *right_enc;

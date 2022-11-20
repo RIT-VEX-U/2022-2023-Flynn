@@ -11,7 +11,7 @@ AutoChooser::AutoChooser(vex::brain &brain) : brain(brain)
     int x = a.brain.Screen.xPosition();
     int y = a.brain.Screen.yPosition();
 
-    entry_t *selected = NULL;
+    entry_config_t *selected = NULL;
     
     // Check if the touchscreen press is inside each rectangle
     for(int i = 0; i < a.list.size(); i++)
@@ -42,7 +42,7 @@ AutoChooser::AutoChooser(vex::brain &brain) : brain(brain)
   * Place all the autonomous choices on the screen.
   * If one is selected, change it's color
   */
-void AutoChooser::render(entry_t *selected)
+void AutoChooser::render(entry_config_t *selected)
 {
   for(int i = 0; i < list.size(); i++)
   {
@@ -65,7 +65,7 @@ void AutoChooser::add(std::string name)
 {
   int x = (PADDING * ((list.size() % 3) + 1)) + ((list.size() % 3) * WIDTH);
   int y = (PADDING * ((list.size() / 3) + 1)) + ((list.size() / 3) * HEIGHT);
-  entry_t entry = {
+  entry_config_t entry = {
     .x=x,
     .y=y,
     .width=WIDTH,

@@ -10,7 +10,7 @@ OdometryTank::OdometryTank(vex::motor_group &left_side, vex::motor_group &right_
 : left_side(&left_side), right_side(&right_side), left_enc(NULL), right_enc(NULL), imu(imu), config(config)
 {
     // Make sure the last known info starts zeroed
-    memset(&current_pos, 0, sizeof(position_t));
+    memset(&current_pos, 0, sizeof(position_config_t));
 
     // Start the asynchronous background thread
     if (is_async)
@@ -27,7 +27,7 @@ OdometryTank::OdometryTank(CustomEncoder &left_enc, CustomEncoder &right_enc, ro
 : left_side(NULL), right_side(NULL), left_enc(&left_enc), right_enc(&right_enc), imu(imu), config(config)
 {
     // Make sure the last known info starts zeroed
-    memset(&current_pos, 0, sizeof(position_t));
+    memset(&current_pos, 0, sizeof(position_config_t));
 
     // Start the asynchronous background thread
     if (is_async)
@@ -38,7 +38,7 @@ OdometryTank::OdometryTank(CustomEncoder &left_enc, CustomEncoder &right_enc, ro
  * Resets the position and rotational data to the input.
  * 
  */
-void OdometryTank::set_position(const position_t &newpos)
+void OdometryTank::set_position(const position_config_t &newpos)
 {
   rotation_offset = newpos.rot - (current_pos.rot - rotation_offset);
 
@@ -65,9 +65,9 @@ int background_task(void* odom_obj)
  * Update, store and return the current position of the robot. Only use if not initializing
  * with a separate thread.
  */
-position_t OdometryTank::update()
+position_config_t OdometryTank::update()
 {
-    position_t updated_pos;
+    position_config_t updated_pos;
 
     double lside_revs = 0, rside_revs = 0;
 
@@ -128,9 +128,9 @@ position_t OdometryTank::update()
  * Using information about the robot's mechanical structure and sensors, calculate a new position
  * of the robot, relative to when this method was previously ran.
  */
-position_t OdometryTank::calculate_new_pos(robot_specs_t &config, position_t &curr_pos, double lside_revs, double rside_revs, double angle_deg)
+position_config_t OdometryTank::calculate_new_pos(robot_specs_t &config, position_config_t &curr_pos, double lside_revs, double rside_revs, double angle_deg)
 {
-    position_t new_pos;
+    position_config_t new_pos;
 
     static double stored_lside_revs = lside_revs;
     static double stored_rside_revs = rside_revs;
@@ -146,7 +146,7 @@ position_t OdometryTank::calculate_new_pos(robot_specs_t &config, position_t &cu
     Vector2D chg_vec(angle, dist_driven);
     
     // Create a vector from the current position in reference to X,Y=0,0
-    Vector2D::point_t curr_point = {.x = curr_pos.x, .y = curr_pos.y};
+    Vector2D::point_config_t curr_point = {.x = curr_pos.x, .y = curr_pos.y};
     Vector2D curr_vec(curr_point);
 
     // Tack on the "difference" vector to the current vector
@@ -165,7 +165,7 @@ position_t OdometryTank::calculate_new_pos(robot_specs_t &config, position_t &cu
 
 double OdometryTank::get_speed()
 {
-  static position_t last_pos = get_position();
+  static position_config_t last_pos = get_position();
   static timer speed_tmr;
 
   double out = 0;

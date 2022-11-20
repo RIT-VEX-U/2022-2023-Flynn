@@ -1,4 +1,4 @@
-#include "../core/include/subsystems/tank_drive.h"
+#include "../core/include/subsystems/drivetrains/tank_drive.h"
 
 TankDrive::TankDrive(motor_group &left_motors, motor_group &right_motors, robot_specs_t &config, OdometryTank *odom)
     : left_motors(left_motors), right_motors(right_motors),
@@ -30,20 +30,12 @@ void TankDrive::stop()
  * 
  * left_motors and right_motors are in "percent": -1.0 -> 1.0
  */
-void TankDrive::drive_tank(double left, double right, int power, bool isdriver)
+void TankDrive::drive_tank(double left, double right, int power)
 {
   left = modify_inputs(left, power);
   right = modify_inputs(right, power);
-
-  if(isdriver == false)
-  {
-    left_motors.spin(directionType::fwd, left * 12, voltageUnits::volt);
-    right_motors.spin(directionType::fwd, right * 12, voltageUnits::volt);
-  }else
-  {
-    left_motors.spin(directionType::fwd, left * 100.0, percentUnits::pct);
-    right_motors.spin(directionType::fwd, right * 100.0, percentUnits::pct);
-  }
+  left_motors.spin(directionType::fwd, left * 12, voltageUnits::volt);
+  right_motors.spin(directionType::fwd, right * 12, voltageUnits::volt);
 }
 
 /**
@@ -75,7 +67,7 @@ void TankDrive::drive_arcade(double forward_back, double left_right, int power)
  */
 bool TankDrive::drive_forward(double inches, double speed, double correction, directionType dir)
 {
-  static position_t pos_setpt;
+  static position_config_t pos_setpt;
 
   // We can't run the auto drive function without odometry
   if(odometry == NULL)
@@ -154,7 +146,7 @@ bool TankDrive::turn_degrees(double degrees, double percent_speed)
 
 /**
   * Use odometry to automatically drive the robot to a point on the field.
-  * X and Y is the final point we want the robot.
+  * X and Y is the final point we want the robot. Units are in inches.
   *
   * Returns whether or not the robot has reached it's destination.
   */
@@ -188,11 +180,11 @@ bool TankDrive::drive_to_point(double x, double y, double speed, double correcti
   }
 
   // Store the initial position of the robot
-  position_t current_pos = odometry->get_position();
-  position_t end_pos = {.x=x, .y=y};
+  position_config_t current_pos = odometry->get_position();
+  position_config_t end_pos = {.x=x, .y=y};
 
   // Create a point (and vector) to get the direction
-  Vector2D::point_t pos_diff_pt = 
+  Vector2D::point_config_t pos_diff_pt = 
   {
     .x = x - current_pos.x,
     .y = y - current_pos.y
@@ -329,14 +321,15 @@ bool TankDrive::turn_to_heading(double heading_deg, double speed)
  */
 double TankDrive::modify_inputs(double input, int power)
 {
-  return (power % 2 == 0 ? (input < 0 ? -1 : 1) : 1) * pow(input, power);
+  if(power % 2 == 0 && input < 0) return -1 * pow(input, power);
+  return pow(input, power);
 }
 
 bool TankDrive::pure_pursuit(std::vector<PurePursuit::hermite_point> path, double radius, double speed, double res, directionType dir) {
   is_pure_pursuit = true;
-  std::vector<Vector2D::point_t> smoothed_path = PurePursuit::smooth_path_hermite(path, res);
+  std::vector<Vector2D::point_config_t> smoothed_path = PurePursuit::smooth_path_hermite(path, res);
 
-  Vector2D::point_t lookahead = PurePursuit::get_lookahead(smoothed_path, {odometry->get_position().x, odometry->get_position().y}, radius);
+  Vector2D::point_config_t lookahead = PurePursuit::get_lookahead(smoothed_path, {odometry->get_position().x, odometry->get_position().y}, radius);
   //printf("%f\t%f\n", odometry->get_position().x, odometry->get_position().y); 
   //printf("%f\t%f\n", lookahead.x, lookahead.y);
   bool is_last_point = (path.back().x == lookahead.x) && (path.back().y == lookahead.y);

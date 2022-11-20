@@ -33,7 +33,7 @@ public:
    * 
    * left_motors and right_motors are in "percent": -1.0 -> 1.0
    */
-  void drive_tank(double left, double right, int power=1, bool isdriver=false);
+  void drive_tank(double left, double right, int power=1);
 
   /**
    * Drive the robot using arcade style controls. forward_back controls the linear motion,
@@ -105,7 +105,7 @@ private:
 
   OdometryTank *odometry;
 
-  position_t saved_pos;
+  position_config_t saved_pos;
 
   robot_specs_t &config;
 
