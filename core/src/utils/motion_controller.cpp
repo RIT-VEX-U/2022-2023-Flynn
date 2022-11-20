@@ -6,10 +6,11 @@
 /**
  * @brief Construct a new Motion Controller object
  * 
- * @param max_v Maximum velocity the movement is capable of
- * @param accel Acceleration / deceleration of the movement
- * @param pid_cfg Definitions of kP, kI, and kD
- * @param ff_cfg Definitions of kS, kV, and kA
+ * @param config The definition of how the robot is able to move
+ *    max_v Maximum velocity the movement is capable of
+ *    accel Acceleration / deceleration of the movement
+ *    pid_cfg Definitions of kP, kI, and kD
+ *    ff_cfg Definitions of kS, kV, and kA
  */
 MotionController::MotionController(m_profile_cfg_t &config)
 : config(config), pid(config.pid_cfg), ff(config.ff_cfg), profile(config.max_v, config.accel)
@@ -17,10 +18,11 @@ MotionController::MotionController(m_profile_cfg_t &config)
 /**
  * @brief Construct a new Motion Controller object
  * 
- * @param max_v Maximum velocity the movement is capable of
- * @param accel Acceleration / deceleration of the movement
- * @param pid_cfg Definitions of kP, kI, and kD
- * @param ff_cfg Definitions of kS, kV, and kA
+ * @param config The definition of how the robot is able to move
+ *    max_v Maximum velocity the movement is capable of
+ *    accel Acceleration / deceleration of the movement
+ *    pid_cfg Definitions of kP, kI, and kD
+  *    ff_cfg Definitions of kS, kV, and kA
  * @param calculate_error Given the target position and where you are currently, return an error value saying how far and in which direction you are off by.
  */
 MotionController::MotionController(m_profile_cfg_t &config, double (*calculate_error)(double target, double sensor_val))
