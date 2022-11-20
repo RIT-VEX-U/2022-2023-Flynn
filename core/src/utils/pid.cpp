@@ -94,7 +94,10 @@ double PID::get()
  */
 double PID::get_error()
 {
-  return target - sensor_val;
+  if (calculate_error==NULL){
+    return target - sensor_val;
+  }
+  return calculate_error(target, sensor_val);
 }
 
 double PID::get_target()
