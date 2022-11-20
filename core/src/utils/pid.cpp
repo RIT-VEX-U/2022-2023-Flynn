@@ -28,9 +28,14 @@ double PID::update(double sensor_val)
 
   this->sensor_val = sensor_val;
 
+
   double time_delta = pid_timer.value() - last_time;
 
-  printf("error: %.3f%s%s\t", get_error(), fabs(get_error()) < 3 ? "✅" : (fabs(get_error())<10 ? "⚠️" : "❌"), get_error() > 0 ? "⬆️" : "⬇️");
+  printf("sensor_val: %f\t", sensor_val);
+  printf("target: %f\t", target);
+  
+  printf("error: %.3f%s%s\t", get_error(), fabs(get_error()) < 3 ? "✅" : (fabs(get_error())<10 ? "⚠️" : "❌") ,"  ");
+  printf("\n");fflush(stdout);
 
 
   // Avoid a divide by zero error
@@ -97,7 +102,7 @@ double PID::get_error()
   if (calculate_error==NULL){
     return target - sensor_val;
   }
-  return calculate_error(target, sensor_val);
+  return calculate_error(sensor_val, target);
 }
 
 double PID::get_target()

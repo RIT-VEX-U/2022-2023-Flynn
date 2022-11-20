@@ -42,13 +42,9 @@ double MotionController::update(double sensor_val)
     motion_t motion = profile.calculate(tmr.time(timeUnits::sec));
     pid.set_target(motion.pos);
     pid.update(sensor_val);
-    double naive_error = pid.get_error();
-    double actual_error = OdometryBase::smallest_angle(motion.pos, sensor_val);
-    if (!(fabs(naive_error-actual_error)<.5)){
-      printf("\n\n==CORRECTION:\n%f\n%f\n==\n\n", naive_error, actual_error);fflush(stdout);
-    }
-    printf("targetP: %f\ttargetV: %f\t", motion.pos, motion.vel);
-
+    printf("targetP: %f\ttargetV: %f\ttargetA: %f\t", motion.pos, motion.vel, motion.accel);
+    printf("pidOut: %f\t", pid.get());
+    printf("ffOut: %f\t", ff.calculate(motion.vel, motion.accel));
     out = pid.get() +  ff.calculate(motion.vel, motion.accel);
 
     if(lower_limit != upper_limit)
@@ -57,7 +53,7 @@ double MotionController::update(double sensor_val)
     return out;
 }
 
-/**
+/**targrt
  * @return the last saved result from the feedback controller
  */
 double MotionController::get()

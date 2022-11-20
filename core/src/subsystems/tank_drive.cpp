@@ -240,11 +240,9 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   // If the angle is behind the robot, report negative.
   if (dir == directionType::fwd && angle > 90 && angle < 270){
     sign = -1;
-    //printf("\n====\ndirtype_fwd\n====\n");
 
   }else if(dir == directionType::rev && (angle < 90 || angle > 270)){
     sign = -1;
-    //printf("\n====\ndirtype_rev\n====\n");
   }
 
   if (fabs(dist_left) < config.drive_correction_cutoff) 
@@ -266,10 +264,8 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
     delta_heading = OdometryBase::smallest_angle(current_pos.rot - 180, heading);
 
   // Update the PID controllers with new information
-  //printf("deltaHeading: %f\t", delta_heading);
-  //printf("Heading\t");
+  printf("Heading:\t");
   correction_pid.update(delta_heading);
-  //printf("Driving\t");
   feedback.update(sign * -1 * dist_left);
 
   // Disable correction when we're close enough to the point
@@ -284,7 +280,6 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   }else{
     drive_pid_rval = feedback.get();
   }
-  //printf("%.3f\t", drive_pid_rval*50);
 
   // Combine the two pid outputs
   double lside = drive_pid_rval - correction;
@@ -297,22 +292,20 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, Feedb
   drive_tank(lside, rside);
   time += .02;
 
-  //printf("%.3f\t", unmodified_dist_left*sign);
-  //printf("%.3f\t", dist_left*sign);
 
-  printf("x: %.3f\t", current_pos.x);
-  printf("y: %.3f\t", current_pos.y);
-  printf("rot: %.3f\t", current_pos.rot);
-  printf("targetX: %.3f\t", x);
-  printf("targetY: %.3f\t", y);
-  printf("Correctoin:%.3f\t", correction);
+
+  //printf("x: %.3f\t", current_pos.x);
+  //printf("y: %.3f\t", current_pos.y);
+  //printf("rot: %.3f\t", current_pos.rot);
+  //printf("targetX: %.3f\t", x);
+  //printf("targetY: %.3f\t", y);
+  //printf("Correctoin:%.3f\t", correction);
   
 
 
   //printf("%.3f\t", end_pos.y);
   //printf("%.3f\t", angle/10);
 
-  printf("\n\r");fflush(stdout);
 
   // Check if the robot has reached it's destination
   if(feedback.is_on_target())
@@ -362,10 +355,6 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
   // Get the difference between the new heading and the current, and decide whether to turn left or right.
   double delta_heading = OdometryBase::smallest_angle(odometry->get_position().rot, heading_deg);
   feedback.update(-delta_heading);
-  printf("dh: %f\t", -delta_heading);
-
-  double vel = OdometryBase::smallest_angle(last_pos.rot, odometry->get_position().rot)/.02;
-  printf("vel: %f\t", vel);
   
 
 

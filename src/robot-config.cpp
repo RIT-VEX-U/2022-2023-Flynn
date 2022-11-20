@@ -23,10 +23,10 @@ MotionController::m_profile_cfg_t mprof_drive_normal_cfg =
     .max_v =  60,
     .accel = 200,
     .pid_cfg = (PID::pid_config_t) {
-        .p = .3,
-        .i = 0.01,
+        .p = .31,
+        .i = 0.012,
         .d = 0.0001,
-        .deadband = .1,
+        .deadband = .15,
     },
     .ff_cfg = (FeedForward::ff_config_t)
     {
@@ -40,19 +40,19 @@ MotionController::m_profile_cfg_t mprof_drive_normal_cfg =
 // -------- Default Turn Motion Profile --------
 MotionController::m_profile_cfg_t mprof_turn_normal_cfg = 
 {
-    .max_v = 300,
-    .accel = 600,
+    .max_v = 600,
+    .accel = 1200,
     .pid_cfg = (PID::pid_config_t) {
-        .p = .03,//6,
-        .i = 0.01,
-        .d = 0,
-        .deadband = .1,
+        .p = 0.03,//6,
+        .i = 0.0,
+        .d = 0.0025,
+        .deadband = 1,//degree
     },
     .ff_cfg = (FeedForward::ff_config_t)
     {
-        .kS = 0.0,//8,
-        .kV = 0.002,//1,//2,
-        .kA = 0.0001,//004,//03
+        .kS = 0,//0,//0.1,//8,
+        .kV = 0,//0.0015,//-0.0025,//1,//2,
+        .kA = 0,//0.00065,//004,//03
     }
 };
 
@@ -60,12 +60,12 @@ MotionController::m_profile_cfg_t mprof_turn_normal_cfg =
 motor lf(PORT3, true);
 motor lm(PORT5, true); 
 motor lr(PORT4); // yes, cable is sketchy
-motor_group drive_right(lf, lm, lr);
+motor_group drive_left(lf, lm, lr);
 
 motor rf(PORT7);
 motor rm(PORT6);
 motor rr(PORT8, true);
-motor_group drive_left(rf, rm, rr);
+motor_group drive_right(rf, rm, rr);
 
 PID::pid_config_t correction_pid = (PID::pid_config_t) {
         .p = .03,
