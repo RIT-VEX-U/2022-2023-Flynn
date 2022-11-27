@@ -90,7 +90,7 @@ robot_specs_t specs = {
 
 };
 
-OdometryTank odom(drive_left, drive_right, specs);
+OdometryTank odom(drive_left, drive_right, specs, &imu);
 TankDrive drive_sys(drive_left, drive_right, specs, &odom);
 
 

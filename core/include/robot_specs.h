@@ -8,7 +8,7 @@
  * that require info about the robot.
  * All distance measurements are in inches.
  */
-typedef struct robot_specs_s
+typedef struct
 {  
   double robot_radius;
 

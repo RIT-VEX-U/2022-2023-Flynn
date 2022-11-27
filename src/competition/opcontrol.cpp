@@ -40,7 +40,7 @@ void opcontrol()
   // Periodic
   while(true)
   {
-    drive_sys.drive_tank(main_controller.Axis3.value()*.015,main_controller.Axis2.value()*.015);
+    drive_sys.drive_tank(main_controller.Axis3.value()*1,main_controller.Axis2.value()*1);
     auto pos = odom.get_position();
     if (main_controller.ButtonB.pressing()){
       printf("(%f, %f) %f\n",pos.x, pos.y, pos.rot);fflush(stdout);
