@@ -44,18 +44,6 @@ class MotionController : public Feedback
      *    ff_cfg Definitions of kS, kV, and kA
      */
     MotionController(m_profile_cfg_t &config);
-    /**
-     * @brief Construct a new Motion Controller object
-     * 
-     * @param config The definition of how the robot is able to move
-     *    max_v Maximum velocity the movement is capable of
-     *    accel Acceleration / deceleration of the movement
-     *    pid_cfg Definitions of kP, kI, and kD
-     *    ff_cfg Definitions of kS, kV, and kA
-     * @param calculate_error Given the target position and where you are currently, return an error value saying how far and in which direction you are off by.
-     */
-
-    MotionController(m_profile_cfg_t &config, double (*calculate_error)(double target, double sensor_val));
 
     /**
      * @brief Initialize the motion profile for a new movement

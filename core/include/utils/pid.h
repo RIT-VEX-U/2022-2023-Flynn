@@ -23,11 +23,21 @@ using namespace vex;
 class PID : Feedback
 {
 public:
+  /**
+   *An enum to distinguish between a linear and angular caluclation of PID error.
+   */
+  enum ERROR_TYPE{
+    LINEAR,
+    ANGULAR
+  };
   struct pid_config_t
   {
     double p, i, d;
     double deadband, on_target_time;
+    ERROR_TYPE error_method;
   };
+
+  
 
   /**
    * Create the PID object
@@ -38,7 +48,7 @@ public:
    * Given the target position and where you are currently, return an error value saying how far and in which direction you are off by.
    * Example: Calculating errors for angles needs to acount for wrapping - you can't just use subtraction
    */
-  PID(pid_config_t &config, double (*calculate_error)(double target, double sensor_val));
+  PID(pid_config_t &config, ERROR_TYPE error_method);
 
 
   /**
@@ -94,7 +104,7 @@ public:
 
 private:
   pid_config_t &config;
-  double (*calculate_error)(double target, double sensor_val);
+  //double (*calculate_error)(double target, double sensor_val);
 
 
   double last_error = 0, accum_error = 0;
