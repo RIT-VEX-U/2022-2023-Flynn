@@ -104,7 +104,6 @@ public:
 
 private:
   pid_config_t &config;
-  //double (*calculate_error)(double target, double sensor_val);
 
 
   double last_error = 0, accum_error = 0;
