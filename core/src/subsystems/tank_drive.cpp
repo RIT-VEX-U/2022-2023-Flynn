@@ -362,7 +362,7 @@ bool TankDrive::turn_to_heading(double heading_deg, Feedback &feedback, double m
 
   fflush(stdout);
 
-  drive_tank(feedback.get(), -feedback.get());
+  drive_tank(-feedback.get(), feedback.get());
 
   // When the robot has reached it's angle, return true.
   if(feedback.is_on_target())
