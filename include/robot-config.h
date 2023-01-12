@@ -23,7 +23,7 @@ extern motor rf, rm, rr;
 extern motor_group drive_left;
 extern motor lf, lm, lr;
 
-extern CustomEncoder lside, rside, offaxis;
+extern vex::encoder lside, rside, offaxis;
 
 extern OdometryTank odom;
 extern Odometry3Wheel odometry3wheel;

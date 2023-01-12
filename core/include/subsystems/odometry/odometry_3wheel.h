@@ -48,7 +48,7 @@ class Odometry3Wheel : public OdometryBase
      * @param cfg robot odometry configuration
      * @param is_async true to constantly run in the background
      */
-    Odometry3Wheel(CustomEncoder &lside_fwd, CustomEncoder &rside_fwd, CustomEncoder &off_axis, odometry3wheel_cfg_t &cfg, bool is_async=true);
+    Odometry3Wheel(vex::encoder &lside_fwd, vex::encoder &rside_fwd, vex::encoder &off_axis, odometry3wheel_cfg_t &cfg, bool is_async=true);
 
     /**
      * Update the current position of the robot once, using the current state of
@@ -84,7 +84,7 @@ class Odometry3Wheel : public OdometryBase
      */
     static position_t calculate_new_pos(double lside_delta_deg, double rside_delta_deg, double offax_delta_deg, position_t old_pos, odometry3wheel_cfg_t cfg);
 
-    CustomEncoder &lside_fwd, &rside_fwd, &off_axis;
+    vex::encoder &lside_fwd, &rside_fwd, &off_axis;
     odometry3wheel_cfg_t &cfg;
 
 
