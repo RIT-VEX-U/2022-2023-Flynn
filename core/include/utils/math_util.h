@@ -1,4 +1,6 @@
 #pragma once
+#include "math.h"
+#include "vex.h"
 
 /**
 * Constrain the input between a minimum and a maximum value
@@ -16,3 +18,6 @@ double clamp(double value, double low, double high);
 * returns the sign +/-1 of x. 0 if x is 0
 **/
 double sign(double x);
+
+double wrap_angle_deg(double input);
+double wrap_angle_rad(double input);

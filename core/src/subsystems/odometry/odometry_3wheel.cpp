@@ -1,5 +1,6 @@
 #include "../core/include/subsystems/odometry/odometry_3wheel.h"
 #include "../core/include/utils/vector2d.h"
+#include "../core/include/utils/math_util.h"
 
 Odometry3Wheel::Odometry3Wheel(CustomEncoder &lside_fwd, CustomEncoder &rside_fwd, CustomEncoder &off_axis, odometry3wheel_cfg_t &cfg, bool is_async) 
 : OdometryBase(is_async), lside_fwd(lside_fwd), rside_fwd(rside_fwd), off_axis(off_axis), cfg(cfg)
@@ -69,7 +70,7 @@ position_t Odometry3Wheel::calculate_new_pos(double lside_delta_deg, double rsid
     Vector2D local_displacement({.x=dist_local_x, .y=dist_local_y});
 
     // Rotate the local displacement to match the old robot's rotation
-    double global_dir_rad = fmod(local_displacement.get_dir() + deg2rad(old_pos.rot), 2*PI);
+    double global_dir_rad = wrap_angle_rad(local_displacement.get_dir() + deg2rad(old_pos.rot));
     Vector2D global_displacement(global_dir_rad, local_displacement.get_mag());
 
     // Tack on the position change to the old position
@@ -78,7 +79,7 @@ position_t Odometry3Wheel::calculate_new_pos(double lside_delta_deg, double rsid
 
     retval.x = new_pos_vec.get_x();
     retval.y = new_pos_vec.get_y();
-    retval.rot = fmod(old_pos.rot + delta_angle_deg, 360);
+    retval.rot = wrap_angle_deg(old_pos.rot + delta_angle_deg);
     
     return retval;
 }
