@@ -54,7 +54,7 @@ position_t Odometry3Wheel::update()
 position_t Odometry3Wheel::calculate_new_pos(double lside_delta_deg, double rside_delta_deg, double offax_delta_deg, position_t old_pos, odometry3wheel_cfg_t cfg)
 {
     //printf("opos(%.2f, %.2f) r: %.2f\t", old_pos.x, old_pos.y, old_pos.rot);      
-
+    
     position_t retval = {};
 
     // Arclength formula for encoder degrees -> single wheel distance driven
@@ -78,8 +78,6 @@ position_t Odometry3Wheel::calculate_new_pos(double lside_delta_deg, double rsid
     // Rotate the local displacement to match the old robot's rotation
     double global_dir_rad = fmod(local_displacement.get_dir() + deg2rad(old_pos.rot), 2*PI);
     Vector2D global_displacement(global_dir_rad, local_displacement.get_mag());
-
-    //printf("glob_dis(%.2f, %.2f)\t", global_displacement.get_x(), global_displacement.get_y());      
 
 
     // Tack on the position change to the old position
