@@ -18,7 +18,7 @@ for i in ${files}; do
 	special=""
 	if [[ -n "$(echo "$i" |grep "robot-config")" ]]; then
 		special="device_config"
-	elif [[ -n "$(egrep "vex::vision [^=]*=" $i)" ]]; then
+	elif [[ -n "$(grep -E "vex::vision [^=]*=" $i)" ]]; then
 		special="vision_config"
 	fi
 
