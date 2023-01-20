@@ -12,12 +12,12 @@ FeedForward::ff_config_t tune_feedforward(vex::motor_group &motor, double pct, d
 {
     FeedForward::ff_config_t out = {};
     
-    double start_pos = motor.rotation(vex::rotationUnits::rev);
+    double start_pos = motor.position(vex::rotationUnits::rev);
 
     // ========== kS Tuning =========
     // Start at 0 and slowly increase the power until the robot starts moving
     double power = 0;
-    while(fabs(motor.rotation(vex::rotationUnits::rev) - start_pos) < 0.05)
+    while(fabs(motor.position(vex::rotationUnits::rev) - start_pos) < 0.05)
     {
         motor.spin(vex::directionType::fwd, power, vex::voltageUnits::volt);
         power += 0.001;
@@ -34,7 +34,7 @@ FeedForward::ff_config_t tune_feedforward(vex::motor_group &motor, double pct, d
 
     double max_speed = 0;
     vex::timer tmr;
-    double time;
+    double time = 0;
 
     MovingAverage vel_ma(3);
     MovingAverage accel_ma(3);
