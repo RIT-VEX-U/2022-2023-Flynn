@@ -14,9 +14,13 @@ motor intake(PORT10);
 // ======== INPUTS ========
 limit shoot_limit(Brain.ThreeWirePort.B);
 
-CustomEncoder lside(Brain.ThreeWirePort.A, 2048);
-CustomEncoder rside(Brain.ThreeWirePort.C, 2048);
-CustomEncoder offaxis(Brain.ThreeWirePort.E, 2048);
+//CustomEncoder lside(Brain.ThreeWirePort.E, 2048);
+//CustomEncoder rside(Brain.ThreeWirePort.C, 2048);
+//CustomEncoder offaxis(Brain.ThreeWirePort.A, 2048);
+
+CustomEncoder rside(Brain.ThreeWirePort.A, 90);
+CustomEncoder offaxis(Brain.ThreeWirePort.C, 90);
+CustomEncoder lside(Brain.ThreeWirePort.E, 90);
 
 // ======== SUBSYSTEMS ========
 PID::pid_config_t flywheel_pid={
@@ -33,15 +37,15 @@ FeedForward::ff_config_t flywheel_ff={
 };
 
 
-motor rf(PORT3);
-motor rm(PORT5); 
-motor rr(PORT4, true); // yes, cable is sketchy
-motor_group drive_right(rf, rm, rr);
+motor lf(PORT1);
+motor lm(PORT2); 
+motor_group drive_left(lf, lm);
 
-motor lf(PORT7, true);
-motor lm(PORT6, true);
-motor lr(PORT8);
-motor_group drive_left(lf, lm, lr);
+motor rf(PORT3);
+motor rm(PORT4);
+
+motor_group drive_right(rf, rm);
+
 
 
 // WARNING: DUMMY VALUES, TO BE REPLACED
@@ -49,7 +53,7 @@ robot_specs_t specs = {
   .robot_radius = 7.5,
   .odom_wheel_diam = 2.75,
   .odom_gear_ratio = 1,
-  .dist_between_wheels = 8.5,
+  .dist_between_wheels = 10,
   .drive_correction_cutoff = 7.0,
 
   // Driving PID
@@ -75,14 +79,14 @@ robot_specs_t specs = {
 };
 
 Odometry3Wheel::odometry3wheel_cfg_t odometry3wheel_cfg = {
-  .wheel_diam = 2.45,
-  .wheelbase_dist = 12,
-  .off_axis_center_dist = 6
+  .wheel_diam = 2.75,
+  .wheelbase_dist = 10.0,
+  .off_axis_center_dist = 4.67
 };
 
 Odometry3Wheel odometry3wheel(lside, rside, offaxis, odometry3wheel_cfg);
 
-OdometryTank odom(drive_left, drive_right, specs);
+// OdometryTank odom(drive_left, drive_right, specs);
 TankDrive drive_sys(drive_left, drive_right, specs);
 
 // TODO: add Flywheel class

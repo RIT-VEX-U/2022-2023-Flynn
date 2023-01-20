@@ -70,7 +70,8 @@ position_t Odometry3Wheel::calculate_new_pos(double lside_delta_deg, double rsid
     Vector2D local_displacement({.x=dist_local_x, .y=dist_local_y});
 
     // Rotate the local displacement to match the old robot's rotation
-    double global_dir_rad = wrap_angle_rad(local_displacement.get_dir() + deg2rad(old_pos.rot));
+    double dir_delta_from_trans_rad = local_displacement.get_dir() - (PI/2.0);
+    double global_dir_rad = wrap_angle_rad(dir_delta_from_trans_rad + deg2rad(old_pos.rot));
     Vector2D global_displacement(global_dir_rad, local_displacement.get_mag());
 
     // Tack on the position change to the old position
