@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     "env": {
         "vex_compilerPath": "${config:vexcode.Cpp.Toolchain.Path}\\clang\\bin\\clang",
         "vex_sdkPath": "${config:vexcode.Cpp.Sdk.Home}\\V5\\V5_20220726_10_00_00\\vexv5",
@@ -49,4 +50,54 @@
         }
     ],
     "version": 4
+=======
+	"env": {
+		"vex_compilerPath": "${config:vexcode.Cpp.Toolchain.Path}\\clang\\bin\\clang",
+		"vex_sdkPath": "${config:vexcode.Cpp.Sdk.Home}\\V5\\V5_20220726_10_00_00\\vexv5",
+		"vex_gcc": "${vex_sdkPath}/gcc/include/c++/4.9.3",
+		"vex_sdkIncludes": [
+			"${vex_sdkPath}/include/**",
+			"${vex_sdkPath}/gcc/include/**",
+			"${vex_sdkPath}/gcc/include/machine/**",
+			"${vex_sdkPath}/gcc/include/newlib-nano/**",
+			"${vex_sdkPath}/gcc/include/sys/**",
+			"${vex_sdkPath}/clang/8.0.0/include/**",
+			"${workspaceFolder}/include/**",
+			"${workspaceFolder}/src/**"
+		]
+	},
+	"configurations": [
+		{
+			"name": "Win32",
+			"includePath": [
+				"${vex_sdkIncludes}"
+			],
+			"compilerPath": "${vex_compilerPath}",
+			"cStandard": "gnu99",
+			"cppStandard": "gnu++11",
+			"intelliSenseMode": "windows-clang-x86"
+		},
+		{
+			"name": "Mac",
+			"includePath": [
+				"${vex_sdkIncludes}"
+			],
+			"compilerPath": "${vex_compilerPath}",
+			"cStandard": "gnu99",
+			"cppStandard": "gnu++11",
+			"intelliSenseMode": "macos-clang-x86"
+		},
+		{
+			"name": "Linux",
+			"includePath": [
+				"${vex_sdkIncludes}"
+			],
+			"compilerPath": "${vex_compilerPath}/clang",
+			"cStandard": "gnu99",
+			"cppStandard": "gnu++17",
+			"intelliSenseMode": "linux-gcc-arm64"
+		}
+	],
+	"version": 4
+>>>>>>> 94388f651644bf6d3b3d999ae6fe13e6148f6e02
 }
