@@ -1,7 +1,7 @@
 {
 	"env": {
-		"vex_compilerPath": "${config:vexcode.Cpp.Toolchain.Path}/clang/bin",
-		"vex_sdkPath": "${config:vexcode.Cpp.Sdk.Home}/V5/V5_20220726_10_00_00/vexv5",
+		"vex_compilerPath": "${config:vexcode.Cpp.Toolchain.Path}\\clang\\bin\\clang",
+		"vex_sdkPath": "${config:vexcode.Cpp.Sdk.Home}\\V5\\V5_20220726_10_00_00\\vexv5",
 		"vex_gcc": "${vex_sdkPath}/gcc/include/c++/4.9.3",
 		"vex_sdkIncludes": [
 			"${vex_sdkPath}/include/**",
@@ -41,10 +41,10 @@
 			"includePath": [
 				"${vex_sdkIncludes}"
 			],
-			"compilerPath": "",
+			"compilerPath": "${vex_compilerPath}/clang",
 			"cStandard": "gnu99",
-			"cppStandard": "gnu++11",
-			"intelliSenseMode": "linux-clang-x86"
+			"cppStandard": "gnu++17",
+			"intelliSenseMode": "linux-gcc-arm64"
 		}
 	],
 	"version": 4
