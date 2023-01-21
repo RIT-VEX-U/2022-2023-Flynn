@@ -46,38 +46,94 @@ public:
   void drive_arcade(double forward_back, double left_right, int power=1);
 
   /**
-   * Autonomously drive forward or backwards, X inches infront or behind the robot's current position.
-   * This driving method is relative, so excessive use may cause the robot to get off course!
+   * Use odometry to automatically drive the robot to a point on the field.
+   * X and Y is the final point we want the robot.
    *
-   * @param inches Distance to drive in a straight line
-   * @param speed How fast the robot should travel, 0 -> 1.0
-   * @param correction How much the robot should correct for being off angle
-   * @param dir Whether the robot is travelling forwards or backwards
+   * Returns whether or not the robot has reached it's destination.
+   * @param x          the x position of the target
+   * @param y          the y position of the target
+   * @param dir        the direction we want to travel forward and backward
+   * @param feedback   the feedback controller we will use to travel. controls the rate at which we accelerate and drive.
+   * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
    */
   bool drive_forward(double inches, directionType dir, Feedback &feedback, double max_speed=1);
+  /**
+   * Autonomously turn the robot X degrees to counterclockwise (negative for clockwise), with a maximum motor speed
+   * of percent_speed (-1.0 -> 1.0)
+   * 
+   * Uses the specified feedback for it's control.
+   * 
+   * @param degrees     degrees by which we will turn relative to the robot (+) turns ccw, (-) turns cw
+   * @param feedback    the feedback controller we will use to travel. controls the rate at which we accelerate and drive.
+   * @param max_speed   the maximum percentage of robot speed at which the robot will travel. 1 = full power
+   */
+
   bool drive_forward(double inches, directionType dir, double max_speed=1);
 
   /**
    * Autonomously turn the robot X degrees to the right (negative for left), with a maximum motor speed
    * of percent_speed (-1.0 -> 1.0)
    * 
-   * Uses a PID loop for it's control.
+   * Uses PID + Feedforward for it's control.
+   * 
+   * @param degrees     degrees by which we will turn relative to the robot (+) turns ccw, (-) turns cw
+   * @param feedback    the feedback controller we will use to travel. controls the rate at which we accelerate and drive.
+   * @param max_speed   the maximum percentage of robot speed at which the robot will travel. 1 = full power
    */
   bool turn_degrees(double degrees, Feedback &feedback, double max_speed=1);
-  bool turn_degrees(double degrees, double max_speed=1);
+  /**
+   * Autonomously turn the robot X degrees to counterclockwise (negative for clockwise), with a maximum motor speed
+   * of percent_speed (-1.0 -> 1.0)
+   * 
+   * Uses the defualt turning feedback of the drive system.
+   * 
+   * @param degrees     degrees by which we will turn relative to the robot (+) turns ccw, (-) turns cw
+   * @param feedback    the feedback controller we will use to travel. controls the rate at which we accelerate and drive.
+   * @param max_speed   the maximum percentage of robot speed at which the robot will travel. 1 = full power
+   */  bool turn_degrees(double degrees, double max_speed=1);
 
   /**
    * Use odometry to automatically drive the robot to a point on the field.
    * X and Y is the final point we want the robot.
+   *
+   * Returns whether or not the robot has reached it's destination.
+   * @param x          the x position of the target
+   * @param y          the y position of the target
+   * @param dir        the direction we want to travel forward and backward
+   * @param feedback   the feedback controller we will use to travel. controls the rate at which we accelerate and drive.
+   * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
    */
   bool drive_to_point(double x, double y, vex::directionType dir, Feedback &feedback, double max_speed=1);
+  
+  /**
+   * Use odometry to automatically drive the robot to a point on the field.
+   * X and Y is the final point we want the robot.
+   * Here we use the default feedback controller from the drive_sys
+   *
+   * Returns whether or not the robot has reached it's destination.
+   * @param x          the x position of the target
+   * @param y          the y position of the target
+   * @param dir        the direction we want to travel forward and backward
+   * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
+   */
   bool drive_to_point(double x, double y, vex::directionType dir, double max_speed=1);
 
   /**
    * Turn the robot in place to an exact heading relative to the field.
-   * 0 is forward, and 0->360 is clockwise.
+   * 0 is forward.
+   * 
+   * @param heading_deg the heading to which we will turn 
+   * @param feedback    the feedback controller we will use to travel. controls the rate at which we accelerate and drive.
+   * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
    */
   bool turn_to_heading(double heading_deg, Feedback &feedback, double max_speed=1);
+  /**
+   * Turn the robot in place to an exact heading relative to the field.
+   * 0 is forward. Uses the defualt turn feedback of the drive system 
+   * 
+   * @param heading_deg the heading to which we will turn 
+   * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
+   */
   bool turn_to_heading(double heading_deg, double max_speed=1);
 
   /**

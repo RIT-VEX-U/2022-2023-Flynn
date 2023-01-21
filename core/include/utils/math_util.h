@@ -1,4 +1,6 @@
 #pragma once
+#include "math.h"
+#include "vex.h"
 #include <vector>
 
 /**
@@ -18,11 +20,13 @@ double clamp(double value, double low, double high);
 **/
 double sign(double x);
 
+double wrap_angle_deg(double input);
+double wrap_angle_rad(double input);
 
 /*
 Calculates the variance of  a set of numbers (needed for linear regression)
 https://en.wikipedia.org/wiki/Variance
-@param values   the values for which the covariance is taken
+@param values   the values for which the variance is taken
 @param mean     the average of values
 */
 double variance(std::vector<double> const &values, double mean);
@@ -36,7 +40,6 @@ double mean(std::vector<double> const &values);
 
 /*
 Calculates the covariance of a set of points (needed for linear regression)
-(refactor to accept to sets of values not a set of points)
 https://en.wikipedia.org/wiki/Covariance
 
 @param points   the points for which the covariance is taken

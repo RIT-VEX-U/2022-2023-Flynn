@@ -1,4 +1,5 @@
 #include "../core/include/utils/trapezoid_profile.h"
+#include "../core/include/utils/math_util.h"
 #include <cmath>
 
 /**
@@ -99,7 +100,7 @@ motion_t TrapezoidProfile::calculate(double time_s)
     if (time_s < accel_time + max_vel_time)
     {
         out.pos = start + CALC_POS(time_s - accel_time, 0, max_v_local, s_accel);
-        out.vel = max_v;
+        out.vel = sign(delta_pos) * max_v;
         out.accel = 0;
         return out;
     }
