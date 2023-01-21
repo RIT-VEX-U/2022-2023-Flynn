@@ -171,6 +171,7 @@ void Odometry3Wheel::tune(vex::controller &con, TankDrive &drive)
     con.Screen.newLine();
     con.Screen.print("Press A to continue");
     while(!con.ButtonA.pressing()) { vexDelay(20); }
+    con.Screen.clearScreen();
     
     old_lval = lside_fwd.position(deg);
     old_rval = rside_fwd.position(deg);
