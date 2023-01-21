@@ -7,7 +7,7 @@ CommandController auto_loader_side();
 CommandController auto_non_loader_side();
 
 CommandController prog_skills_loader_side();
-CommandController priog_skills_non_loader_size();
+CommandController prog_skills_non_loader_size();
 
 
 
@@ -50,13 +50,13 @@ CommandController auto_loader_side(){
 
     loader_side_auto.add(new SpinRPMCommand(flywheel_sys, loader_side_full_court_shot_rpm));
     loader_side_auto.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshhold for shooting is
-    //loader_side_auto.add(new ShooterShootAllCommand()); // TODO use shooter when it exists
+    loader_side_auto.add(new ShootCommand(intake, 2)); // TODO measure how long we need to wait to shoot all 
     loader_side_auto.add(new FlywheelStopCommand(flywheel_sys));
     loader_side_auto.add(new TurnDegreesCommand(drive_sys, 60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
     loader_side_auto.add(new DriveForwardCommand(drive_sys, 2, fwd, 1)); // Drive to align vertically with the spinners. // TODO measure this distance on the field with the actual robot
     loader_side_auto.add(new TurnDegreesCommand(drive_sys, 90, 1)); // Turn from facing directly upwards to facing the spinner.
     loader_side_auto.add(new DriveForwardCommand(drive_sys, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
-    loader_side_auto.add(new SpinRollerCommand(roller)); // TODO implement auto_spin_spinner_to_red based on testing on our field
+    loader_side_auto.add(new SpinRollerCommand(roller)); // TODO measure the distances in SpinRollerCommand to travel
 
     return loader_side_auto;
 }
@@ -88,14 +88,41 @@ CommandController auto_non_loader_side(){
 
     non_loader_side_auto.add(new SpinRPMCommand(flywheel_sys, non_loader_side_full_court_shot_rpm));
     non_loader_side_auto.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshhold for shooting is
-    //loader_side_auto.add(new ShooterShootAllCommand()); // TODO use shooter when it exists
+    non_loader_side_auto.add(new ShootCommand(intake, 2)); // TODO measure how long we need to wait to shoot all 
     non_loader_side_auto.add(new FlywheelStopCommand(flywheel_sys));
     non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, -60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
     non_loader_side_auto.add(new DriveForwardCommand(drive_sys, 20, fwd, 1)); // Drive to align vertically with the spinners. // TODO measure this distance on the field with the actual robot
     non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, -90, 1)); // Turn from facing directly upwards to facing the spinner.
     non_loader_side_auto.add(new DriveForwardCommand(drive_sys, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
-    non_loader_side_auto.add(new SpinRollerCommand(roller)); // TODO implement auto_spin_spinner_to_red based on testing on our field
+    non_loader_side_auto.add(new SpinRollerCommand(roller)); // TODO measure the distances in SpinRollerCommand to travel
 
     return non_loader_side_auto;
 }
 
+
+
+CommandController prog_skills_loader_side(){
+  const int times_to_shoot_then_load_from_station = 4; //TODO figure out how many iterations we want to do this for
+  const double length_between_before_loader_and_shooting_position = 60; //TODO measure this distance
+  const double prog_skills_loader_side_shot_rpm = 3000; // TODO measure how many rpms we need to make this shot
+
+  CommandController prog_skills_loader_side;
+  for (int i = 0; i< times_to_shoot_then_load_from_station; i++){
+    prog_skills_loader_side.add(new SpinRPMCommand(flywheel_sys, prog_skills_loader_side_shot_rpm));
+    prog_skills_loader_side.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshhold for shooting is
+    prog_skills_loader_side.add(new ShootCommand(intake, 1)); // TODO use shooter when it exists
+    prog_skills_loader_side.add(new DriveForwardCommand(drive_sys, length_between_before_loader_and_shooting_position, vex::reverse, 1));
+    prog_skills_loader_side.add(new StartIntakeCommand(intake, 10)); // TODO measure voltage needed to intake
+    prog_skills_loader_side.add(new DriveForwardCommand(drive_sys, length_between_before_loader_and_shooting_position, vex::fwd, .25)); // TODO measure how slow we need to to pick up disks from the loading zone
+    prog_skills_loader_side.add(new StopIntakeCommand(intake));
+
+  }  
+
+  return prog_skills_loader_side;
+}
+CommandController prog_skills_non_loader_size(){
+  CommandController prog_skills_non_loader_side;
+
+
+  return prog_skills_non_loader_side;
+}

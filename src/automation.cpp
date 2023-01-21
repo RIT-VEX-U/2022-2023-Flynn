@@ -1,4 +1,4 @@
-#include "../include/roller_controller.h"
+#include "../include/automation.h"
 
 
 /**
@@ -38,4 +38,46 @@ bool SpinRollerCommand::run() {
     return false;
 }
 
+/**
+* Construct a ShootCommand
+* @param firing_motor The motor that will spin the disk into the flywheel
+*/
+ShootCommand::ShootCommand(vex::motor firing_motor, double seconds_to_shoot): firing_motor(firing_motor), seconds_to_shoot(seconds_to_shoot){}
 
+/**
+ * Run the intake motor backward to move the disk into the flywheel
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+ */
+bool ShootCommand::run(){
+  if (!func_initialized){
+    tmr.reset();
+    func_initialized = true;
+  }
+
+  if (tmr.time(vex::seconds) > seconds_to_shoot){
+    func_initialized = false;
+    return true;
+  }
+
+  firing_motor.spin(vex::reverse); //TODO figure out if this needs to be negated to slap it into the flywheel
+  return false;
+}
+
+
+
+
+StartIntakeCommand::StartIntakeCommand(vex::motor intaking_motor, double intaking_voltage):intaking_motor(intaking_motor), intaking_voltage(intaking_voltage){}
+
+bool StartIntakeCommand::run(){
+  intaking_motor.spin(vex::fwd, intaking_voltage, vex::volt); 
+  return true;
+}
+
+
+StopIntakeCommand::StopIntakeCommand(vex::motor intaking_motor):intaking_motor(intaking_motor){}
+
+bool StopIntakeCommand::run(){
+  intaking_motor.stop(); 
+  return true;
+}
