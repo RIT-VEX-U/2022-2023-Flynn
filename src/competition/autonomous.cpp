@@ -3,20 +3,20 @@
 
 
 //functions to choose which auto we want. construct a GenericAuto when chosen.
-GenericAuto auto_loader_side(){}
-GenericAuto auto_non_loader_side(){};
+CommandController auto_loader_side();
+CommandController auto_non_loader_side();
 
-GenericAuto prog_skills_loader_side(){};
-GenericAuto priog_skills_non_loader_size(){};
+CommandController prog_skills_loader_side();
+CommandController priog_skills_non_loader_size();
 
-
+// TODO separate spin roller command into its own file
 static bool func_initialized;
 static double start_pos;
 static double target_pos;
 
 class SpinRollerCommand: public AutoCommand {
   public:
-    SpinRollerCommand();
+    SpinRollerCommand(){};
 
     /**
      * Run drive_forward
@@ -30,8 +30,8 @@ class SpinRollerCommand: public AutoCommand {
 
         // Initialize start and end position if not already
         if (!func_initialized){
-            double start_pos = roller.position(rev);
-            double target_pos = start_pos + num_revolutions_to_spin_motor;
+            start_pos = roller.position(rev);
+            target_pos = start_pos + num_revolutions_to_spin_motor;
         }    
 
         // Calculate error
@@ -57,7 +57,7 @@ class SpinRollerCommand: public AutoCommand {
  */ 
 void autonomous()
 {
-    GenericAuto current_auto = auto_loader_side();    
+    CommandController current_auto = auto_loader_side();    
     //current_auto.run(true);
 
 }
@@ -84,7 +84,7 @@ Map from page 40 of the game manual
  Human Instructions:
  Align robot to specified place and angle using LOADER SIDE AUTO jig
 */
-GenericAuto auto_loader_side(){
+CommandController auto_loader_side(){
     int loader_side_full_court_shot_rpm = 3000;  // TODO measure this RPM based on testing
     CommandController loader_side_auto;
 
@@ -97,6 +97,8 @@ GenericAuto auto_loader_side(){
     loader_side_auto.add(new TurnDegreesCommand(drive_sys, 90, 1)); // Turn from facing directly upwards to facing the spinner.
     loader_side_auto.add(new DriveForwardCommand(drive_sys, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
     loader_side_auto.add(new SpinRollerCommand()); // TODO implement auto_spin_spinner_to_red based on testing on our field
+
+    return loader_side_auto;
 }
 
 /*
@@ -120,7 +122,7 @@ Map from page 40 of the game manual
  Human Instructions:
  Align robot to specified place and angle using NON LOADER SIDE AUTO jig
 */
-GenericAuto auto_non_loader_side(){
+CommandController auto_non_loader_side(){
     int non_loader_side_full_court_shot_rpm = 3000;  // TODO measure this RPM based on testing
     CommandController non_loader_side_auto;
 
@@ -134,6 +136,6 @@ GenericAuto auto_non_loader_side(){
     non_loader_side_auto.add(new DriveForwardCommand(drive_sys, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
     non_loader_side_auto.add(new SpinRollerCommand()); // TODO implement auto_spin_spinner_to_red based on testing on our field
 
-
+    return non_loader_side_auto;
 }
 
