@@ -112,3 +112,39 @@ double OdometryBase::smallest_angle(double start_deg, double end_deg)
 
   return retval;
 }
+
+double OdometryBase::get_speed()
+{
+  mut.lock();
+  double retval = speed;
+  mut.unlock();
+  
+  return retval;
+}
+
+double OdometryBase::get_accel()
+{
+  mut.lock();
+  double retval = accel;
+  mut.unlock();
+
+  return retval;
+}
+
+double OdometryBase::get_angular_speed_deg()
+{
+  mut.lock();
+  double retval = ang_speed_deg;
+  mut.unlock();
+
+  return retval;
+}
+
+double OdometryBase::get_angular_accel_deg()
+{
+  mut.lock();
+  double retval = ang_accel_deg;
+  mut.unlock();
+
+  return retval;
+}

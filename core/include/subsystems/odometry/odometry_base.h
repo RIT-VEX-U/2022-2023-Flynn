@@ -88,10 +88,18 @@ public:
 
     bool end_task = false;
 
+    double get_speed();
+    double get_accel();
+
+    double get_angular_speed_deg();
+    double get_angular_accel_deg();
+
     inline static constexpr position_t zero_pos = {.x=0.0L, .y=0.0L, .rot=90.0L};
 
 protected:
     vex::task *handle;
     vex::mutex mut;
     position_t current_pos;
+
+    double speed, accel, ang_speed_deg, ang_accel_deg;
 };
