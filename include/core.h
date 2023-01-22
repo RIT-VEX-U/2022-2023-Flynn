@@ -11,6 +11,11 @@
 #include "../core/include/subsystems/flywheel.h"
 
 // Utils
+#include "../core/include/utils/command_structure/auto_command.h"
+#include "../core/include/utils/command_structure/command_controller.h"
+#include "../core/include/utils/command_structure/delay_command.h"
+#include "../core/include/utils/command_structure/drive_commands.h"
+#include "../core/include/utils/command_structure/flywheel_commands.h"
 #include "../core/include/utils/auto_chooser.h"
 #include "../core/include/utils/feedforward.h"
 #include "../core/include/utils/generic_auto.h"
