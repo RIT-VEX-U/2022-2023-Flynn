@@ -1,6 +1,7 @@
 #include "tuning.h"
 #include "robot-config.h"
 #include "math.h"
+#include "core.h"
 
 #define ENC_IN(enc) (enc.rotation(rev) * PI * odometry_cfg.wheel_diam)
 #define ENC_DIFF_IN(left,right) (fabs(ENC_IN(left)-ENC_IN(right))/2.0)
@@ -75,11 +76,11 @@ void tune_odometry_offax_dist()
     main_controller.Screen.print("Turn the robot in place 5 times");
     main_controller.Screen.setCursor(2,1);
     main_controller.Screen.print("Offaxis Dist: %f", offax_dist);
-    printf("Offaxis Dist: %f\n", offax_dist);
+    printf("Angle: %f, Offaxis Dist: %f\n", angle_rad, offax_dist);
 }
 
 // Drive Tuning
-void tune_drive_ff_ks()
+void tune_drive_ff_ks(DriveType dt)
 {
     static timer tmr;
     static double last_time = 0.0;
@@ -116,6 +117,11 @@ void tune_drive_ff_ks()
        if (tmr.time() - last_time > 500)
             test_pct += 0.01;
 
+        if(dt == DRIVE)
+            drive_sys.drive_tank(test_pct, test_pct);
+        else if(dt == TURN)
+            drive_sys.drive_tank(test_pct, -test_pct);
+
     }else
     {
         drive_sys.stop();
@@ -123,7 +129,7 @@ void tune_drive_ff_ks()
     }
 }
 
-void tune_drive_ff_kv()
+void tune_drive_ff_kv(DriveType dt, double ks)
 {
     static bool new_press = true;
 
@@ -134,10 +140,20 @@ void tune_drive_ff_kv()
             reset_avg_counter();
             new_press = false;
         }
+
+        double vel = 0;
         
-        drive_sys.drive_arcade(0.5, 0.0);
-        double vel = odometry_sys.get_speed();
-        double kv = 0.5 / continuous_avg(vel);
+        if(dt == DRIVE)
+        {
+            drive_sys.drive_tank(0.5, 0.5);
+            vel = odometry_sys.get_speed();
+        } else if(dt == TURN)
+        {
+            drive_sys.drive_tank(0.5, -0.5);
+            vel = odometry_sys.get_angular_speed_deg();
+        }
+        
+        double kv = (0.5-ks) / continuous_avg(vel);
 
         main_controller.Screen.clearScreen();
         main_controller.Screen.setCursor(1,1);
@@ -152,13 +168,19 @@ void tune_drive_ff_kv()
 
 }
 
-void tune_drive_pid()
+void tune_drive_pid(DriveType dt)
 {
     static bool done = false;
 
+    if(main_controller.ButtonB.pressing())
+        odometry_sys.set_position();
+
     if (main_controller.ButtonA.pressing())
     {
-        if(done || drive_sys.drive_to_point(0,24,fwd, drive_fast_mprofile))
+        if(dt == DRIVE && (done || drive_sys.drive_to_point(0,24,fwd, drive_fast_mprofile)))
+            done = true;
+        
+        if(dt == TURN && (done || drive_sys.turn_to_heading(270, turn_fast_mprofile)))
             done = true;
 
     }else
@@ -168,7 +190,7 @@ void tune_drive_pid()
     }
 }
 
-void tune_drive_motion_maxv()
+void tune_drive_motion_maxv(DriveType dt)
 {
     static bool new_press = true;
 
@@ -180,8 +202,17 @@ void tune_drive_motion_maxv()
             new_press = false;
         }
 
-        drive_sys.drive_arcade(1.0, 0);
-        double maxv = continuous_avg(odometry_sys.get_speed());
+        double maxv = 0;
+
+        if(dt == DRIVE)
+        {
+            drive_sys.drive_tank(1.0, 1.0);
+            maxv = continuous_avg(odometry_sys.get_speed());
+        }else if (dt == TURN)
+        {
+            drive_sys.drive_tank(1.0, -1.0);
+            maxv = continuous_avg(odometry_sys.get_angular_speed_deg());
+        }    
 
         main_controller.Screen.clearScreen();
         main_controller.Screen.setCursor(1,1);
@@ -195,7 +226,7 @@ void tune_drive_motion_maxv()
     }
 }
 
-void tune_drive_motion_accel(double maxv)
+void tune_drive_motion_accel(DriveType dt, double maxv)
 {
     static bool done = false;
     static bool new_press = true;
@@ -209,9 +240,22 @@ void tune_drive_motion_accel(double maxv)
             new_press = false;
         }
 
-        double accel = continuous_avg(odometry_sys.get_accel());
+        double accel = 0;
+        double vel = 0;
 
-        if(done || odometry_sys.get_speed() >= maxv)
+        if(dt == DRIVE)
+        {
+            vel = odometry_sys.get_speed();
+            accel = continuous_avg(odometry_sys.get_accel());
+            drive_sys.drive_tank(1.0, 1.0);
+        } else if (dt == TURN)
+        {
+            vel = odometry_sys.get_angular_speed_deg();
+            accel = continuous_avg(odometry_sys.get_angular_accel_deg());
+            drive_sys.drive_tank(1.0, -1.0);
+        }
+
+        if(done || vel >= maxv)
         {
             main_controller.Screen.clearScreen();
             main_controller.Screen.setCursor(1,1);
@@ -236,16 +280,82 @@ void tune_drive_motion_accel(double maxv)
 
 // Flywheel Tuning
 void tune_flywheel_ff()
-{
+{ 
+    static bool new_press = true;
+    if(main_controller.ButtonA.pressing())
+    {
+        if(new_press)
+        {
+            reset_avg_counter();
+            new_press = false;
+        }
 
+        flywheel_sys.spin_raw(0.5);
+        double rpm = flywheel_sys.getRPM();
+        double kv = 0.5 / continuous_avg(rpm);
+
+        main_controller.Screen.clearScreen();
+        main_controller.Screen.setCursor(1, 1);
+        main_controller.Screen.print("kv: %f", kv);
+        printf("rpm: %f, kV: %f\n", rpm, kv);
+    }else
+    {
+        flywheel_sys.stop();
+        new_press = true;
+    }
+    
 }
 
 void tune_flywheel_pid()
 {
+    static bool first_run = true;
+    static int setpt_rpm = 0;
+    if(first_run)
+    {
+        main_controller.ButtonUp.pressed([](){setpt_rpm+=500;});
+        main_controller.ButtonDown.pressed([](){setpt_rpm-=500;});
+        main_controller.ButtonRight.pressed([](){setpt_rpm+=50;});
+        main_controller.ButtonLeft.pressed([](){setpt_rpm-=50;});
+    }
 
+    static bool new_press = true;
+    if(main_controller.ButtonA.pressing())
+    {
+        if(new_press)
+        {
+            new_press = false;
+        }
+
+        flywheel_sys.spinRPM(setpt_rpm);
+        double rpm = flywheel_sys.getRPM();
+
+        main_controller.Screen.clearScreen();
+        main_controller.Screen.setCursor(1, 1);
+        main_controller.Screen.print("rpm: %f", rpm);
+        main_controller.Screen.setCursor(2,1);
+        main_controller.Screen.print("setpt: %d", setpt_rpm);
+        printf("setpt: %d, rpm: %f\n", setpt_rpm, rpm);
+    }else
+    {
+        flywheel_sys.stop();
+        new_press = true;
+    }
 }
 
 void tune_flywheel_distcalc()
 {
+    static bool first_run = true;
+    static int setpt_rpm = 0;
+    if(first_run)
+    {
+        main_controller.ButtonUp.pressed([](){setpt_rpm+=500;});
+        main_controller.ButtonDown.pressed([](){setpt_rpm-=500;});
+        main_controller.ButtonRight.pressed([](){setpt_rpm+=50;});
+        main_controller.ButtonLeft.pressed([](){setpt_rpm-=50;});
+    }
 
+    main_controller.Screen.clearScreen();
+    main_controller.Screen.setCursor(1,1);
+    main_controller.Screen.print("setpt: %d", setpt_rpm);
+    printf("setpt: %d, rpm: %f\n", setpt_rpm, flywheel_sys.getRPM());
 }
