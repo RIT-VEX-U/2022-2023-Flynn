@@ -15,7 +15,7 @@ motor right_front(PORT11, true), right_mid(PORT1, true), right_rear(PORT2, true)
 motor_group left_motors(left_front, left_mid, left_rear);
 motor_group right_motors(right_front, right_mid, right_rear);
 
-// Manipulation
+// Manipulation 
 motor flywheel(PORT12);
 motor intake(PORT19);
 motor roller(PORT18);
@@ -104,11 +104,11 @@ robot_specs_t config = {
 
 // Flywheel Tuning
 FeedForward::ff_config_t flywheel_ff_cfg = {
-
+  .kV =  0.000293
 };
 
 PID::pid_config_t flywheel_pid_cfg = {
-    
+    .p = .00015
 };
 
 // ======== SUBSYSTEMS ========
@@ -117,7 +117,7 @@ Odometry3Wheel odometry_sys(left_enc, right_enc, mid_enc, odometry_cfg);
 
 TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 
-Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 1.0);
+Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 18);
 
 AutoChooser autochooser(Brain);
 
