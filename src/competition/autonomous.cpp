@@ -1,13 +1,28 @@
-#include "competition/autonomous.h"
+#include "../include/competition/autonomous.h"
 
 
-
-//functions to choose which auto we want. construct a GenericAuto when chosen.
+//functions that define autos. construct a GenericAuto when called.
 CommandController auto_loader_side();
 CommandController auto_non_loader_side();
-
 CommandController prog_skills_loader_side();
 CommandController prog_skills_non_loader_size();
+
+
+// Pick the auto based off of which one we've selected on the screen
+CommandController get_chosen_auto(){
+    std::string choice = autochooser.get_choice();
+    if (choice == AutoLoaderSideDisplayName){
+        return auto_loader_side();
+    }  else if(choice == AutoNonLoaderSideDisplayName){
+        return auto_non_loader_side();
+    } else if (choice == SkillsLoaderSideDisplayName){
+        return prog_skills_loader_side();
+    } else if (choice == SkillsLoaderSideDisplayName){
+        return prog_skills_non_loader_size();
+    }
+  return CommandController();
+}
+
 
 
 
@@ -18,7 +33,7 @@ CommandController prog_skills_non_loader_size();
 void autonomous()
 {
     CommandController current_auto = auto_loader_side();    
-    //current_auto.run(true);
+    current_auto.run();
 
 }
 

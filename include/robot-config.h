@@ -39,7 +39,11 @@ extern Odometry3Wheel odometry_sys;
 extern TankDrive drive_sys;
 extern Flywheel flywheel_sys;
 
-
+extern AutoChooser autochooser;
+extern std::string AutoLoaderSideDisplayName;
+extern std::string AutoNonLoaderSideDisplayName;
+extern std::string SkillsLoaderSideDisplayName;
+extern std::string SkillsNonLoaderSideDisplayName;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

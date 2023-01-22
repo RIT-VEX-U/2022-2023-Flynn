@@ -119,7 +119,12 @@ TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 
 Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 1.0);
 
+AutoChooser autochooser(Brain);
 
+std::string AutoLoaderSideDisplayName = "Auto Loader Side";
+std::string AutoNonLoaderSideDisplayName = "Auto Non Loader Side";
+std::string SkillsLoaderSideDisplayName = "Skills Loader Side";
+std::string SkillsNonLoaderSideDisplayName = "Skills Non Loader Side";
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
