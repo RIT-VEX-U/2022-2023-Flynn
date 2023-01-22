@@ -9,8 +9,8 @@ controller main_controller;
 // ======== OUTPUTS ========
 
 // Drive
-motor left_front(PORT20), left_mid(PORT8), left_rear(PORT9);
-motor right_front(PORT11, true), right_mid(PORT1, true), right_rear(PORT2, true);
+motor left_front(PORT20, true), left_mid(PORT8, true), left_rear(PORT9, true);
+motor right_front(PORT11), right_mid(PORT1), right_rear(PORT2);
 
 motor_group left_motors(left_front, left_mid, left_rear);
 motor_group right_motors(right_front, right_mid, right_rear);
@@ -118,6 +118,7 @@ Odometry3Wheel odometry_sys(left_enc, right_enc, mid_enc, odometry_cfg);
 TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 
 Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 18);
+vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
 

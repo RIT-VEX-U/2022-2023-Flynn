@@ -9,30 +9,29 @@ void opcontrol()
   // Initialization
   printf("starting\n");
   fflush(stdout);
-
-  flywheel_sys.spin_manual(4000);//Change speed to what is needed
-  main_controller.ButtonL2.pressed([](){intake.spinFor(1,timeUnits::sec);});//Change 1 second to whatever is needed
+  double oneshot_time = .15;//Change 1 second to whatever is needed
+  bool oneshotting = false;
+  
+  flywheel_sys.spin_manual(3000);//TODO measure speed that is needed
+  main_controller.ButtonR1.pressed([](){intake.spin(reverse, 12, volt);}); // Intake
+  main_controller.ButtonR2.pressed([](){intake.spin(fwd, 12, volt);}); // Shoot
+  main_controller.ButtonL2.pressed([](){intake.spin(fwd, 12, volt);oneshot_tmr.reset();}); //Single Shoot
+  main_controller.ButtonL1.pressed([](){roller.spin(fwd);}); //Roller
   // Periodic
   while(true)
   {
     // ========== DRIVING CONTROLS ==========
     drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);
+    
     // ========== MANIPULATING CONTROLS ==========
 
 
-    if(main_controller.ButtonR1.pressing()){
-      intake.spin(reverse);
-    }
-    else if(main_controller.ButtonR2.pressing()){
-      intake.spin(fwd);
-    }
-    else if(main_controller.ButtonL1.pressing()){
-      roller.spin(fwd);
-    }
-    else if(main_controller.ButtonY.pressing() && main_controller.ButtonRight.pressing()){
+    if(main_controller.ButtonY.pressing() && main_controller.ButtonRight.pressing()){
       //TODO eject string
-    }else{
-      roller.stop();
+    }
+
+    oneshotting = oneshot_tmr.time(vex::sec) < oneshot_time;
+    if (!main_controller.ButtonR1.pressing() && !main_controller.ButtonR2.pressing() && !oneshotting){
       intake.stop();
     }
 
@@ -42,4 +41,5 @@ void opcontrol()
 
     vexDelay(20);
   }
+  
 }

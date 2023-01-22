@@ -38,6 +38,8 @@ extern PID::pid_config_t flywheel_pid_cfg;
 extern Odometry3Wheel odometry_sys;
 extern TankDrive drive_sys;
 extern Flywheel flywheel_sys;
+extern vex::timer oneshot_tmr;
+
 
 extern AutoChooser autochooser;
 extern std::string AutoLoaderSideDisplayName;
