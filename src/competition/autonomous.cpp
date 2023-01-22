@@ -32,7 +32,7 @@ CommandController get_chosen_auto(){
  */ 
 void autonomous()
 {
-    CommandController current_auto = auto_loader_side();    
+    CommandController current_auto = get_chosen_auto();   
     current_auto.run();
 
 }
@@ -115,13 +115,34 @@ CommandController auto_non_loader_side(){
 }
 
 
+/*
+Skills loader side
 
+Map from page 40 of the game manual
+
+(R) = Red Hoop, Blue Zone
+(B) = Blue Hoop, Red Zone
+ *  = Starting position for this auto
++-------------------+
+|        |____| (R) |
+|___           |    |
+| * |          |    |
+|   |          |    |
+|   |          |_*__|
+|___|  ____         |
+|(B)  |____|        |
++-------------------+
+
+ Human Instructions:
+ Align robot to specified place and angle using LOADER SIDE SKILLS jig
+*/
 CommandController prog_skills_loader_side(){
   const int times_to_shoot_then_load_from_station = 4; //TODO figure out how many iterations we want to do this for
   const double length_between_before_loader_and_shooting_position = 60; //TODO measure this distance
   const double prog_skills_loader_side_shot_rpm = 3000; // TODO measure how many rpms we need to make this shot
 
   CommandController prog_skills_loader_side;
+  
   for (int i = 0; i< times_to_shoot_then_load_from_station; i++){
     prog_skills_loader_side.add(new SpinRPMCommand(flywheel_sys, prog_skills_loader_side_shot_rpm));
     prog_skills_loader_side.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshhold for shooting is
@@ -135,9 +156,33 @@ CommandController prog_skills_loader_side(){
 
   return prog_skills_loader_side;
 }
-CommandController prog_skills_non_loader_size(){
-  CommandController prog_skills_non_loader_side;
 
+
+
+/*
+Skills Non-loader side
+
+Map from page 40 of the game manual
+
+(R) = Red Hoop, Blue Zone
+(B) = Blue Hoop, Red Zone
+ *  = Starting position for this auto
++-------------------+
+|        |*___| (R) |
+|___           |    |
+|   |          |    |
+|   |          |    |
+|   |          |____|
+|___|  ____         |
+|(B)  |___*|        |
++-------------------+
+
+ Human Instructions:
+ Align robot to specified place and angle using NON LOADER SIDE SKILLS jig
+*/
+CommandController prog_skills_non_loader_size(){
+
+  CommandController prog_skills_non_loader_side;
 
   return prog_skills_non_loader_side;
 }
