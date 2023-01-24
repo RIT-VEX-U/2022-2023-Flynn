@@ -6,6 +6,11 @@
  */
 void opcontrol()
 {
+  while(true){
+    printf("right wheel enc %f\n", right_motors.position(vex::rev));
+    vexDelay(20);
+  }
+  /*
   // Initialization
   printf("starting\n");
   fflush(stdout);
@@ -41,5 +46,6 @@ void opcontrol()
 
     vexDelay(20);
   }
+  */
   
 }

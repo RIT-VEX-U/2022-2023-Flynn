@@ -19,7 +19,7 @@ extern CustomEncoder left_enc, right_enc, mid_enc;
 
 // ======== UTILS ========
 // Drive Tuning
-extern Odometry3Wheel::odometry3wheel_cfg_t odometry_cfg;
+
 
 extern PID::pid_config_t drive_pid_cfg, turn_pid_cfg;
 extern FeedForward::ff_config_t drive_ff_cfg, turn_ff_cfg;
@@ -35,7 +35,7 @@ extern FeedForward::ff_config_t flywheel_ff_cfg;
 extern PID::pid_config_t flywheel_pid_cfg;
 
 // ======== SUBSYSTEMS ========
-extern Odometry3Wheel odometry_sys;
+extern OdometryTank odometry_sys;
 extern TankDrive drive_sys;
 extern Flywheel flywheel_sys;
 extern vex::timer oneshot_tmr;

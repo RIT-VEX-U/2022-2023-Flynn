@@ -3,7 +3,7 @@
 #include "math.h"
 #include "core.h"
 
-#define ENC_IN(enc) (enc.rotation(rev) * PI * odometry_cfg.wheel_diam)
+#define ENC_IN(enc) (enc.rotation(rev) * PI * config.odom_wheel_diam)
 #define ENC_DIFF_IN(left,right) (fabs(ENC_IN(left)-ENC_IN(right))/2.0)
 
 double stored_avg = 0;
@@ -68,7 +68,7 @@ void tune_odometry_offax_dist()
         mid_enc.resetRotation();
     }
     
-    double angle_rad = ENC_DIFF_IN(left_enc, right_enc) / odometry_cfg.wheelbase_dist;
+    double angle_rad = ENC_DIFF_IN(left_enc, right_enc) / config.dist_between_wheels;
     double offax_dist = ENC_IN(mid_enc) / angle_rad;
 
     main_controller.Screen.clearScreen();

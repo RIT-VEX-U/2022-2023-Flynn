@@ -9,8 +9,8 @@ controller main_controller;
 // ======== OUTPUTS ========
 
 // Drive
-motor left_front(PORT20, true), left_mid(PORT8, true), left_rear(PORT9, true);
-motor right_front(PORT11), right_mid(PORT1), right_rear(PORT2);
+motor left_front(PORT20, vex::gearSetting::ratio18_1, true), left_mid(PORT8, vex::gearSetting::ratio18_1, true), left_rear(PORT9, vex::gearSetting::ratio18_1, true);
+motor right_front(PORT11, vex::gearSetting::ratio18_1), right_mid(PORT1, vex::gearSetting::ratio18_1), right_rear(PORT2, vex::gearSetting::ratio18_1);
 
 motor_group left_motors(left_front, left_mid, left_rear);
 motor_group right_motors(right_front, right_mid, right_rear);
@@ -32,6 +32,8 @@ CustomEncoder right_enc(Brain.ThreeWirePort.E, 2048);
 Odometry3Wheel::odometry3wheel_cfg_t odometry_cfg = {
 
 };
+
+
 
 // Drive Tuning
 PID::pid_config_t drive_pid_cfg = {
@@ -92,6 +94,9 @@ MotionController turn_fast_mprofile(turn_fast_mprofile_cfg), turn_slow_mprofile(
 
 robot_specs_t config = {
     .robot_radius = 0,
+    .dist_between_wheels = 10,
+    .odom_wheel_diam = 2.75,
+    .odom_gear_ratio = .5,
     .drive_correction_cutoff = 0,
     .drive_feedback = &drive_fast_mprofile,
     .turn_feedback = &turn_fast_mprofile,
@@ -113,7 +118,8 @@ PID::pid_config_t flywheel_pid_cfg = {
 
 // ======== SUBSYSTEMS ========
 
-Odometry3Wheel odometry_sys(left_enc, right_enc, mid_enc, odometry_cfg);
+
+OdometryTank odometry_sys(left_motors, right_motors, config);
 
 TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 
