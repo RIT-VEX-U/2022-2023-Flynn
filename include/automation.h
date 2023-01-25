@@ -2,7 +2,9 @@
 #include "vex.h"
 #include "../core/include/utils/command_structure/auto_command.h"
 
-
+/**
+ * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
+*/
 class SpinRollerCommand: public AutoCommand {
   public:
     /**
@@ -26,7 +28,9 @@ class SpinRollerCommand: public AutoCommand {
 };
 
 
-
+/**
+ * ShootCommand is an ACS command that tells the robot to shoot the disks for a certain amount of time
+*/
 class ShootCommand : public AutoCommand{
   public:
     ShootCommand(vex::motor firing_motor, double seconds_to_shoot);
@@ -45,7 +49,9 @@ class ShootCommand : public AutoCommand{
 
 };
 
-
+/**
+ * StartIntakeCommand is an ACS command that tells the robot to begin intaking disks
+*/
 class StartIntakeCommand : public AutoCommand{
   public:
     StartIntakeCommand(vex::motor intaking_motor, double intaking_voltage);
@@ -62,7 +68,9 @@ class StartIntakeCommand : public AutoCommand{
 
 };
 
-
+/**
+ * StopIntakeCommand is an ACS command that tells the robot to stop intaking disks
+*/
 class StopIntakeCommand : public AutoCommand{
   public:
     StopIntakeCommand(vex::motor intaking_motor);

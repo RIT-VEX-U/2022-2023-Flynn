@@ -66,17 +66,35 @@ bool ShootCommand::run(){
 
 
 
-
+/**
+* Construct a StartIntakeCommand
+* @param intaking_motor The motor that will pull the disk into the robot
+* @param intaking_voltage The voltage at which to run the intake motor
+*/
 StartIntakeCommand::StartIntakeCommand(vex::motor intaking_motor, double intaking_voltage):intaking_motor(intaking_motor), intaking_voltage(intaking_voltage){}
 
+/**
+ * Run the StartIntakeCommand
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+ 
+*/
 bool StartIntakeCommand::run(){
   intaking_motor.spin(vex::fwd, intaking_voltage, vex::volt); 
   return true;
 }
 
-
+/**
+* Construct a StartIntakeCommand
+* @param intaking_motor The motor that will be stopped
+*/
 StopIntakeCommand::StopIntakeCommand(vex::motor intaking_motor):intaking_motor(intaking_motor){}
 
+/**
+ * Run the StopIntakeCommand
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+ */
 bool StopIntakeCommand::run(){
   intaking_motor.stop(); 
   return true;
