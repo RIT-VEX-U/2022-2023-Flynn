@@ -33,6 +33,11 @@ class SpinRollerCommand: public AutoCommand {
 */
 class ShootCommand : public AutoCommand{
   public:
+    /** 
+     * Construct a Shoot command
+     * @param firing_motor the motor to spin to push a disk into the flywheel
+     * @param seconds_to_shoot the time in seconds that we will try to shoot for 
+     */
     ShootCommand(vex::motor firing_motor, double seconds_to_shoot);
     /**
      * Run the firing motor to slap the disk into the flywheel
