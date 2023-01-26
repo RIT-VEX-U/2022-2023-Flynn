@@ -21,12 +21,19 @@ public:
     {
         double x, y;
 
+        /**
+         * Get the distance from robot to a certain point
+         * @param other -The point being used for distance
+         */
         double dist(const point_t other)
         {
           return sqrt(pow(this->x - other.x, 2) + pow(this->y - other.y, 2));
         }
 
-        // Vector2D addition operation on points
+        /**
+         * Correctly add vectors together with the + operator
+         * @param &other -The point on which to do the operation
+         */
         point_t operator+(const point_t &other)
         {
           point_t p 
@@ -37,7 +44,10 @@ public:
           return p;
         }
 
-        // Vector2D subtraction operation on points
+        /**
+         * Correctly subtract vectors with the - operator
+         * @param &other -The point on which to do the operation
+         */
         point_t operator-(const point_t &other)
         {
           point_t p 

@@ -12,8 +12,19 @@
  */
 typedef struct
 {
+    /**
+     * X position of robot
+     */
     double x;
+
+    /**
+     * Y position of robot
+     */
     double y;
+
+    /**
+     * Z position of robot
+     */
     double rot;
 } position_t;
 
