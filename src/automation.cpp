@@ -15,10 +15,10 @@ SpinRollerCommand::SpinRollerCommand(TankDrive &drive_sys, vex::motor roller_mot
  * @returns true when execution is complete, false otherwise
  */
 bool SpinRollerCommand::run() {
-    const double roller_cutoff_threshold = .01; //revolutions //TODO measure once against roller
-    const double num_revolutions_to_spin_motor = 1; //revolutions //TODO measure once against roller
-    const double kP = .01; // Proportional constant for spinning the roller half a revolution// TODO measure based on field
-    const double drive_power = .1;
+    const double roller_cutoff_threshold = .01; //revolutions // [measure]
+    const double num_revolutions_to_spin_motor = 1; //revolutions // [measure]
+    const double kP = .01; // Proportional constant for spinning the roller half a revolution // [measure]
+    const double drive_power = .1; // [measure]
 
     // Initialize start and end position if not already
     if (!func_initialized){

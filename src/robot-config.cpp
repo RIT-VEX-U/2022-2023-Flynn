@@ -72,22 +72,12 @@ FeedForward::ff_config_t turn_ff_cfg = {
     .kA = 0
 };
 
-MotionController::m_profile_cfg_t turn_fast_mprofile_cfg = {
-    .pid_cfg = turn_pid_cfg,
-    .ff_cfg = turn_ff_cfg,
-    .max_v = 0,
-    .accel = 0
-};
 
-MotionController::m_profile_cfg_t turn_slow_mprofile_cfg = {
-    .pid_cfg = turn_pid_cfg,
-    .ff_cfg = turn_ff_cfg,
-    .max_v = 0,
-    .accel = 0
-};
 
 MotionController drive_fast_mprofile(drive_fast_mprofile_cfg), drive_slow_mprofile(drive_slow_mprofile_cfg);
-MotionController turn_fast_mprofile(turn_fast_mprofile_cfg), turn_slow_mprofile(turn_slow_mprofile_cfg);
+//MotionController turn_fast_mprofile(turn_fast_mprofile_cfg), turn_slow_mprofile(turn_slow_mprofile_cfg);
+
+
 
 robot_specs_t config = {
     .robot_radius = 10,
@@ -98,7 +88,7 @@ robot_specs_t config = {
     .drive_correction_cutoff = 4,
 
     .drive_feedback = &drive_fast_mprofile,
-    .turn_feedback = &turn_fast_mprofile,
+    .turn_feedback = new PID(turn_pid_cfg),
     .correction_pid = {
         .p = .012,
         .i = 0,
