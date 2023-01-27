@@ -306,10 +306,12 @@ void tune_drive_motion_accel(DriveType dt, double maxv)
 
 
 // Flywheel Tuning
-//.5 000340
+//.5 .000340
+//.75 .000316
+//1.0 0.000299
 void tune_flywheel_ff()
 { 
-    double flywheel_target_pct = .75;
+    double flywheel_target_pct = 1;
     static bool new_press = true;
     static int counter = 0;
     if(main_controller.ButtonA.pressing())
@@ -369,7 +371,7 @@ void tune_flywheel_pid()
         main_controller.Screen.print("rpm: %f", rpm);
         main_controller.Screen.setCursor(2,1);
         main_controller.Screen.print("setpt: %d", setpt_rpm);
-        printf("setpt: %d, rpm: %f\n", setpt_rpm, rpm);
+        printf("setpt %d rpm: %f\n", setpt_rpm, rpm);
     }else
     {
         flywheel_sys.stop();
@@ -381,18 +383,25 @@ void tune_flywheel_distcalc()
 {
     static bool first_run = true;
     static int setpt_rpm = 0;
+    static double t = 0;
+    MovingAverage avg_err = MovingAverage(10, 0);
     if(first_run)
     {
         main_controller.ButtonUp.pressed([](){setpt_rpm+=500;});
         main_controller.ButtonDown.pressed([](){setpt_rpm-=500;});
-        main_controller.ButtonRight.pressed([](){setpt_rpm+=50;});
-        main_controller.ButtonLeft.pressed([](){setpt_rpm-=50;});
+        main_controller.ButtonRight.pressed([](){setpt_rpm+=25;});
+        main_controller.ButtonLeft.pressed([](){setpt_rpm-=25;});
+//        main_controller.ButtonX.pressed([](){setpt_rpm = 0;});
+        main_controller.ButtonA.pressed([](){intake.spin(fwd, 4, volt);});
+        main_controller.ButtonA.released([](){intake.spin(fwd, 0, volt);});
         first_run = false;
+        printf("time setpt rpm fb_out avg err\n");
     }
-
+    t+=.02;
     flywheel_sys.spinRPM(setpt_rpm);
     main_controller.Screen.clearScreen();
     main_controller.Screen.setCursor(1,1);
     main_controller.Screen.print("setpt: %d", setpt_rpm);
-    printf("setpt: %d, rpm: %f\n", setpt_rpm, flywheel_sys.getRPM());
+    avg_err.add_entry(fabs(flywheel_sys.getRPM() - flywheel_sys.getDesiredRPM()));
+    printf("%f %d %f %f %f\n", t, setpt_rpm, flywheel_sys.getRPM(), flywheel_sys.getFeedforwardValue() + flywheel_sys.getPIDValue(), avg_err.get_average());
 }
