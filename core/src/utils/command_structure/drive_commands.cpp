@@ -123,6 +123,11 @@ bool DriveStopCommand::run() {
 
 
 // ==== ODOMETRY ====
+/**
+ * Construct an Odometry set pos
+ * @param drive_sys the drive system we are commanding
+ */
+OdomSetPosition::OdomSetPosition(OdometryBase &odom, const position_t &newpos): odom(odom), newpos(newpos){}
 
 bool OdomSetPosition::run() {
   odom.set_position(newpos);

@@ -37,8 +37,9 @@ class ShootCommand : public AutoCommand{
      * Construct a Shoot command
      * @param firing_motor the motor to spin to push a disk into the flywheel
      * @param seconds_to_shoot the time in seconds that we will try to shoot for 
+     * @param volt_pct the voltage (0 to 1) to run the intake at. lower volts means flywheel has more time to recover
      */
-    ShootCommand(vex::motor firing_motor, double seconds_to_shoot);
+    ShootCommand(vex::motor firing_motor, double seconds_to_shoot, double volt);
     /**
      * Run the firing motor to slap the disk into the flywheel
      * Overrides run from AutoCommand
@@ -50,6 +51,7 @@ class ShootCommand : public AutoCommand{
     vex::motor firing_motor;
     bool func_initialized;
     double seconds_to_shoot;
+    double volt;
     vex::timer tmr;
 
 };

@@ -1,4 +1,5 @@
 #include "../include/automation.h"
+#include "robot-config.h"
 
 
 /**
@@ -42,7 +43,7 @@ bool SpinRollerCommand::run() {
 * Construct a ShootCommand
 * @param firing_motor The motor that will spin the disk into the flywheel
 */
-ShootCommand::ShootCommand(vex::motor firing_motor, double seconds_to_shoot): firing_motor(firing_motor), seconds_to_shoot(seconds_to_shoot){}
+ShootCommand::ShootCommand(vex::motor firing_motor, double seconds_to_shoot, double volt): firing_motor(firing_motor), seconds_to_shoot(seconds_to_shoot), volt(volt){}
 
 /**
  * Run the intake motor backward to move the disk into the flywheel
@@ -57,10 +58,11 @@ bool ShootCommand::run(){
 
   if (tmr.time(vex::seconds) > seconds_to_shoot){
     func_initialized = false;
+    firing_motor.stop();
     return true;
   }
-
-  firing_motor.spin(vex::reverse); //TODO figure out if this needs to be negated to slap it into the flywheel
+  printf("Shooting at %f RPM\n", flywheel_sys.getRPM());
+  firing_motor.spin(vex::fwd, volt, vex::volt); //TODO figure out if this needs to be negated to slap it into the flywheel
   return false;
 }
 
@@ -80,7 +82,7 @@ StartIntakeCommand::StartIntakeCommand(vex::motor intaking_motor, double intakin
  
 */
 bool StartIntakeCommand::run(){
-  intaking_motor.spin(vex::fwd, intaking_voltage, vex::volt); 
+  intaking_motor.spin(vex::reverse, intaking_voltage, vex::volt); 
   return true;
 }
 
