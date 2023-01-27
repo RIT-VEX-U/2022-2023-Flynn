@@ -126,13 +126,16 @@ void tune_drive_ff_ks(DriveType dt)
         {
             // Initialize the function once
             tmr.reset();
-            odometry_sys.set_position();
+            // left_enc.resetRotation();
+            // right_enc.resetRotation();
+            left_motors.resetPosition();
+            right_motors.resetPosition();
             test_pct = 0.0;
             done = false;
             new_press = false;
         }
 
-        if (done || OdometryBase::pos_diff(odometry_sys.get_position(), OdometryBase::zero_pos) > 0)
+        if (done || (fabs(left_motors.position(rev)) + fabs(right_motors.position(rev))) > 0)
         {
             main_controller.Screen.clearScreen();
             main_controller.Screen.setCursor(1,1);
@@ -217,7 +220,7 @@ void tune_drive_pid(DriveType dt)
         if(dt == DRIVE && (done || drive_sys.drive_to_point(24,24,fwd, drive_fast_mprofile)))
             done = true;
         
-        if(dt == TURN && (done || drive_sys.turn_to_heading(270, turn_fast_mprofile)))
+        if(dt == TURN && (done || drive_sys.turn_to_heading(270, .6)))
             done = true;
 
     }else

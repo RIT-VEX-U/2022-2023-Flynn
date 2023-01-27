@@ -28,20 +28,24 @@ void opcontrol()
     // tune_odometry_wheel_diam();
     // tune_odometry_wheelbase();
     // tune_flywheel_ff();
-    // tune_drive_ff_ks(DRIVE);
-    // tune_drive_ff_kv(DRIVE, 0.07);
-    // tune_drive_motion_maxv(DRIVE);
-    // tune_drive_motion_accel(DRIVE, 48);
-    tune_drive_pid(DRIVE);
+    // tune_drive_ff_ks(TURN);
+    // tune_drive_ff_kv(TURN, 0.12);
+    // tune_drive_motion_maxv(TURN);
+    // tune_drive_motion_accel(TURN, 700);
+    tune_drive_pid(TURN);
     
     auto pos = odometry_sys.get_position();
     main_controller.Screen.clearScreen();
     main_controller.Screen.setCursor(0, 0);
     main_controller.Screen.print("(%.3f, %.3f) : %.3f", pos.x, pos.y, pos.rot);
-    // printf("X: %f, Y: %f, R: %f\n", pos.x, pos.y, pos.rot);
-    motion_t cur_motion = drive_fast_mprofile.get_motion();
-    double s = (cur_motion.pos != 0? 24 + cur_motion.pos : 0);
-    printf("%.2f %.2f %.2f %.2f %.2f\n", tmr.time(sec), s, pos.y, cur_motion.vel, odometry_sys.get_speed());
+    printf("X: %f, Y: %f, R: %f\n", pos.x, pos.y, pos.rot);
+    // motion_t cur_motion = turn_fast_mprofile.get_motion();
+    // double s = (cur_motion.pos != 0? 24 + cur_motion.pos : 0);
+    // double s = cur_motion.pos + 180; //(cur_motion.pos != 0? 90 + cur_motion.pos : 0) + 90;
+    // printf("%.2f %.2f %.2f %.2f %.2f %.2f %.2f\n", tmr.time(sec), s, pos.rot, fabs(cur_motion.vel), fabs(odometry_sys.get_angular_speed_deg()), cur_motion.accel, odometry_sys.get_angular_accel_deg());
+
+    // if(main_controller.ButtonX.pressing())
+    //   drive_sys.drive_tank(.11, -.11);
 
     // ========== DRIVING CONTROLS ==========
     // drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);

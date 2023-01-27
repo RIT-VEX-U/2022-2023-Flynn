@@ -69,9 +69,9 @@ CommandController auto_loader_side(){
     loader_side_auto.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshold for shooting is
     loader_side_auto.add(new ShootCommand(intake, 2)); // TODO measure how long we need to wait to shoot all 
     loader_side_auto.add(new FlywheelStopCommand(flywheel_sys));
-    loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, 60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
+    // loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, 60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
     loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // Drive to align vertically with the spinners. // TODO measure this distance on the field with the actual robot
-    loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, 90, 1)); // Turn from facing directly upwards to facing the spinner.
+    // loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, 90, 1)); // Turn from facing directly upwards to facing the spinner.
     loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
     loader_side_auto.add(new SpinRollerCommand(roller)); // TODO measure the distances in SpinRollerCommand to travel
 
@@ -107,9 +107,9 @@ CommandController auto_non_loader_side(){
     non_loader_side_auto.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshold for shooting is
     non_loader_side_auto.add(new ShootCommand(intake, 2)); // TODO measure how long we need to wait to shoot all 
     non_loader_side_auto.add(new FlywheelStopCommand(flywheel_sys));
-    non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, -60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
+    // non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, -60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
     non_loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 20, fwd, 1)); // Drive to align vertically with the spinners. // TODO measure this distance on the field with the actual robot
-    non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, -90, 1)); // Turn from facing directly upwards to facing the spinner.
+    // non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, -90, 1)); // Turn from facing directly upwards to facing the spinner.
     non_loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
     non_loader_side_auto.add(new SpinRollerCommand(roller)); // TODO measure the distances in SpinRollerCommand to travel
 
