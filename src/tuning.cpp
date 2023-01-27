@@ -11,7 +11,13 @@ double stored_num = 0;
 double continuous_avg(double updateval)
 {
     stored_num++;
-    return (stored_avg * (stored_num-1) / stored_num) + (updateval / stored_num);
+
+    if (stored_num<1){
+      stored_avg = 0.0;
+    } else{
+      stored_avg = (stored_avg * (stored_num-1) / stored_num) + (updateval / stored_num);
+    }
+    return stored_avg;
 }
 
 void reset_avg_counter()
@@ -21,38 +27,59 @@ void reset_avg_counter()
 }
 
 // Odometry Tuning
+void tune_odometry_gear_ratio_right_wheel(){
+    if(main_controller.ButtonA.pressing())
+    {
+        //SET THESE BACK TO LEFT ENC RIGHT ENC
+        right_enc.resetRotation();
+    }
+    double ratio = right_enc.rotation(rev);
+
+    main_controller.Screen.clearScreen();
+    main_controller.Screen.setCursor(1,1);
+    main_controller.Screen.print("turn right odom wheel 1 rev");
+    main_controller.Screen.setCursor(2,1);
+    main_controller.Screen.print("ratio: %f", ratio);
+    printf("ratio: %f", ratio);
+
+}
 
 void tune_odometry_wheel_diam()
 {
     if(main_controller.ButtonA.pressing())
     {
+        //SET THESE BACK TO LEFT ENC RIGHT ENC
         left_enc.resetRotation();
         right_enc.resetRotation();
     }
     double avg = (fabs(left_enc.rotation(rev)) + fabs(right_enc.rotation(rev))) / 2.0;
-    double diam = 100.0 / (avg * PI);
+    if (fabs(avg) <.1){
+      return;
+    }
+    double diam = 120.0 / (avg * PI);
 
     main_controller.Screen.clearScreen();
     main_controller.Screen.setCursor(1,1);
-    main_controller.Screen.print("Push robot 100 inches");
+    main_controller.Screen.print("Push robot 120 inches");
     main_controller.Screen.setCursor(2,1);
-    main_controller.Screen.print("Diameter: %f", diam);
-    printf("Diameter: %f\n", diam);
+    main_controller.Screen.print("Diam: %f", diam);
+    printf("Diam: %f\n", diam);
 }
 
 void tune_odometry_wheelbase()
 {
+    int times_to_turn = 5;
     if(main_controller.ButtonA.pressing())
     {
         left_enc.resetRotation();
         right_enc.resetRotation();
     }
-    double radius =  ENC_DIFF_IN(left_enc, right_enc) / (5 * 2 * PI); // radius = arclength / theta
+    double radius =  ENC_DIFF_IN(left_enc, right_enc) / ((double)times_to_turn * 2 * PI); // radius = arclength / theta
     double wheelbase = 2 * radius;
 
     main_controller.Screen.clearScreen();
     main_controller.Screen.setCursor(1,1);
-    main_controller.Screen.print("Turn the robot in place 5 times");
+    main_controller.Screen.print("Turn the robot in place %d times", times_to_turn);
     main_controller.Screen.setCursor(2,1);
     main_controller.Screen.print("Wheelbase: %f", wheelbase);
     printf("Wheelbase: %f\n", wheelbase);
@@ -279,25 +306,33 @@ void tune_drive_motion_accel(DriveType dt, double maxv)
 
 
 // Flywheel Tuning
+//.5 000340
 void tune_flywheel_ff()
 { 
+    double flywheel_target_pct = .75;
     static bool new_press = true;
+    static int counter = 0;
     if(main_controller.ButtonA.pressing())
     {
+        counter++;
         if(new_press)
         {
             reset_avg_counter();
             new_press = false;
         }
 
-        flywheel_sys.spin_raw(0.5);
+        flywheel_sys.spin_raw(flywheel_target_pct);
+
+        if (counter<30){
+          return;
+        }
         double rpm = flywheel_sys.getRPM();
-        double kv = 0.5 / continuous_avg(rpm);
+        double kv = flywheel_target_pct / continuous_avg(rpm);
 
         main_controller.Screen.clearScreen();
         main_controller.Screen.setCursor(1, 1);
         main_controller.Screen.print("kv: %f", kv);
-        printf("rpm: %f, kV: %f\n", rpm, kv);
+        printf("rpm %f kV %f\n", rpm, kv);
     }else
     {
         flywheel_sys.stop();
@@ -352,8 +387,10 @@ void tune_flywheel_distcalc()
         main_controller.ButtonDown.pressed([](){setpt_rpm-=500;});
         main_controller.ButtonRight.pressed([](){setpt_rpm+=50;});
         main_controller.ButtonLeft.pressed([](){setpt_rpm-=50;});
+        first_run = false;
     }
 
+    flywheel_sys.spinRPM(setpt_rpm);
     main_controller.Screen.clearScreen();
     main_controller.Screen.setCursor(1,1);
     main_controller.Screen.print("setpt: %d", setpt_rpm);

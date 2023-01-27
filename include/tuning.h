@@ -6,6 +6,7 @@ enum DriveType
 };
 
 // Odometry Tuning
+void tune_odometry_gear_ratio_right_wheel();
 void tune_odometry_wheelbase();
 void tune_odometry_offax_dist();
 void tune_odometry_wheel_diam();
