@@ -5,7 +5,7 @@
 CommandController auto_loader_side();
 CommandController auto_non_loader_side();
 CommandController prog_skills_loader_side();
-CommandController prog_skills_non_loader_size();
+CommandController prog_skills_non_loader_side();
 
 
 // Pick the auto based off of which one we've selected on the screen
@@ -18,8 +18,8 @@ CommandController get_chosen_auto(){
     } else if (choice == SkillsLoaderSideDisplayName){
         return prog_skills_loader_side();
     } else if (choice == SkillsLoaderSideDisplayName){
-        return prog_skills_non_loader_size();
-    }
+        return prog_skills_non_loader_side();
+    }   
 
     // Empty Command Controller - something has gone very wrong
     return CommandController();
@@ -34,6 +34,10 @@ CommandController get_chosen_auto(){
  */ 
 void autonomous()
 {
+
+    // while(!imu.is_calibrating){
+    //  vexDelay(20);
+    // }
     CommandController current_auto = get_chosen_auto();   
     current_auto.run();
 
@@ -48,34 +52,42 @@ Map from page 40 of the game manual
 (R) = Red Hoop, Blue Zone
 (B) = Blue Hoop, Red Zone
  *  = Starting position for this auto
-+-------------------+
-|        |____| (R) |
-|___           |    |
-| * |          |    |
-|   |          |    |
-|   |          |_*__|
-|___|  ____         |
-|(B)  |____|        |
-+-------------------+
+
+           ^ 180 degrees
+  +-------------------+
+  |        |____| (R) |
+  |___           |    |
+  | * |          |    |
+  |   |          |    |  --> 90 degrees
+  |   |          |_*__|
+  |___|  ____         |
+  |(B)  |____|        |
+  +-------------------+
+           v 0 degrees
 
  Human Instructions:
  Align robot to specified place and angle using LOADER SIDE AUTO jig
 */
 CommandController auto_loader_side(){
-    int loader_side_full_court_shot_rpm = 3000;  // TODO measure this RPM based on testing
-    CommandController loader_side_auto;
+    int loader_side_full_shot_rpm = 3000;  // [measure]
 
-    loader_side_auto.add(new SpinRPMCommand(flywheel_sys, loader_side_full_court_shot_rpm));
-    loader_side_auto.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshold for shooting is
-    loader_side_auto.add(new ShootCommand(intake, 2)); // TODO measure how long we need to wait to shoot all 
-    loader_side_auto.add(new FlywheelStopCommand(flywheel_sys));
-    // loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, 60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
-    loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // Drive to align vertically with the spinners. // TODO measure this distance on the field with the actual robot
-    // loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, 90, 1)); // Turn from facing directly upwards to facing the spinner.
-    loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
-    loader_side_auto.add(new SpinRollerCommand(roller)); // TODO measure the distances in SpinRollerCommand to travel
+    position_t start_pos = position_t{.x = 9.75, .y = 105.25, .rot = -90};
 
-    return loader_side_auto;
+    CommandController lsa;
+    lsa.add(new OdomSetPosition(odometry_sys, start_pos));
+
+    // spin -90 degree roller
+    lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 1, fwd)); //[measure]
+    lsa.add(new SpinRollerCommand(drive_sys, roller));
+    lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 4, reverse)); // [measure]
+    
+    //shoot
+    lsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180)); // [measure]
+    lsa.add(new SpinRPMCommand(flywheel_sys, loader_side_full_shot_rpm));
+    lsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
+    lsa.add(new ShootCommand(intake, 3, 4));
+
+    return lsa;
 }
 
 /*
@@ -86,34 +98,42 @@ Map from page 40 of the game manual
 (R) = Red Hoop, Blue Zone
 (B) = Blue Hoop, Red Zone
  *  = Starting position for this auto
-+-------------------+
-|        |*___| (R) |
-|___           |    |
-|   |          |    |
-|   |          |    |
-|   |          |____|
-|___|  ____         |
-|(B)  |___*|        |
-+-------------------+
+           ^ 180 degrees
+  +-------------------+
+  |        |*___| (R) |
+  |___           |    |
+  |   |          |    |
+  |   |          |    |  --> 90 degrees
+  |   |          |____|
+  |___|  ____         |
+  |(B)  |__*_|        |
+  +-------------------+
+           v 0 degrees
 
  Human Instructions:
  Align robot to specified place and angle using NON LOADER SIDE AUTO jig
 */
 CommandController auto_non_loader_side(){
-    int non_loader_side_full_court_shot_rpm = 3000;  // TODO measure this RPM based on testing
-    CommandController non_loader_side_auto;
+    int non_loader_side_shot_rpm = 3000;  // [measure]
+    CommandController nlsa;
+    position_t start_pos = {.x = 128, .y = 84, .rot = 90}; // [measure]
+    nlsa.add(new OdomSetPosition(odometry_sys, start_pos));
+    // Arrow 1 -------------------
+    nlsa.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 128, 96, fwd, 1)); // [measure]
+    nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0, 1)); // [measure]
+    
+    
+    // Arrow 2 -------------------
+    nlsa.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // [measure]
+    nlsa.add(new SpinRollerCommand(drive_sys, roller));
+    nlsa.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, reverse, 1)); // [measure]
 
-    non_loader_side_auto.add(new SpinRPMCommand(flywheel_sys, non_loader_side_full_court_shot_rpm));
-    non_loader_side_auto.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshold for shooting is
-    non_loader_side_auto.add(new ShootCommand(intake, 2)); // TODO measure how long we need to wait to shoot all 
-    non_loader_side_auto.add(new FlywheelStopCommand(flywheel_sys));
-    // non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, -60, 1)); // Angle to point directly upwards. Towards far field edge. // TODO measure this angle once initial shooting angle is determined
-    non_loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 20, fwd, 1)); // Drive to align vertically with the spinners. // TODO measure this distance on the field with the actual robot
-    // non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, -90, 1)); // Turn from facing directly upwards to facing the spinner.
-    non_loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
-    non_loader_side_auto.add(new SpinRollerCommand(roller)); // TODO measure the distances in SpinRollerCommand to travel
-
-    return non_loader_side_auto;
+    // Spin and shoot
+    nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 170, 1)); //[measure]
+    nlsa.add(new SpinRPMCommand(flywheel_sys, non_loader_side_shot_rpm));
+    nlsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
+    nlsa.add(new ShootCommand(intake, 3, 2)); // [measure]
+    return nlsa;
 }
 
 
@@ -125,38 +145,84 @@ Map from page 40 of the game manual
 (R) = Red Hoop, Blue Zone
 (B) = Blue Hoop, Red Zone
  *  = Starting position for this auto
-+-------------------+
-|        |____| (R) |
-|___           |    |
-| * |          |    |
-|   |          |    |
-|   |          |_*__|
-|___|  ____         |
-|(B)  |____|        |
-+-------------------+
+    -x   ^ 180 degrees
+  0-------------------+
+  |        |____| (R) |
+  |___           |    |
+  | * |          |    |
+  |   |          |    |  --> 90 degrees (+y)
+  |   |          |_*__|
+  |___|  ____         |
+  |(B)  |____|        |
+  +-------------------+ (140, 140)
+           v 0 degrees
+           (+x)
 
  Human Instructions:
  Align robot to specified place and angle using LOADER SIDE SKILLS jig
 */
 CommandController prog_skills_loader_side(){
-  const int times_to_shoot_then_load_from_station = 4; //TODO figure out how many iterations we want to do this for
-  const double length_between_before_loader_and_shooting_position = 60; //TODO measure this distance
-  const double prog_skills_loader_side_shot_rpm = 3000; // TODO measure how many rpms we need to make this shot
-
-  CommandController prog_skills_loader_side;
   
-  for (int i = 0; i< times_to_shoot_then_load_from_station; i++){
-    prog_skills_loader_side.add(new SpinRPMCommand(flywheel_sys, prog_skills_loader_side_shot_rpm));
-    prog_skills_loader_side.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10)); //TODO measure what a good +/- threshold for shooting is
-    prog_skills_loader_side.add(new ShootCommand(intake, 1)); // TODO use shooter when it exists
-    prog_skills_loader_side.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, length_between_before_loader_and_shooting_position, vex::reverse, 1));
-    prog_skills_loader_side.add(new StartIntakeCommand(intake, 10)); // TODO measure voltage needed to intake
-    prog_skills_loader_side.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, length_between_before_loader_and_shooting_position, vex::fwd, .25)); // TODO measure how slow we need to to pick up disks from the loading zone
-    prog_skills_loader_side.add(new StopIntakeCommand(intake));
+    position_t start_pos = position_t{.x = 9.75, .y = 34.75, .rot = -90};
 
-  }  
+    CommandController lss;
+    lss.add(new OdomSetPosition(odometry_sys, start_pos));
 
-  return prog_skills_loader_side;
+    // Arrow 1 -------------------------
+    // spin -90 degree roller
+    lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 1, fwd)); //[measure]
+    lss.add(new SpinRollerCommand(drive_sys, roller));
+    lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 4, reverse)); // [measure]
+    
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180)); //[measure]
+    
+    // Arrow 2 -------------------------
+    // intake corner disk
+    lss.add(new StartIntakeCommand(intake, 12));
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 17.5, 17.5, fwd, 1)); // [measure]
+    lss.add(new StopIntakeCommand(intake));
+
+    // align to 180 degree roller
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 45));  // [measure]
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 24, 115.0, fwd, 1)); //[measure] for sure
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180));  // [measure]
+    
+    // spin 180 degree roller
+    lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 2, fwd)); //[measure]
+    lss.add(new SpinRollerCommand(drive_sys, roller));
+    lss.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, reverse)); //[measure]
+
+    //spin and shoot 3
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 80)); //[measure]
+    lss.add(new SpinRPMCommand(flywheel_sys, 3500)); // [measure]
+    lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
+    lss.add(new ShootCommand(intake, 3, .5));
+
+    // Arrow 3 -------------------------
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 45)); //[measure]
+    lss.add(new StartIntakeCommand(intake, 12));
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 70, 50, fwd, 1)); //[measure]
+    lss.add(new StopIntakeCommand(intake));
+
+    //face hoop and fire
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 135)); // [measure]
+    lss.add(new SpinRPMCommand(flywheel_sys, 3000)); // [measure]
+    lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
+    lss.add(new ShootCommand(intake, 2, 4)); // [measure]
+    
+    // Arrow 4 -------------------------
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 75)); // [measure]
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 80, 132, fwd,  1)); //[measure]
+
+    // Move to endgame pos
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 10)); // [measure]
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 122.5, 122.5, fwd,  1)); //[measure]
+
+    // Endgame
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 215)); //[measure]
+    lss.add(new EndgameCommand(endgame_solenoid));
+
+  return lss;
 }
 
 
@@ -169,22 +235,39 @@ Map from page 40 of the game manual
 (R) = Red Hoop, Blue Zone
 (B) = Blue Hoop, Red Zone
  *  = Starting position for this auto
-+-------------------+
-|        |*___| (R) |
-|___           |    |
-|   |          |    |
-|   |          |    |
-|   |          |____|
-|___|  ____         |
-|(B)  |___*|        |
-+-------------------+
+
+           ^ 180 degrees
+  +-------------------+
+  |        |*___| (R) |
+  |___           |    |
+  |   |          |    |
+  |   |          |    |  --> 90 degrees
+  |   |          |____|
+  |___|  ____         |
+  |(B)  |__*_|        |
+  +-------------------+
+           v 0 degrees
 
  Human Instructions:
  Align robot to specified place and angle using NON LOADER SIDE SKILLS jig
 */
-CommandController prog_skills_non_loader_size(){
+CommandController prog_skills_non_loader_side(){
 
-  CommandController prog_skills_non_loader_side;
+  CommandController nlss;
+  
+  position_t start_pos = {.x = 128, .y = 84, .rot = 90}; // [measure]
+  nlss.add(new OdomSetPosition(odometry_sys, start_pos));
 
-  return prog_skills_non_loader_side;
+  // Arrow 1 -------------------
+  nlss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 128, 96, fwd, 1)); // [measure]
+  nlss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0, 1)); // [measure]
+    
+    
+    // Arrow 2 -------------------
+  nlss.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // [measure]
+  nlss.add(new SpinRollerCommand(drive_sys, roller)); 
+  nlss.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, reverse, 1)); // [measure]
+
+
+  return nlss;
 }

@@ -43,6 +43,8 @@ extern vex::timer oneshot_tmr;
 
 
 extern AutoChooser autochooser;
+extern vex::digital_out endgame_solenoid;
+
 extern std::string AutoLoaderSideDisplayName;
 extern std::string AutoNonLoaderSideDisplayName;
 extern std::string SkillsLoaderSideDisplayName;
