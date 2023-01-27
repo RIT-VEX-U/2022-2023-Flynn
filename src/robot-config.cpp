@@ -26,33 +26,37 @@ motor_group flywheel_motors(flywheel);
 CustomEncoder left_enc(Brain.ThreeWirePort.A, 2048);
 CustomEncoder right_enc(Brain.ThreeWirePort.C, 2048);
 
+inertial imu(PORT4);
+
 // ======== UTILS ========
 
 // Drive Tuning
 PID::pid_config_t drive_pid_cfg = {
-    .p = 0,
+    .p = .025,
     .i = 0, 
-    .d = 0
+    .d = 0,
+    .deadband = .7,
+    .on_target_time = 0.2
 };
 
 FeedForward::ff_config_t drive_ff_cfg = {
-    .kS = 0,
-    .kV = 0,
-    .kA = 0
+    .kS = 0.07,
+    .kV =.011, // 0.014205,
+    .kA = 0.0015
 };
 
 MotionController::m_profile_cfg_t drive_fast_mprofile_cfg = {
     .pid_cfg = drive_pid_cfg,
     .ff_cfg = drive_ff_cfg,
-    .max_v = 0,
-    .accel = 0
+    .max_v = 40,// MAX = 48,
+    .accel = 150 // MAX = 200
 };
 
 MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
     .pid_cfg = drive_pid_cfg,
     .ff_cfg = drive_ff_cfg,
-    .max_v = 0,
-    .accel = 0
+    .max_v = 20,
+    .accel = 100
 };
 
 // Turn Tuning
@@ -86,19 +90,19 @@ MotionController drive_fast_mprofile(drive_fast_mprofile_cfg), drive_slow_mprofi
 MotionController turn_fast_mprofile(turn_fast_mprofile_cfg), turn_slow_mprofile(turn_slow_mprofile_cfg);
 
 robot_specs_t config = {
-    .robot_radius = 0,
-    .odom_wheel_diam = 3.25*2,
+    .robot_radius = 10,
+    .odom_wheel_diam = 6.374,
     .odom_gear_ratio = 1, // .44    16:12
-    .dist_between_wheels = 10.3025,
+    .dist_between_wheels = 10.163,
 
-    .drive_correction_cutoff = 0,
+    .drive_correction_cutoff = 4,
 
     .drive_feedback = &drive_fast_mprofile,
     .turn_feedback = &turn_fast_mprofile,
     .correction_pid = {
-        .p = 0,
+        .p = .012,
         .i = 0,
-        .d = 0
+        .d = 0.0012
     }
 };
 
@@ -114,7 +118,8 @@ PID::pid_config_t flywheel_pid_cfg = {
 // ======== SUBSYSTEMS ========
 
 
-OdometryTank odometry_sys(left_enc, right_enc, config);
+// OdometryTank odometry_sys(left_enc, right_enc, config);
+OdometryTank odometry_sys(left_motors, right_motors, config, &imu);
 
 TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 
@@ -134,5 +139,6 @@ std::string SkillsNonLoaderSideDisplayName = "Skills Non Loader Side";
  * This should be called at the start of your int main function.
  */
 void vexcodeInit(void) {
+    imu.calibrate();
 
 }
