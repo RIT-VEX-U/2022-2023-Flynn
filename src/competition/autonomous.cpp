@@ -1,5 +1,7 @@
 #include "../include/competition/autonomous.h"
 
+#define TURN_SPEED 0.6
+
 
 //functions that define autos. construct a CommandController when called.
 CommandController auto_loader_side();
@@ -82,7 +84,7 @@ CommandController auto_loader_side(){
     lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 4, reverse)); // [measure]
     
     //shoot
-    lsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180)); // [measure]
+    lsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180, TURN_SPEED)); // [measure]
     lsa.add(new SpinRPMCommand(flywheel_sys, loader_side_full_shot_rpm));
     lsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
     lsa.add(new ShootCommand(intake, 3, 4));
@@ -120,7 +122,7 @@ CommandController auto_non_loader_side(){
     nlsa.add(new OdomSetPosition(odometry_sys, start_pos));
     // Arrow 1 -------------------
     nlsa.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 128, 96, fwd, 1)); // [measure]
-    nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0, 1)); // [measure]
+    nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0, TURN_SPEED)); // [measure]
     
     
     // Arrow 2 -------------------
@@ -129,7 +131,7 @@ CommandController auto_non_loader_side(){
     nlsa.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, reverse, 1)); // [measure]
 
     // Spin and shoot
-    nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 170, 1)); //[measure]
+    nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 170, TURN_SPEED)); //[measure]
     nlsa.add(new SpinRPMCommand(flywheel_sys, non_loader_side_shot_rpm));
     nlsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
     nlsa.add(new ShootCommand(intake, 3, 2)); // [measure]
@@ -174,7 +176,7 @@ CommandController prog_skills_loader_side(){
     lss.add(new SpinRollerCommand(drive_sys, roller));
     lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 4, reverse)); // [measure]
     
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180)); //[measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180, TURN_SPEED)); //[measure]
     
     // Arrow 2 -------------------------
     // intake corner disk
@@ -183,9 +185,9 @@ CommandController prog_skills_loader_side(){
     lss.add(new StopIntakeCommand(intake));
 
     // align to 180 degree roller
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 45));  // [measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 45, TURN_SPEED));  // [measure]
     lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 24, 115.0, fwd, 1)); //[measure] for sure
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180));  // [measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180, TURN_SPEED));  // [measure]
     
     // spin 180 degree roller
     lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 2, fwd)); //[measure]
@@ -193,33 +195,33 @@ CommandController prog_skills_loader_side(){
     lss.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, reverse)); //[measure]
 
     //spin and shoot 3
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 80)); //[measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 80, TURN_SPEED)); //[measure]
     lss.add(new SpinRPMCommand(flywheel_sys, 3500)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
     lss.add(new ShootCommand(intake, 3, .5));
 
     // Arrow 3 -------------------------
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 45)); //[measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 45, TURN_SPEED)); //[measure]
     lss.add(new StartIntakeCommand(intake, 12));
     lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 70, 50, fwd, 1)); //[measure]
     lss.add(new StopIntakeCommand(intake));
 
     //face hoop and fire
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 135)); // [measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 135, TURN_SPEED)); // [measure]
     lss.add(new SpinRPMCommand(flywheel_sys, 3000)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
     lss.add(new ShootCommand(intake, 2, 4)); // [measure]
     
     // Arrow 4 -------------------------
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 75)); // [measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 75, TURN_SPEED)); // [measure]
     lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 80, 132, fwd,  1)); //[measure]
 
     // Move to endgame pos
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 10)); // [measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 10, TURN_SPEED)); // [measure]
     lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 122.5, 122.5, fwd,  1)); //[measure]
 
     // Endgame
-    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 215)); //[measure]
+    lss.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 215, TURN_SPEED)); //[measure]
     lss.add(new EndgameCommand(endgame_solenoid));
 
   return lss;

@@ -41,7 +41,7 @@
 			"includePath": [
 				"${vex_sdkIncludes}"
 			],
-			"compilerPath": "${vex_compilerPath}",
+			"compilerPath": "${vex_compilerPath}/clang",
 			"cStandard": "gnu99",
 			"cppStandard": "gnu++17",
 			"intelliSenseMode": "linux-gcc-arm64",
