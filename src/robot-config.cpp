@@ -22,6 +22,9 @@ motor roller(PORT5);
 
 motor_group flywheel_motors(flywheel);
 
+// Other Outputs
+vex::digital_out endgame_solenoid(Brain.ThreeWirePort.H); //TODO make this an actual port
+
 // ======== INPUTS ========
 CustomEncoder left_enc(Brain.ThreeWirePort.A, 2048);
 CustomEncoder right_enc(Brain.ThreeWirePort.C, 2048);
@@ -133,8 +136,6 @@ Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 18);
 vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
-
-vex::digital_out endgame_solenoid(Brain.ThreeWirePort.H); //TODO make this an actual port
 
 std::string AutoLoaderSideDisplayName = "Auto Loader Side";
 std::string AutoNonLoaderSideDisplayName = "Auto Non Loader Side";

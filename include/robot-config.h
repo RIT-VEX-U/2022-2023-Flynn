@@ -14,6 +14,8 @@ extern motor intake, roller, flywheel;
 extern motor_group left_motors, right_motors;
 extern motor_group flywheel_motors;
 
+extern vex::digital_out endgame_solenoid;
+
 // ======== INPUTS ========
 extern CustomEncoder left_enc, right_enc, mid_enc;
 extern inertial imu;
@@ -43,7 +45,6 @@ extern vex::timer oneshot_tmr;
 
 
 extern AutoChooser autochooser;
-extern vex::digital_out endgame_solenoid;
 
 extern std::string AutoLoaderSideDisplayName;
 extern std::string AutoNonLoaderSideDisplayName;
