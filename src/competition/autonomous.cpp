@@ -132,6 +132,8 @@ CommandController auto_non_loader_side(){
 
     // Spin and shoot
     nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 170, TURN_SPEED)); //[measure]
+    nlsa.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 0, 0, directionType::fwd, 1)); //[ measure]
+    nlsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0, 0.6)); // [measure]
     nlsa.add(new SpinRPMCommand(flywheel_sys, non_loader_side_shot_rpm));
     nlsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
     nlsa.add(new ShootCommand(intake, 3, 2)); // [measure]
