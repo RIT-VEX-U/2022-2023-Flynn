@@ -3,7 +3,7 @@
 #include "math.h"
 #include "core.h"
 
-#define ENC_IN(enc) (enc.rotation(rev) * PI * config.odom_wheel_diam)
+#define ENC_IN(enc) (enc.position(rev) * PI * config.odom_wheel_diam)
 #define ENC_DIFF_IN(left,right) (fabs(ENC_IN(left)-ENC_IN(right))/2.0)
 
 double stored_avg = 0;
@@ -49,18 +49,20 @@ void tune_odometry_wheel_diam()
     if(main_controller.ButtonA.pressing())
     {
         //SET THESE BACK TO LEFT ENC RIGHT ENC
-        left_enc.resetRotation();
-        right_enc.resetRotation();
+        left_motors.resetPosition();
+        right_motors.resetPosition();
     }
-    double avg = (fabs(left_enc.rotation(rev)) + fabs(right_enc.rotation(rev))) / 2.0;
+    // double avg = (fabs(left_enc.rotation(rev)) + fabs(right_enc.rotation(rev))) / 2.0;
+    double avg = (fabs(left_motors.position(rev)) + fabs(right_motors.position(rev))) / 2.0;
     if (fabs(avg) <.1){
+        printf("Diam: 0\n");
       return;
     }
-    double diam = 120.0 / (avg * PI);
+    double diam = 100.0 / (avg * PI);
 
     main_controller.Screen.clearScreen();
     main_controller.Screen.setCursor(1,1);
-    main_controller.Screen.print("Push robot 120 inches");
+    main_controller.Screen.print("Push robot 100 inches");
     main_controller.Screen.setCursor(2,1);
     main_controller.Screen.print("Diam: %f", diam);
     printf("Diam: %f\n", diam);
@@ -71,10 +73,14 @@ void tune_odometry_wheelbase()
     int times_to_turn = 5;
     if(main_controller.ButtonA.pressing())
     {
-        left_enc.resetRotation();
-        right_enc.resetRotation();
+        // left_enc.resetRotation();
+        // right_enc.resetRotation();
+        left_motors.resetPosition();
+        right_motors.resetPosition();
     }
-    double radius =  ENC_DIFF_IN(left_enc, right_enc) / ((double)times_to_turn * 2 * PI); // radius = arclength / theta
+    // double radius =  ENC_DIFF_IN(left_enc, right_enc) / ((double)times_to_turn * 2 * PI); // radius = arclength / theta
+    double radius =  ENC_DIFF_IN(left_motors, right_motors) / ((double)times_to_turn * 2 * PI); // radius = arclength / theta
+
     double wheelbase = 2 * radius;
 
     main_controller.Screen.clearScreen();
@@ -110,7 +116,6 @@ void tune_odometry_offax_dist()
 void tune_drive_ff_ks(DriveType dt)
 {
     static timer tmr;
-    static double last_time = 0.0;
     static double test_pct = 0.0;
     static bool new_press = true;
     static bool done = false;
@@ -121,12 +126,13 @@ void tune_drive_ff_ks(DriveType dt)
         {
             // Initialize the function once
             tmr.reset();
+            odometry_sys.set_position();
             test_pct = 0.0;
             done = false;
             new_press = false;
         }
 
-        if (done || odometry_sys.get_speed() > 0)
+        if (done || OdometryBase::pos_diff(odometry_sys.get_position(), OdometryBase::zero_pos) > 0)
         {
             main_controller.Screen.clearScreen();
             main_controller.Screen.setCursor(1,1);
@@ -134,15 +140,19 @@ void tune_drive_ff_ks(DriveType dt)
             printf("kS: %f\n", test_pct);
             done = true;
             return;
-        }else
+        } else
         {
             main_controller.Screen.clearScreen();
             main_controller.Screen.setCursor(1,1);
             main_controller.Screen.print("Running...");
         }
 
-       if (tmr.time() - last_time > 500)
+       if (tmr.time() > 500)
+       {
             test_pct += 0.01;
+            tmr.reset();
+       }
+        
 
         if(dt == DRIVE)
             drive_sys.drive_tank(test_pct, test_pct);
@@ -204,7 +214,7 @@ void tune_drive_pid(DriveType dt)
 
     if (main_controller.ButtonA.pressing())
     {
-        if(dt == DRIVE && (done || drive_sys.drive_to_point(0,24,fwd, drive_fast_mprofile)))
+        if(dt == DRIVE && (done || drive_sys.drive_to_point(24,24,fwd, drive_fast_mprofile)))
             done = true;
         
         if(dt == TURN && (done || drive_sys.turn_to_heading(270, turn_fast_mprofile)))
@@ -213,6 +223,7 @@ void tune_drive_pid(DriveType dt)
     }else
     {
         drive_sys.drive_arcade(main_controller.Axis3.position() / 100.0, main_controller.Axis1.position() / 100.0);
+        drive_sys.reset_auto();
         done = false;
     }
 }
@@ -257,6 +268,7 @@ void tune_drive_motion_accel(DriveType dt, double maxv)
 {
     static bool done = false;
     static bool new_press = true;
+    static double accel = 0;
 
     if(main_controller.ButtonA.pressing())
     {
@@ -267,19 +279,16 @@ void tune_drive_motion_accel(DriveType dt, double maxv)
             new_press = false;
         }
 
-        double accel = 0;
         double vel = 0;
 
-        if(dt == DRIVE)
+        if(!done && dt == DRIVE)
         {
             vel = odometry_sys.get_speed();
-            accel = continuous_avg(odometry_sys.get_accel());
-            drive_sys.drive_tank(1.0, 1.0);
-        } else if (dt == TURN)
+            accel = odometry_sys.get_accel();
+        } else if (!done)
         {
             vel = odometry_sys.get_angular_speed_deg();
-            accel = continuous_avg(odometry_sys.get_angular_accel_deg());
-            drive_sys.drive_tank(1.0, -1.0);
+            accel = odometry_sys.get_angular_accel_deg();
         }
 
         if(done || vel >= maxv)
@@ -289,13 +298,18 @@ void tune_drive_motion_accel(DriveType dt, double maxv)
             main_controller.Screen.print("Accel: %f", accel);
             printf("Accel: %f\n", accel);
             done = true;
+            drive_sys.stop();
             return;
-        }else
-        {
-            main_controller.Screen.clearScreen();
-            main_controller.Screen.setCursor(1,1);
-            main_controller.Screen.print("Running...");
         }
+        
+        main_controller.Screen.clearScreen();
+        main_controller.Screen.setCursor(1,1);
+        main_controller.Screen.print("Running...");
+
+        if(dt == DRIVE)
+            drive_sys.drive_tank(1.0, 1.0);
+        else
+            drive_sys.drive_tank(1.0, -1.0);
         
     }else
     {

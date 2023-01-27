@@ -16,6 +16,7 @@ extern motor_group flywheel_motors;
 
 // ======== INPUTS ========
 extern CustomEncoder left_enc, right_enc, mid_enc;
+extern inertial imu;
 
 // ======== UTILS ========
 // Drive Tuning
