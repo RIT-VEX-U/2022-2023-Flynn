@@ -4,9 +4,10 @@
 
 /**
 * Construct a SpinRollerCommand
+* @param drive_sys the drive train that will allow us to apply pressure on the rollers
 * @param roller_motor The motor that will spin the roller
 */
-SpinRollerCommand::SpinRollerCommand(vex::motor roller_motor): roller_motor(roller_motor){};
+SpinRollerCommand::SpinRollerCommand(TankDrive &drive_sys, vex::motor roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
 
 /**
  * Run roller controller to spin the roller to our color
@@ -17,7 +18,8 @@ bool SpinRollerCommand::run() {
     const double roller_cutoff_threshold = .01; //revolutions //TODO measure once against roller
     const double num_revolutions_to_spin_motor = 1; //revolutions //TODO measure once against roller
     const double kP = .01; // Proportional constant for spinning the roller half a revolution// TODO measure based on field
- 
+    const double drive_power = .1;
+
     // Initialize start and end position if not already
     if (!func_initialized){
         start_pos = roller_motor.position(vex::rev);
@@ -36,6 +38,7 @@ bool SpinRollerCommand::run() {
 
     // otherwise, do a P controller
     roller_motor.spin(vex::fwd, error * kP, vex::volt);
+    drive_sys.drive_tank(drive_power, drive_power);
     return false;
 }
 
@@ -99,5 +102,11 @@ StopIntakeCommand::StopIntakeCommand(vex::motor intaking_motor):intaking_motor(i
  */
 bool StopIntakeCommand::run(){
   intaking_motor.stop(); 
+  return true;
+}
+
+EndgameCommand::EndgameCommand(vex::digital_out solenoid): solenoid(solenoid){}
+bool EndgameCommand::run(){
+  solenoid.set(true);
   return true;
 }

@@ -34,7 +34,7 @@ void CommandController::add_delay(int ms) {
  */
 void CommandController::run() {
   AutoCommand *next_cmd;
-  printf("Beginning Auto. Starting from 1-%d\n", command_queue.size());
+  printf("Beginning Auto. Commands 1 to %d\n", command_queue.size());
   fflush(stdout);
   int command_count = 1;
   while(!command_queue.empty()) {

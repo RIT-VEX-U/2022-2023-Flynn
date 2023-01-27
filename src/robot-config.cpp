@@ -18,7 +18,7 @@ motor_group right_motors(right_front, right_mid, right_rear);
 // Manipulation 
 motor flywheel(PORT12);
 motor intake(PORT19);
-motor roller(PORT18);
+motor roller(PORT5);
 
 motor_group flywheel_motors(flywheel);
 
@@ -35,7 +35,7 @@ PID::pid_config_t drive_pid_cfg = {
     .p = .025,
     .i = 0, 
     .d = 0,
-    .deadband = .7,
+    .deadband = 2,
     .on_target_time = 0.2
 };
 
@@ -129,6 +129,8 @@ vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
 
+vex::digital_out endgame_solenoid(Brain.ThreeWirePort.H); //TODO make this an actual port
+
 std::string AutoLoaderSideDisplayName = "Auto Loader Side";
 std::string AutoNonLoaderSideDisplayName = "Auto Non Loader Side";
 std::string SkillsLoaderSideDisplayName = "Skills Loader Side";
@@ -140,6 +142,6 @@ std::string SkillsNonLoaderSideDisplayName = "Skills Non Loader Side";
  * This should be called at the start of your int main function.
  */
 void vexcodeInit(void) {
+    endgame_solenoid.set(false); //TODO figure out if false or true shoots 
     imu.calibrate();
-
 }

@@ -78,27 +78,14 @@ CommandController auto_loader_side(){
 
     // spin -90 degree roller
     lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 1, fwd)); //[measure]
-    lsa.add(new SpinRollerCommand(roller));
+    lsa.add(new SpinRollerCommand(drive_sys, roller));
     lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 4, reverse)); // [measure]
     
+    //shoot
     lsa.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 180));
-    
-    // intake corner disk
-    lsa.add(new StartIntakeCommand(intake, 12));
-    lsa.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 17.5, 122.5, fwd, 1));
-    lsa.add(new StopIntakeCommand(intake));
-
-    // align to 180 degree roller
-    lsa.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 45));
-    lsa.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 25, 116.0, fwd, 1)); //[measure] for sure
-    lsa.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 180));
-    
-    // spin 180 degree roller
-    lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 2, fwd)); //[measure]
-    lsa.add(new SpinRollerCommand(roller));
-    lsa.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, reverse)); //[measure]
-    
-
+    lsa.add(new SpinRPMCommand(flywheel_sys, loader_side_full_shot_rpm));
+    lsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
+    lsa.add(new ShootCommand(intake, 3, 4));
 
     return lsa;
 }
@@ -138,7 +125,7 @@ CommandController auto_non_loader_side(){
     non_loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 20, fwd, 1)); // Drive to align vertically with the spinners. // TODO measure this distance on the field with the actual robot
     non_loader_side_auto.add(new TurnDegreesCommand(drive_sys, turn_fast_mprofile, -90, 1)); // Turn from facing directly upwards to facing the spinner.
     non_loader_side_auto.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, fwd, 1)); // Drive until touching the spinner. // TODO measure this distance on the field with the actual robot
-    non_loader_side_auto.add(new SpinRollerCommand(roller)); // TODO measure the distances in SpinRollerCommand to travel
+    non_loader_side_auto.add(new SpinRollerCommand(drive_sys, roller)); // TODO measure the distances in SpinRollerCommand to travel
 
     return non_loader_side_auto;
 }
@@ -152,24 +139,25 @@ Map from page 40 of the game manual
 (R) = Red Hoop, Blue Zone
 (B) = Blue Hoop, Red Zone
  *  = Starting position for this auto
-           ^ 180 degrees
-  +-------------------+
+    -x   ^ 180 degrees
+  0-------------------+
   |        |____| (R) |
   |___           |    |
   | * |          |    |
-  |   |          |    |  --> 90 degrees
+  |   |          |    |  --> 90 degrees (+y)
   |   |          |_*__|
   |___|  ____         |
   |(B)  |____|        |
-  +-------------------+
+  +-------------------+ (140, 140)
            v 0 degrees
+           (+x)
 
  Human Instructions:
  Align robot to specified place and angle using LOADER SIDE SKILLS jig
 */
 CommandController prog_skills_loader_side(){
   
-    position_t start_pos = position_t{.x = 9.75, .y = 105.25, .rot = -90};
+    position_t start_pos = position_t{.x = 9.75, .y = 34.75, .rot = -90};
 
     CommandController lss;
     lss.add(new OdomSetPosition(odometry_sys, start_pos));
@@ -177,41 +165,56 @@ CommandController prog_skills_loader_side(){
     // Arrow 1 -------------------------
     // spin -90 degree roller
     lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 1, fwd)); //[measure]
-    lss.add(new SpinRollerCommand(roller));
+    lss.add(new SpinRollerCommand(drive_sys, roller));
     lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 4, reverse)); // [measure]
     
-    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 180));
+    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 180)); //[measure]
     
     // Arrow 2 -------------------------
     // intake corner disk
     lss.add(new StartIntakeCommand(intake, 12));
-    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 17.5, 122.5, fwd, 1));
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 17.5, 17.5, fwd, 1)); // [measure]
     lss.add(new StopIntakeCommand(intake));
 
     // align to 180 degree roller
-    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 45));
-    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 25, 116.0, fwd, 1)); //[measure] for sure
-    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 180));
+    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 45));  // [measure]
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 24, 115.0, fwd, 1)); //[measure] for sure
+    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 180));  // [measure]
     
     // spin 180 degree roller
     lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 2, fwd)); //[measure]
-    lss.add(new SpinRollerCommand(roller));
+    lss.add(new SpinRollerCommand(drive_sys, roller));
     lss.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 2, reverse)); //[measure]
 
     //spin and shoot 3
     lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 80)); //[measure]
-    lss.add(new SpinRPMCommand(flywheel_sys, 3500));
+    lss.add(new SpinRPMCommand(flywheel_sys, 3500)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
     lss.add(new ShootCommand(intake, 3, .5));
-
 
     // Arrow 3 -------------------------
     lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 45)); //[measure]
     lss.add(new StartIntakeCommand(intake, 12));
-    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 80, 80, fwd, 1)); //[measure]
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 70, 50, fwd, 1)); //[measure]
+    lss.add(new StopIntakeCommand(intake));
 
-    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 135));
+    //face hoop and fire
+    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 135)); // [measure]
+    lss.add(new SpinRPMCommand(flywheel_sys, 3000)); // [measure]
+    lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
+    lss.add(new ShootCommand(intake, 2, 4)); // [measure]
+    
+    // Arrow 4 -------------------------
+    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 75)); // [measure]
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 80, 132, fwd,  1)); //[measure]
 
+    // Move to endgame pos
+    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 10)); // [measure]
+    lss.add(new DriveToPointCommand(drive_sys, drive_fast_mprofile, 122.5, 122.5, fwd,  1)); //[measure]
+
+    // Endgame
+    lss.add(new TurnToHeadingCommand(drive_sys, turn_fast_mprofile, 215)); //[measure]
+    lss.add(new EndgameCommand(endgame_solenoid));
 
   return lss;
 }
