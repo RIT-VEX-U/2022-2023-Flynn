@@ -7,14 +7,14 @@
 * @param drive_sys the drive train that will allow us to apply pressure on the rollers
 * @param roller_motor The motor that will spin the roller
 */
-SpinRollerCommand::SpinRollerCommand(TankDrive &drive_sys, vex::motor roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
+SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
 
 /**
  * Run roller controller to spin the roller to our color
  * Overrides run from AutoCommand
  * @returns true when execution is complete, false otherwise
  */
-bool SpinRollerCommand::run() {
+bool SpinRollerCommandAUTO::run() {
     const double roller_cutoff_threshold = .01; //revolutions // [measure]
     const double num_revolutions_to_spin_motor = 1; //revolutions // [measure]
     const double kP = .01; // Proportional constant for spinning the roller half a revolution // [measure]

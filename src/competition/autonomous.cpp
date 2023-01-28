@@ -71,23 +71,31 @@ Map from page 40 of the game manual
  Align robot to specified place and angle using LOADER SIDE AUTO jig
 */
 CommandController auto_loader_side(){
-    int loader_side_full_shot_rpm = 3000;  // [measure]
+    int loader_side_full_shot_rpm = 3350;  // [measure]
 
     position_t start_pos = position_t{.x = 9.75, .y = 105.25, .rot = -90};
 
     CommandController lsa;
+    
     lsa.add(new OdomSetPosition(odometry_sys, start_pos));
+    lsa.add(new SpinRPMCommand(flywheel_sys, loader_side_full_shot_rpm));
 
     // spin -90 degree roller
-    lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 1, fwd)); //[measure]
+    lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 2, fwd)); //[measure]
     lsa.add(new SpinRollerCommand(drive_sys, roller));
-    lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 4, reverse)); // [measure]
+    lsa.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 7, reverse)); // [measure]
     
     //shoot
-    lsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 180, TURN_SPEED)); // [measure]
-    lsa.add(new SpinRPMCommand(flywheel_sys, loader_side_full_shot_rpm));
+    lsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 30, .6)); // [measure]
+    lsa.add(new DriveToPointCommand(drive_sys, drive_slow_mprofile, 45, 150, fwd, 1));
+    
+    lsa.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 128.5, .6)); // [measure]
+    
     lsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
-    lsa.add(new ShootCommand(intake, 3, 4));
+    lsa.add(new ShootCommand(intake, .15, 12));
+    lsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
+    lsa.add(new ShootCommand(intake, .15, 12));
+    lsa.add(new FlywheelStopCommand(flywheel_sys));
 
     return lsa;
 }

@@ -6,14 +6,14 @@
 /**
  * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
 */
-class SpinRollerCommand: public AutoCommand {
+class SpinRollerCommandAUTO: public AutoCommand {
   public:
     /**
     * Construct a SpinRollerCommand
     * @param drive_sys the drivetrain tha will let us apply pressure to spin the roller
     * @param roller_motor The motor that will spin the roller
     */
-    SpinRollerCommand(TankDrive &drive_sys, vex::motor roller_motor);
+    SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor roller_motor);
 
     /**
      * Run roller controller to spin the roller to our color
@@ -31,9 +31,6 @@ class SpinRollerCommand: public AutoCommand {
 };
 
 
-/**
- * ShootCommand is an ACS command that tells the robot to shoot the disks for a certain amount of time
-*/
 class ShootCommand : public AutoCommand{
   public:
     /** 
@@ -58,6 +55,7 @@ class ShootCommand : public AutoCommand{
     vex::timer tmr;
 
 };
+
 
 /**
  * StartIntakeCommand is an ACS command that tells the robot to begin intaking disks
