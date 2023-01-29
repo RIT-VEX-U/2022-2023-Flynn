@@ -15,33 +15,85 @@ SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor ro
  * @returns true when execution is complete, false otherwise
  */
 bool SpinRollerCommandAUTO::run() {
-    const double roller_cutoff_threshold = .01; //revolutions // [measure]
-    const double num_revolutions_to_spin_motor = 1; //revolutions // [measure]
-    const double kP = .01; // Proportional constant for spinning the roller half a revolution // [measure]
-    const double drive_power = .1; // [measure]
+    const double roller_cutoff_threshold = .05; //revolutions // [measure]
+    const double num_revolutions_to_spin_motor = -2.5; //revolutions // [measure]
+    const double drive_power = .2; // [measure]
 
     // Initialize start and end position if not already
     if (!func_initialized){
         start_pos = roller_motor.position(vex::rev);
         target_pos = start_pos + num_revolutions_to_spin_motor;
-    }    
+    }
 
     // Calculate error
     double current_pos = roller_motor.position(vex::rev);
-    double error = current_pos - start_pos;
-
+    double error = target_pos - current_pos;
+    printf("error: %f\n", error);
     // If we're close enough, call it here.
-    if (fabs(error)>roller_cutoff_threshold < roller_cutoff_threshold){
+    if (fabs(error) < roller_cutoff_threshold){
         func_initialized = false;
+        roller_motor.stop();
+        drive_sys.stop() ;       
         return true;
     }
 
     // otherwise, do a P controller
-    roller_motor.spin(vex::fwd, error * kP, vex::volt);
+    vex::directionType spin_dir = fwd;
+    if (sign(error) < 0){
+      spin_dir = reverse;
+    }
+    roller_motor.spin(spin_dir, 12, volt);
     drive_sys.drive_tank(drive_power, drive_power);
+    func_initialized = true;
     return false;
 }
 
+
+/**
+* Construct a SpinRollerCommand
+* @param drive_sys the drive train that will allow us to apply pressure on the rollers
+* @param roller_motor The motor that will spin the roller
+*/
+SpinRollerCommandSKILLS::SpinRollerCommandSKILLS(TankDrive &drive_sys, vex::motor roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
+
+/**
+ * Run roller controller to spin the roller to our color
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+ */
+bool SpinRollerCommandSKILLS::run() {
+    const double roller_cutoff_threshold = .01; //revolutions // [measure]
+    const double num_revolutions_to_spin_motor = -4.5; //revolutions // [measure]
+    const double drive_power = .2; // [measure]
+
+    // Initialize start and end position if not already
+    if (!func_initialized){
+        start_pos = roller_motor.position(vex::rev);
+        target_pos = start_pos + num_revolutions_to_spin_motor;
+    }
+
+    // Calculate error
+    double current_pos = roller_motor.position(vex::rev);
+    double error = target_pos - current_pos;
+    printf("error: %f\n", error);
+    // If we're close enough, call it here.
+    if (fabs(error) < roller_cutoff_threshold){
+        func_initialized = false;
+        roller_motor.stop();
+        drive_sys.stop() ;       
+        return true;
+    }
+
+    // otherwise, do a P controller
+    vex::directionType spin_dir = fwd;
+    if (sign(error) < 0){
+      spin_dir = reverse;
+    }
+    roller_motor.spin(spin_dir, 12, volt);
+    drive_sys.drive_tank(drive_power, drive_power);
+    func_initialized = true;
+    return false;
+}
 /**
 * Construct a ShootCommand
 * @param firing_motor The motor that will spin the disk into the flywheel

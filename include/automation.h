@@ -29,6 +29,32 @@ class SpinRollerCommandAUTO: public AutoCommand {
     double target_pos;
     TankDrive &drive_sys;
 };
+/**
+ * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
+*/
+class SpinRollerCommandSKILLS: public AutoCommand {
+  public:
+    /**
+    * Construct a SpinRollerCommand
+    * @param drive_sys the drivetrain tha will let us apply pressure to spin the roller
+    * @param roller_motor The motor that will spin the roller
+    */
+    SpinRollerCommandSKILLS(TankDrive &drive_sys, vex::motor roller_motor);
+
+    /**
+     * Run roller controller to spin the roller to our color
+     * Overrides run from AutoCommand
+     * @returns true when execution is complete, false otherwise
+     */
+    bool run() override;
+  
+  private:
+    vex::motor roller_motor;
+    bool func_initialized;
+    double start_pos;
+    double target_pos;
+    TankDrive &drive_sys;
+};
 
 
 class ShootCommand : public AutoCommand{
