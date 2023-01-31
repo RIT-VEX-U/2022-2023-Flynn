@@ -14,20 +14,23 @@ extern motor intake, roller, flywheel;
 extern motor_group left_motors, right_motors;
 extern motor_group flywheel_motors;
 
+extern vex::digital_out endgame_solenoid;
+
 // ======== INPUTS ========
 extern CustomEncoder left_enc, right_enc, mid_enc;
+extern inertial imu;
 
 // ======== UTILS ========
 // Drive Tuning
 
 
 extern PID::pid_config_t drive_pid_cfg, turn_pid_cfg;
-extern FeedForward::ff_config_t drive_ff_cfg, turn_ff_cfg;
+extern FeedForward::ff_config_t drive_ff_cfg;//, turn_ff_cfg;
 extern MotionController::m_profile_cfg_t drive_fast_mprofile_cfg, drive_slow_mprofile_cfg;
-extern MotionController::m_profile_cfg_t turn_fast_mprofile_cfg, turn_slow_mprofile_cfg;
+// extern MotionController::m_profile_cfg_t turn_fast_mprofile_cfg, turn_slow_mprofile_cfg;
 
 extern MotionController drive_fast_mprofile, drive_slow_mprofile;
-extern MotionController turn_fast_mprofile, turn_slow_mprofile;
+// extern MotionController turn_fast_mprofile, turn_slow_mprofile;
 extern robot_specs_t config;
 
 // Flywheel Tuning
@@ -42,6 +45,7 @@ extern vex::timer oneshot_tmr;
 
 
 extern AutoChooser autochooser;
+
 extern std::string AutoLoaderSideDisplayName;
 extern std::string AutoNonLoaderSideDisplayName;
 extern std::string SkillsLoaderSideDisplayName;

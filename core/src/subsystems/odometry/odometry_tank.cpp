@@ -45,8 +45,6 @@ void OdometryTank::set_position(const position_t &newpos)
  */
 position_t OdometryTank::update()
 {
-    position_t updated_pos;
-
     double lside_revs = 0, rside_revs = 0;
 
     if(left_side != NULL && right_side != NULL)
@@ -70,7 +68,6 @@ position_t OdometryTank::update()
       // Get the arclength of the turning circle of the robot
       double distance_diff = (rside_revs - lside_revs) * PI * config.odom_wheel_diam;
 
-      // printf("dist_diff: %f, ", distance_diff);
 
       //Use the arclength formula to calculate the angle. Add 90 to make "0 degrees" to starboard
       angle = ((180.0 / PI) * (distance_diff / config.dist_between_wheels)) + 90;
@@ -92,58 +89,37 @@ position_t OdometryTank::update()
     if(angle < 0)
         angle += 360;
 
-    mut.lock();
-    position_t current_pos_local = current_pos;
-    mut.unlock();
-
-    updated_pos = calculate_new_pos(config, current_pos_local, lside_revs, rside_revs, angle);
+    current_pos = calculate_new_pos(config, current_pos, lside_revs, rside_revs, angle);
 
 
-    static position_t last_pos = updated_pos;
+    static position_t last_pos = current_pos;
     static double last_speed = 0;
     static double last_ang_speed = 0;
     static timer tmr;
-
-    double speed_local = 0;
-    double accel_local = 0;
-    double ang_speed_local = 0;
-    double ang_accel_local = 0;
     bool update_vel_accel = tmr.time(sec) > 0.1;
 
     // This loop runs too fast. Only check at LEAST every 1/10th sec
     if(update_vel_accel)
     {
       // Calculate robot velocity
-      speed_local = pos_diff(updated_pos, last_pos) / tmr.time(sec);
+      speed = pos_diff(current_pos, last_pos) / tmr.time(sec);
 
       // Calculate robot acceleration
-      accel_local = (speed_local - last_speed) / tmr.time(sec);
+      accel = (speed - last_speed) / tmr.time(sec);
 
       // Calculate robot angular velocity (deg/sec)
-      ang_speed_local = smallest_angle(updated_pos.rot, last_pos.rot) / tmr.time(sec);
+      ang_speed_deg = smallest_angle(current_pos.rot, last_pos.rot) / tmr.time(sec);
 
       // Calculate robot angular acceleration (deg/sec^2)
-      ang_accel_local = (ang_speed_local - last_ang_speed) / tmr.time(sec);
+      ang_accel_deg = (ang_speed_deg - last_ang_speed) / tmr.time(sec);
 
       tmr.reset();
-      last_pos = updated_pos;
-      last_speed = speed_local;
-      last_ang_speed = ang_speed_local;
+      last_pos = current_pos;
+      last_speed = speed;
+      last_ang_speed = ang_speed_deg;
     }
 
-    // Update the class' stored position
-    mut.lock();
-    this->current_pos = updated_pos;
-    if(update_vel_accel)
-    {
-      this->speed = speed_local;
-      this->accel = accel_local;
-      this->ang_speed_deg = ang_speed_local;
-      this->ang_accel_deg = ang_accel_local;
-    }
-    mut.unlock();
-
-    return updated_pos;
+    return current_pos;
 }
 
 /**
@@ -165,6 +141,7 @@ position_t OdometryTank::calculate_new_pos(robot_specs_t &config, position_t &cu
     double angle = angle_deg * PI / 180.0; // Degrees to radians
 
     // Create a vector from the change in distance in the current direction of the robot
+    //deg2rad((smallest_angle(curr_pos.rot, angle_deg)/2 + curr_pos.rot, dist_driven)
     Vector2D chg_vec(angle, dist_driven);
     
     // Create a vector from the current position in reference to X,Y=0,0
