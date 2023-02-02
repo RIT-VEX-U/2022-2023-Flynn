@@ -15,7 +15,7 @@ SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor ro
  * @returns true when execution is complete, false otherwise
  */
 bool SpinRollerCommandAUTO::run() {
-    const double roller_cutoff_threshold = .05; //revolutions // [measure]
+    const double roller_cutoff_threshold = .05  ; //revolutions // [measure]
     const double num_revolutions_to_spin_motor = -2.5; //revolutions // [measure]
     const double drive_power = .2; // [measure]
 

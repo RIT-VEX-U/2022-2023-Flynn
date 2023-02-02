@@ -31,6 +31,9 @@ void autonomous()
     vex::task printodom(print_odom);
     CommandController current_auto = prog_skills_loader_side();
     current_auto.run();
+    while(true){
+        drive_sys.stop();
+    }
 
 }
 

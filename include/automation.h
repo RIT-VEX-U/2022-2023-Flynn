@@ -3,6 +3,21 @@
 #include "vex.h"
 #include "../core/include/utils/command_structure/auto_command.h"
 
+
+
+// Pushes the firing flap to the up position for close in shots
+void FlapUp(){
+  flapup_solenoid.set(true);
+  flapdown_solenoid.set(false);
+}
+
+// Pushes the firing flap to the down position for far away shots
+void FlapDown(){
+  flapup_solenoid.set(false);
+  flapdown_solenoid.set(true);
+}
+
+
 /**
  * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
 */

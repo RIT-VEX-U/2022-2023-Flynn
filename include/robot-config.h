@@ -16,6 +16,9 @@ extern motor_group flywheel_motors;
 
 extern vex::digital_out endgame_solenoid;
 
+extern vex::digital_out flapdown_solenoid;
+extern vex::digital_out flapup_solenoid;
+
 // ======== INPUTS ========
 extern CustomEncoder left_enc, right_enc, mid_enc;
 extern inertial imu;
