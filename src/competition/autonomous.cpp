@@ -11,10 +11,10 @@ CommandController prog_skills_loader_side();
 
 int print_odom(){
     while(true){
-        auto pos = odometry_sys.get_position();
+        position_t pos = odometry_sys.get_position();
         printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+        vexDelay(20);
     }
-
     return 0;
 }
 

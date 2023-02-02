@@ -2,6 +2,37 @@
 #include "robot-config.h"
 
 
+// Pushes the firing flap to the up position for close in shots
+void FlapUp(){
+  flapup_solenoid.set(true);
+  flapdown_solenoid.set(false);
+}
+
+// Pushes the firing flap to the down position for far away shots
+void FlapDown(){
+  flapup_solenoid.set(false);
+  flapdown_solenoid.set(true);
+}
+/**
+ * Construct a FlapUpCommand
+ * when run it flaps the flap up
+*/
+FlapUpCommand::FlapUpCommand(){}
+bool FlapUpCommand::run(){
+  FlapUp();
+  return true;
+}
+/**
+ * Construct a FlapDownCommand
+ * when run it flaps the flap down
+*/
+FlapDownCommand::FlapDownCommand(){}
+bool FlapDownCommand::run(){
+  FlapDown();
+  return true;
+}
+
+
 /**
 * Construct a SpinRollerCommand
 * @param drive_sys the drive train that will allow us to apply pressure on the rollers
