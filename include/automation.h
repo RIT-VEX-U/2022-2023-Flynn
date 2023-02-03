@@ -143,7 +143,7 @@ class EndgameCommand : public AutoCommand{
     * Construct and Endgame command
     * this is the one that shoots the string
     */
-    EndgameCommand(vex::digital_out solenoid);
+    EndgameCommand(vex::digital_out &solenoid);
 
     bool run() override;
   private:

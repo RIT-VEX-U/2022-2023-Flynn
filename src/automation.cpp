@@ -188,7 +188,7 @@ bool StopIntakeCommand::run(){
   return true;
 }
 
-EndgameCommand::EndgameCommand(vex::digital_out solenoid): solenoid(solenoid){}
+EndgameCommand::EndgameCommand(vex::digital_out &solenoid): solenoid(solenoid){}
 bool EndgameCommand::run(){
   solenoid.set(true);
   return true;
