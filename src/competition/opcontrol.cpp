@@ -20,16 +20,15 @@ int print_odom(){
 void opcontrol()
 {
   test_stuff();
-  //return;
-  printf("opcontrollin");
+  return;
+  
   // Initialization
   fflush(stdout);
   double oneshot_time = .05;//Change 1 second to whatever is needed
   bool oneshotting = false;
-  //flywheel_sys.spinRPM(3000);
-  //flywheel_sys.stop();
-  //flywheel.spin(fwd, 12, volt);//TODO measure speed that is needed
-  main_controller.ButtonUp.pressed([](){flywheel_sys.spinRPM(3000);});
+  flywheel_sys.spinRPM(3000);
+  
+  main_controller.ButtonUp.pressed([](){flywheel_sys.spinRPM(3500);});
   main_controller.ButtonDown.pressed([](){flywheel_sys.stop();});
   main_controller.ButtonR1.pressed([](){intake.spin(reverse, 12, volt);}); // Intake
   main_controller.ButtonR2.pressed([](){intake.spin(fwd, 12, volt);}); // Shoot
@@ -57,8 +56,7 @@ void opcontrol()
   }
     
     // ========== DRIVING CONTROLS ==========
-    //drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);
-    drive_sys.drive_arcade(main_controller.Axis2.position(pct)/200.0, main_controller.Axis4.position(pct)/100.0);    
+    drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);
     // ========== MANIPULATING CONTROLS ==========
 
 
