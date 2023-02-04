@@ -16,7 +16,6 @@ class SpinRollerCommandAUTO: public AutoCommand {
     * @param roller_motor The motor that will spin the roller
     */
     SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor &roller_motor);
-    SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor &roller_motor);
 
     /**
      * Run roller controller to spin the roller to our color
@@ -26,7 +25,6 @@ class SpinRollerCommandAUTO: public AutoCommand {
     bool run() override;
   
   private:
-    vex::motor &roller_motor;
     vex::motor &roller_motor;
     bool func_initialized;
     double start_pos;
@@ -207,4 +205,20 @@ class VisionAimCommand : public AutoCommand
     TankDrive &drive_sys;
     PID pid;
     timer tmr;
+};
+
+class FlapUpCommand : public AutoCommand
+{
+  public:
+   FlapUpCommand();
+   
+   bool run();
+};
+
+class FlapDownCommand : public AutoCommand
+{
+  public:
+   FlapDownCommand();
+   
+   bool run();
 };
