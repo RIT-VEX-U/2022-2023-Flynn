@@ -3,7 +3,6 @@
 #include "../include/robot-config.h"
 #include "../include/tuning.h"
 
-
 int print_odom(){
     while(true){
         position_t pos = odometry_sys.get_position();
@@ -13,30 +12,6 @@ int print_odom(){
     return 0;
 }
 
-
-void test_stuff(){
-  //vex::task printodom(print_odom);
-
-  //while(true){
-  //  tune_flywheel_distcalc();
-  //  vexDelay(20);
-  //}
-  colorSensor.setLight(ledState::on);
-  colorSensor.setLightPower(10);
-
-  while(imu.isCalibrating()){
-    vexDelay(20);
-  }
-
-  CommandController mine;
-  // mine.add(new PrintOdomCommand(odometry_sys));
-  // mine.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0.0, .6), 4.0);
-  // mine.add(new PrintOdomCommand(odometry_sys));
-  mine.add(new SpinToColorCommand(colorSensor, 230, roller));
-  mine.run();
-  printf("finshed\n");
-}
-
 /**
  * Contains the main loop of the robot code while running in the driver-control period.
  */
@@ -44,14 +19,15 @@ void opcontrol()
 {
   test_stuff();
   return;
-
+  
   // Initialization
   fflush(stdout);
   double oneshot_time = .05;//Change 1 second to whatever is needed
   bool oneshotting = false;
-  flywheel_sys.stop();
-  flywheel.spin(fwd, 12, volt);//TODO measure speed that is needed
+  flywheel_sys.spinRPM(3000);
   
+  main_controller.ButtonUp.pressed([](){flywheel_sys.spinRPM(3500);});
+  main_controller.ButtonDown.pressed([](){flywheel_sys.stop();});
   main_controller.ButtonR1.pressed([](){intake.spin(reverse, 12, volt);}); // Intake
   main_controller.ButtonR2.pressed([](){intake.spin(fwd, 12, volt);}); // Shoot
   main_controller.ButtonL2.pressed([](){intake.spin(fwd, 12, volt);oneshot_tmr.reset();}); //Single Shoot
@@ -61,15 +37,24 @@ void opcontrol()
   main_controller.ButtonB.pressed([](){odometry_sys.set_position();});
 
   odometry_sys.end_async();
+  int i = 0;
   // Periodic
   while(true)
   {
+    i++;
+    if (i%5==0){
+    main_controller.Screen.setCursor(0, 0);
+    main_controller.Screen.clearScreen();
+    main_controller.Screen.print("fw rpm: %f", flywheel_sys.getRPM());
+    main_controller.Screen.setCursor(2, 0);
+    main_controller.Screen.print("fw temp: %.1ff", flywheel.temperature(vex::fahrenheit));
+    main_controller.Screen.setCursor(4, 0);
+    main_controller.Screen.print("bat volt: %.2fv", Brain.Battery.voltage(vex::volt));
     
-
+  }
     
     // ========== DRIVING CONTROLS ==========
     drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);
-    
     // ========== MANIPULATING CONTROLS ==========
 
 

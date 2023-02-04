@@ -2,7 +2,6 @@
 #include "../include/robot-config.h"
 #include "../core/include/utils/math_util.h"
 
-
 // Pushes the firing flap to the up position for close in shots
 void FlapUp(){
   flapup_solenoid.set(true);
@@ -33,7 +32,6 @@ bool FlapDownCommand::run(){
   return true;
 }
 
-
 /**
 * Construct a SpinRollerCommand
 * @param drive_sys the drive train that will allow us to apply pressure on the rollers
@@ -47,85 +45,38 @@ SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor &r
  * @returns true when execution is complete, false otherwise
  */
 bool SpinRollerCommandAUTO::run() {
-    const double roller_cutoff_threshold = .05  ; //revolutions // [measure]
-    const double num_revolutions_to_spin_motor = -2.5; //revolutions // [measure]
+    const double roller_cutoff_threshold = .05; //revolutions // [measure]
+    const double num_revolutions_to_spin_motor = -2; //revolutions // [measure]
     const double drive_power = .2; // [measure]
 
     // Initialize start and end position if not already
     if (!func_initialized){
         start_pos = roller_motor.position(vex::rev);
         target_pos = start_pos + num_revolutions_to_spin_motor;
-    }
+        func_initialized = true;
+    }    
 
     // Calculate error
     double current_pos = roller_motor.position(vex::rev);
-    double error = target_pos - current_pos;
-    printf("error: %f\n", error);
+    double error = target_pos-current_pos;
+
     // If we're close enough, call it here.
-    if (fabs(error) < roller_cutoff_threshold){
+    if (fabs(error)>roller_cutoff_threshold < roller_cutoff_threshold){
         func_initialized = false;
         roller_motor.stop();
-        drive_sys.stop() ;       
         return true;
     }
 
-    // otherwise, do a P controller
-    vex::directionType spin_dir = fwd;
-    if (sign(error) < 0){
-      spin_dir = reverse;
+    vex::directionType dir = fwd;
+    if (error<0){
+      dir = reverse;
     }
-    roller_motor.spin(spin_dir, 12, volt);
+    // otherwise, do a P controller
+    roller_motor.spin(dir, 8, vex::volt);
     drive_sys.drive_tank(drive_power, drive_power);
-    func_initialized = true;
     return false;
 }
 
-
-/**
-* Construct a SpinRollerCommand
-* @param drive_sys the drive train that will allow us to apply pressure on the rollers
-* @param roller_motor The motor that will spin the roller
-*/
-SpinRollerCommandSKILLS::SpinRollerCommandSKILLS(TankDrive &drive_sys, vex::motor roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
-
-/**
- * Run roller controller to spin the roller to our color
- * Overrides run from AutoCommand
- * @returns true when execution is complete, false otherwise
- */
-bool SpinRollerCommandSKILLS::run() {
-    const double roller_cutoff_threshold = .01; //revolutions // [measure]
-    const double num_revolutions_to_spin_motor = -4.5; //revolutions // [measure]
-    const double drive_power = .2; // [measure]
-
-    // Initialize start and end position if not already
-    if (!func_initialized){
-        start_pos = roller_motor.position(vex::rev);
-        target_pos = start_pos + num_revolutions_to_spin_motor;
-    }
-
-    // Calculate error
-    double current_pos = roller_motor.position(vex::rev);
-    double error = target_pos - current_pos;
-    printf("error: %f\n", error);
-    // If we're close enough, call it here.
-    if (fabs(error) < roller_cutoff_threshold){
-        func_initialized = false;
-        roller_motor.stop();
-        drive_sys.stop() ;       
-        return true;
-    }
-
-    // otherwise, do a P controller
-    vex::directionType spin_dir = fwd;
-    if (sign(error) < 0){
-      spin_dir = reverse;
-    }
-    roller_motor.spin(spin_dir, 12, volt);
-    drive_sys.drive_tank(drive_power, drive_power);
-    func_initialized = true;
-    return false;
-}
 /**
 * Construct a ShootCommand
 * @param firing_motor The motor that will spin the disk into the flywheel
@@ -154,7 +105,6 @@ bool ShootCommand::run(){
 }
 
 
-
 /**
 * Construct a StartIntakeCommand
 * @param intaking_motor The motor that will pull the disk into the robot
@@ -170,6 +120,19 @@ StartIntakeCommand::StartIntakeCommand(vex::motor &intaking_motor, double intaki
 */
 bool StartIntakeCommand::run(){
   intaking_motor.spin(vex::reverse, intaking_voltage, vex::volt); 
+  return true;
+}
+
+SpinRawCommand::SpinRawCommand(vex::motor &flywheel_motor, double voltage):flywheel_motor(flywheel_motor), voltage(voltage){}
+
+/**
+ * Run the StartIntakeCommand
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+ 
+*/
+bool SpinRawCommand::run(){
+  flywheel_motor.spin(vex::fwd, voltage, vex::volt); 
   return true;
 }
 
@@ -194,12 +157,11 @@ bool EndgameCommand::run(){
   solenoid.set(true);
   return true;
 }
-
 PrintOdomCommand::PrintOdomCommand(OdometryTank &odom): odom(odom){}
+
 bool PrintOdomCommand::run(){
   position_t pos = odom.get_position();
   printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
-  
   return true;
 }
 
@@ -219,3 +181,75 @@ SpinToColorCommand::SpinToColorCommand(vex::optical &colorSensor, double color, 
 
     return true;
   }
+
+
+
+PID::pid_config_t vis_pid_cfg = {
+  .p = 0,
+  .d = 0,
+  .deadband = 0,
+  .on_target_time = 0
+};
+
+#define VISION_CENTER 0
+#define NOT_DETECTED_TIME 2
+#define MAX_SPEED 0.5
+
+VisionAimCommand::VisionAimCommand(vision &cam, initializer_list<vision::signature> sigs, TankDrive &drive_sys): cam(cam), sig_vec(sigs), drive_sys(drive_sys), pid(vis_pid_cfg) 
+{}
+VisionAimCommand::VisionAimCommand(vision &cam, vision::signature sig, TankDrive &drive_sys): cam(cam), sig_vec({sig}), drive_sys(drive_sys), pid(vis_pid_cfg)
+{}
+
+/**
+ * Run the VisionAimCommand
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+*/
+bool VisionAimCommand::run()
+{
+  // If the camera isn't installed, move on to the next command
+  if(!cam.installed())
+    return true;
+  
+  // cam.takeSnapshot(sig, 1);
+  if(cam.objectCount > 0)
+  {
+    // Take a snapshot with each color selected, 
+    // and store the largest found object for each in a vector
+    vector<vision::object> found;
+    for(vision::signature s : sig_vec)
+    {
+      cam.takeSnapshot(s, 1);
+      for(int i=0; i<cam.objects.getLength(); i++)
+        found.push_back(cam.objects[i]);
+    }
+
+    // Make sure we have something
+    if(found.size() < 1)
+      return false;
+
+    // Find the largest object in the "found" list
+    vision::object &largest = found[0];
+    for(int i=1; i<found.size(); i++)
+    {
+      if((found[i].width * found[i].height) > (largest.width * largest.height))
+        largest = found[i];
+    }
+
+    // Update the PID loop & drive the robot
+    pid.set_target(VISION_CENTER);
+    pid.set_limits(-MAX_SPEED, MAX_SPEED);
+    double out = pid.update(largest.centerX);
+
+    drive_sys.drive_tank(out, -out);
+
+    if(pid.is_on_target())
+      return true;
+
+  } else
+  {
+    drive_sys.stop();
+  }
+
+  return false;
+}

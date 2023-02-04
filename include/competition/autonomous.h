@@ -1,11 +1,6 @@
 #pragma once
 #include "vex.h"
-#include "../core/include/utils/command_structure/auto_command.h"
-#include "../core/include/utils/command_structure/command_controller.h"
-#include "../core/include/utils/command_structure/drive_commands.h"
-#include "../core/include/utils/command_structure/flywheel_commands.h"
-#include "../automation.h"
-#include "../robot-config.h"
+#include "../autonomous_flynn.h"
 /**
  * Contains all the code run during autonomous.
  */ 
