@@ -1,11 +1,37 @@
 #include "../include/autonomous_flynn.h"
-#include <stdio.h>
+#include "vision.h"
+
+#define TURN_SPEED 0.6
+#define INTAKE_VOLT 12
+#define SHOOTING_RPM 3500
+#define SINGLE_SHOT_TIME 0.2
+#define SINGLE_SHOT_VOLT 12
+#define SINGLE_SHOT_RECOVER_DELAY 1
 
 #define DriveToPointFast(x, y) new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, fwd, 1.0)
 #define DriveForwardFast(dist, dir) new DriveForwardCommand(drive_sys, drive_fast_mprofile, dist, dir, 1.0)
-#define TurnToHeading(heading_deg) new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, .6)
-#define StartIntake() new StartIntakeCommand(intake, 12)
-#define StopIntake() new StopIntakeCommand(intake)
+#define TurnToHeading(heading_deg) new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, TURN_SPEED)
+#define StartIntake new StartIntakeCommand(intake, INTAKE_VOLT)
+#define StopIntake new StopIntakeCommand(intake)
+
+#define VisionAim (new VisionAimCommand(cam, {RED_GOAL, BLUE_GOAL}, drive_sys))
+#define WaitForFW (new WaitUntilUpToSpeedCommand(flywheel_sys, SHOOTING_RPM))
+#define ShootDisk (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
+
+#define PrintOdom (new PrintOdomCommand(odometry_sys))
+#define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
+
+
+void add_single_shot_cmd(CommandController &controller, double vis_timeout=0.0)
+{
+    controller.add(WAIT_FOR_FLYWHEEL);
+    if(vis_timeout == 0.0)
+        controller.add(VisionAim);
+    else
+        controller.add(VisionAim, vis_timeout);
+    controller.add(SHOOT_DISK);
+    controller.add_delay(SINGLE_SHOT_RECOVER_DELAY);
+}
 
 void pleasant_opcontrol();
 
@@ -17,9 +43,7 @@ void test_stuff(){
 
   CommandController mine;
   mine.add(new PrintOdomCommand(odometry_sys));
-  //mine.add(TurnToHeading(0));
-  //mine.add(DriveToPointFast(10, 0));
-  
+  mine.add(PrintOdomContinous);
   mine.add(new PrintOdomCommand(odometry_sys));  mine.run();
   vex_printf("timedout %d\n", mine.last_command_timed_out());
   vex_printf("finshed\n");
@@ -130,8 +154,8 @@ CommandController auto_loader_side(){
     lsa.add(TurnToHeading(129)); // [measure]
  
     //lsa.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
-    lsa.add(new ShootCommand(intake, 3, 3));
-    lsa.add(StopIntake());
+    lsa.add(ShootDisk);
+    lsa.add(StopIntake);
 
     return lsa;
 
@@ -180,9 +204,9 @@ CommandController prog_skills_loader_side(){
     
     // Arrow 2 -------------------------
     // intake corner disk
-    lss.add(StartIntake());
+    lss.add(StartIntake);
     lss.add(DriveToPointFast(17.5, 17.5)); // [measure]
-    lss.add(StopIntake());
+    lss.add(StopIntake);
 
     // align to 180 degree roller
     lss.add(TurnToHeading(45));  // [measure]
@@ -198,19 +222,19 @@ CommandController prog_skills_loader_side(){
     lss.add(TurnToHeading(80)); //[measure]
     lss.add(new SpinRPMCommand(flywheel_sys, 3500)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
-    lss.add(new ShootCommand(intake, 3, .5));
+    lss.add(ShootDisk);
 
     // Arrow 3 -------------------------
     lss.add(TurnToHeading(45)); //[measure]
-    lss.add(StartIntake());
+    lss.add(StartIntake);
     lss.add(DriveToPointFast(70, 50)); //[measure]
-    lss.add(StopIntake());
+    lss.add(StopIntake);
 
     //face hoop and fire
     lss.add(TurnToHeading(135)); // [measure]
     lss.add(new SpinRPMCommand(flywheel_sys, 3000)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
-    lss.add(new ShootCommand(intake, 2, 4)); // [measure]
+    lss.add(ShootDisk); // [measure]
     
     // Arrow 4 -------------------------
     lss.add(TurnToHeading(75)); // [measure]

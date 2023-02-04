@@ -139,6 +139,17 @@ class PrintOdomCommand : public AutoCommand{
     OdometryTank &odom;
 };
 
+class PrintOdomContinousCommand : public AutoCommand{
+  public:
+    /**
+     * Construct a PrintOdomCommand
+    */
+   PrintOdomContinousCommand(OdometryTank &odom);
+   bool run() override;
+  private:
+    OdometryTank &odom;
+};
+
 /**
  * ACS Command for targetting the high goal with vision using PID
 */

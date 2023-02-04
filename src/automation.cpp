@@ -135,6 +135,12 @@ bool PrintOdomCommand::run(){
   return true;
 }
 
+PrintOdomContinousCommand::PrintOdomContinousCommand(OdometryTank &odom): odom(odom){}
+bool PrintOdomContinousCommand::run(){
+  position_t pos = odom.get_position();
+  printf("(%.2f, %.2f), %.2f\n", pos.x, pos.y, pos.rot);
+  return false;
+}
 
 
 
