@@ -1,7 +1,7 @@
-#include "competition/opcontrol.h"
-#include "automation.h"
-#include "robot-config.h"
-#include "tuning.h"
+#include "../../include/competition/opcontrol.h"
+#include "../include/automation.h"
+#include "../include/robot-config.h"
+#include "../include/tuning.h"
 
 
 int print_odom(){
@@ -21,16 +21,18 @@ void test_stuff(){
   //  tune_flywheel_distcalc();
   //  vexDelay(20);
   //}
-
+  colorSensor.setLight(ledState::on);
+  colorSensor.setLightPower(10);
 
   while(imu.isCalibrating()){
     vexDelay(20);
   }
 
   CommandController mine;
-  mine.add(new PrintOdomCommand(odometry_sys));
-  mine.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0.0, .6), 4.0);
-  mine.add(new PrintOdomCommand(odometry_sys));
+  // mine.add(new PrintOdomCommand(odometry_sys));
+  // mine.add(new TurnToHeadingCommand(drive_sys, *config.turn_feedback, 0.0, .6), 4.0);
+  // mine.add(new PrintOdomCommand(odometry_sys));
+  mine.add(new SpinToColorCommand(colorSensor, 230, roller));
   mine.run();
   printf("finshed\n");
 }

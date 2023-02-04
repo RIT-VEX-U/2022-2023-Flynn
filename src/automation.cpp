@@ -1,5 +1,6 @@
 #include "../include/automation.h"
-#include "robot-config.h"
+#include "../include/robot-config.h"
+#include "../core/include/utils/math_util.h"
 
 
 // Pushes the firing flap to the up position for close in shots
@@ -38,7 +39,7 @@ bool FlapDownCommand::run(){
 * @param drive_sys the drive train that will allow us to apply pressure on the rollers
 * @param roller_motor The motor that will spin the roller
 */
-SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
+SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor &roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
 
 /**
  * Run roller controller to spin the roller to our color
@@ -129,7 +130,7 @@ bool SpinRollerCommandSKILLS::run() {
 * Construct a ShootCommand
 * @param firing_motor The motor that will spin the disk into the flywheel
 */
-ShootCommand::ShootCommand(vex::motor firing_motor, double seconds_to_shoot, double volt): firing_motor(firing_motor), seconds_to_shoot(seconds_to_shoot), volt(volt){}
+ShootCommand::ShootCommand(vex::motor &firing_motor, double seconds_to_shoot, double volt): firing_motor(firing_motor), seconds_to_shoot(seconds_to_shoot), volt(volt){}
 
 /**
  * Run the intake motor backward to move the disk into the flywheel
@@ -159,7 +160,7 @@ bool ShootCommand::run(){
 * @param intaking_motor The motor that will pull the disk into the robot
 * @param intaking_voltage The voltage at which to run the intake motor
 */
-StartIntakeCommand::StartIntakeCommand(vex::motor intaking_motor, double intaking_voltage):intaking_motor(intaking_motor), intaking_voltage(intaking_voltage){}
+StartIntakeCommand::StartIntakeCommand(vex::motor &intaking_motor, double intaking_voltage):intaking_motor(intaking_motor), intaking_voltage(intaking_voltage){}
 
 /**
  * Run the StartIntakeCommand
@@ -176,7 +177,7 @@ bool StartIntakeCommand::run(){
 * Construct a StartIntakeCommand
 * @param intaking_motor The motor that will be stopped
 */
-StopIntakeCommand::StopIntakeCommand(vex::motor intaking_motor):intaking_motor(intaking_motor){}
+StopIntakeCommand::StopIntakeCommand(vex::motor &intaking_motor):intaking_motor(intaking_motor){}
 
 /**
  * Run the StopIntakeCommand
@@ -201,3 +202,20 @@ bool PrintOdomCommand::run(){
   
   return true;
 }
+
+SpinToColorCommand::SpinToColorCommand(vex::optical &colorSensor, double color, vex::motor &rollerMotor, double error):colorSensor(colorSensor), color(color), rollerMotor(rollerMotor), error(error){}
+  bool SpinToColorCommand::run(){
+    if(color<=error){
+      if(colorSensor.hue()>color+15 && colorSensor.hue() < wrap_angle_deg(color-error)){
+        return false;
+      }
+    }
+    else if(colorSensor.hue() < wrap_angle_deg(color-error) || colorSensor.hue() > wrap_angle_deg(color+error)){
+      rollerMotor.spin(vex::directionType::fwd);
+      return false;
+    }
+
+    rollerMotor.stop();
+
+    return true;
+  }
