@@ -401,14 +401,14 @@ void tune_flywheel_distcalc()
     static bool first_run = true;
     static int setpt_rpm = 0;
     static double t = 0;
-    MovingAverage avg_err = MovingAverage(10, 0);
+    static MovingAverage avg_err = MovingAverage(10, 0);
     if(first_run)
     {
         main_controller.ButtonUp.pressed([](){setpt_rpm+=500;});
         main_controller.ButtonDown.pressed([](){setpt_rpm-=500;});
         main_controller.ButtonRight.pressed([](){setpt_rpm+=25;});
         main_controller.ButtonLeft.pressed([](){setpt_rpm-=25;});
-//        main_controller.ButtonX.pressed([](){setpt_rpm = 0;});
+        main_controller.ButtonX.pressed([](){setpt_rpm = 0;});
         main_controller.ButtonA.pressed([](){intake.spin(fwd, 4, volt);});
         main_controller.ButtonA.released([](){intake.spin(fwd, 0, volt);});
         first_run = false;

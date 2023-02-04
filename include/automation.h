@@ -5,7 +5,6 @@
 
 
 
-
 class FlapUpCommand: public AutoCommand{
   public:
     FlapUpCommand();
@@ -148,4 +147,15 @@ class EndgameCommand : public AutoCommand{
     bool run() override;
   private:
     vex::digital_out solenoid;
+};
+
+class PrintOdomCommand : public AutoCommand{
+  public:
+    /**
+     * Construct a PrintOdomCommand
+    */
+   PrintOdomCommand(OdometryTank &odom);
+   bool run() override;
+  private:
+    OdometryTank &odom;
 };
