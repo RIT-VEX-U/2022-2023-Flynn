@@ -23,6 +23,8 @@ extern vex::digital_out flapup_solenoid;
 extern CustomEncoder left_enc, right_enc, mid_enc;
 extern inertial imu;
 
+extern vex::optical colorSensor;
+
 // ======== UTILS ========
 // Drive Tuning
 

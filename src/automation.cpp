@@ -1,13 +1,43 @@
 #include "../include/automation.h"
-#include "robot-config.h"
+#include "../include/robot-config.h"
+#include "../core/include/utils/math_util.h"
 
+// Pushes the firing flap to the up position for close in shots
+void FlapUp(){
+  flapup_solenoid.set(true);
+  flapdown_solenoid.set(false);
+}
+
+// Pushes the firing flap to the down position for far away shots
+void FlapDown(){
+  flapup_solenoid.set(false);
+  flapdown_solenoid.set(true);
+}
+/**
+ * Construct a FlapUpCommand
+ * when run it flaps the flap up
+*/
+FlapUpCommand::FlapUpCommand(){}
+bool FlapUpCommand::run(){
+  FlapUp();
+  return true;
+}
+/**
+ * Construct a FlapDownCommand
+ * when run it flaps the flap down
+*/
+FlapDownCommand::FlapDownCommand(){}
+bool FlapDownCommand::run(){
+  FlapDown();
+  return true;
+}
 
 /**
 * Construct a SpinRollerCommand
 * @param drive_sys the drive train that will allow us to apply pressure on the rollers
 * @param roller_motor The motor that will spin the roller
 */
-SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor &roller_motor): roller_motor(roller_motor), drive_sys(drive_sys){};
+SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor &roller_motor): drive_sys(drive_sys), roller_motor(roller_motor){};
 
 /**
  * Run roller controller to spin the roller to our color
@@ -135,6 +165,37 @@ bool PrintOdomCommand::run(){
   return true;
 }
 
+/**
+* Construct a StartIntakeCommand
+* @param colorSensor The color sensor being used
+* @param color The hue value of the color being detected
+* @param rollerMotor The rollor motor to spin the roller
+* @param error Error for color detection color+-error
+*/
+SpinToColorCommand::SpinToColorCommand(vex::optical &colorSensor, double color, vex::motor &rollerMotor, double error):colorSensor(colorSensor), color(color), rollerMotor(rollerMotor), error(error){}
+  
+  /**
+ * Run the StopIntakeCommand
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+ */
+  bool SpinToColorCommand::run(){
+    //To deal with wrap around
+    if(color<=error){
+      if(colorSensor.hue()>color+15 && colorSensor.hue() < wrap_angle_deg(color-error)){
+        return false;
+      }
+    }
+    //no wrap around
+    else if(colorSensor.hue() < wrap_angle_deg(color-error) || colorSensor.hue() > wrap_angle_deg(color+error)){
+      rollerMotor.spin(vex::directionType::fwd);
+      return false;
+    }
+
+    rollerMotor.stop();
+
+    return true;
+  }
 
 
 

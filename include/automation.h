@@ -31,6 +31,32 @@ class SpinRollerCommandAUTO: public AutoCommand {
     double target_pos;
     TankDrive &drive_sys;
 };
+/**
+ * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
+*/
+class SpinRollerCommandSKILLS: public AutoCommand {
+  public:
+    /**
+    * Construct a SpinRollerCommand
+    * @param drive_sys the drivetrain tha will let us apply pressure to spin the roller
+    * @param roller_motor The motor that will spin the roller
+    */
+    SpinRollerCommandSKILLS(TankDrive &drive_sys, vex::motor roller_motor);
+
+    /**
+     * Run roller controller to spin the roller to our color
+     * Overrides run from AutoCommand
+     * @returns true when execution is complete, false otherwise
+     */
+    bool run() override;
+  
+  private:
+    vex::motor roller_motor;
+    bool func_initialized;
+    double start_pos;
+    double target_pos;
+    TankDrive &drive_sys;
+};
 
 
 /**
@@ -140,6 +166,25 @@ class PrintOdomCommand : public AutoCommand{
 };
 
 /**
+ * ACS Command to spin roller to a certain color using a color sensor
+*/
+class SpinToColorCommand : public AutoCommand{
+  public:
+  /**
+   * Construct a new SpinToColorCommand
+  */
+    SpinToColorCommand(vex::optical &colorSensor, double color, vex::motor &rollerMotor, double error=15);
+
+    bool run() override;
+
+  private:
+    vex::optical &colorSensor;
+    double color;
+    vex::motor &rollerMotor;
+    double error;
+};
+
+/**
  * ACS Command for targetting the high goal with vision using PID
 */
 class VisionAimCommand : public AutoCommand
@@ -155,9 +200,25 @@ class VisionAimCommand : public AutoCommand
 
   private:
 
-  vision &cam;
-  std::vector<vision::signature> sig_vec;
-  TankDrive &drive_sys;
-  PID pid;
-  timer tmr;
+    vision &cam;
+    std::vector<vision::signature> sig_vec;
+    TankDrive &drive_sys;
+    PID pid;
+    timer tmr;
+};
+
+class FlapUpCommand : public AutoCommand
+{
+  public:
+   FlapUpCommand();
+   
+   bool run();
+};
+
+class FlapDownCommand : public AutoCommand
+{
+  public:
+   FlapDownCommand();
+   
+   bool run();
 };
