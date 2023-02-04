@@ -127,6 +127,16 @@ bool EndgameCommand::run(){
   solenoid.set(true);
   return true;
 }
+PrintOdomCommand::PrintOdomCommand(OdometryTank &odom): odom(odom){}
+
+bool PrintOdomCommand::run(){
+  position_t pos = odom.get_position();
+  printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+  return true;
+}
+
+
+
 
 PID::pid_config_t vis_pid_cfg = {
   .p = 0,

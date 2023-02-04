@@ -1,7 +1,8 @@
 {
     "files.associations": {
         "cmath": "cpp",
-        "new": "cpp"
+        "new": "cpp",
+        "initializer_list": "cpp"
     },
     "C_Cpp.errorSquiggles": "enabled"
 }

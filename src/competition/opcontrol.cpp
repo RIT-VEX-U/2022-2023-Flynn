@@ -3,7 +3,6 @@
 #include "robot-config.h"
 #include "tuning.h"
 
-
 int print_odom(){
     while(true){
         position_t pos = odometry_sys.get_position();
@@ -14,32 +13,6 @@ int print_odom(){
 }
 
 
-void test_stuff(){
-
-
-  //vex::task printodom(print_odom);
-
-  // while(true){
-  //   tune_flywheel_distcalc();
-  //   vexDelay(50);
-  // }
-
-  while(imu.isCalibrating()){
-    vexDelay(20);
-  }
-
-  auto DriveToPointFast = [](double x, double y){return new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, fwd, 1.0);};
-  auto TurnToHeading = [](double heading_deg){return new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, .6);};
-
-  CommandController mine;
-  mine.add(new PrintOdomCommand(odometry_sys));
-  mine.add(DriveToPointFast(0, 10));
-  mine.add(TurnToHeading(0));
-  
-  mine.add(new PrintOdomCommand(odometry_sys));  mine.run();
-  printf("timedout %d\n", mine.last_command_timed_out());
-  printf("finshed\n");
-}
 
 /**
  * Contains the main loop of the robot code while running in the driver-control period.

@@ -6,5 +6,6 @@
 #include "robot-config.h"
 
 
+void test_stuff();
 CommandController prog_skills_loader_side();
 CommandController auto_loader_side();

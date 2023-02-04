@@ -127,6 +127,18 @@ class EndgameCommand : public AutoCommand{
     vex::digital_out &solenoid;
 };
 
+
+class PrintOdomCommand : public AutoCommand{
+  public:
+    /**
+     * Construct a PrintOdomCommand
+    */
+   PrintOdomCommand(OdometryTank &odom);
+   bool run() override;
+  private:
+    OdometryTank &odom;
+};
+
 /**
  * ACS Command for targetting the high goal with vision using PID
 */
@@ -136,7 +148,7 @@ class VisionAimCommand : public AutoCommand
   /**
    * Contstruct a new VisionAimCommmand
   */
-    VisionAimCommand(vision &cam, initializer_list<vision::signature> sigs, TankDrive &drive_sys);
+    VisionAimCommand(vision &cam, std::initializer_list<vision::signature> sigs, TankDrive &drive_sys);
     VisionAimCommand(vision &cam, vision::signature sig, TankDrive &drive_sys);
 
     bool run() override;
@@ -144,7 +156,7 @@ class VisionAimCommand : public AutoCommand
   private:
 
   vision &cam;
-  vector<vision::signature> sig_vec;
+  std::vector<vision::signature> sig_vec;
   TankDrive &drive_sys;
   PID pid;
   timer tmr;

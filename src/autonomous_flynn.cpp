@@ -4,6 +4,33 @@
 #define DriveForwardFast(dist, dir) new DriveForwardCommand(drive_sys, drive_fast_mprofile, dist, dir, 1.0)
 #define TurnToHeading(heading_deg) new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, .6)
 
+void test_stuff(){
+  //vex::task printodom(print_odom);
+
+  // while(true){
+  //   tune_flywheel_distcalc();
+  //   vexDelay(50);
+  // }
+
+  while(imu.isCalibrating()){
+    vexDelay(20);
+  }
+
+  auto DriveToPointFast = [](double x, double y){return new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, fwd, 1.0);};
+  auto TurnToHeading = [](double heading_deg){return new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, .6);};
+
+  CommandController mine;
+  mine.add(new PrintOdomCommand(odometry_sys));
+  mine.add(DriveToPointFast(0, 10));
+  mine.add(TurnToHeading(0));
+  
+  mine.add(new PrintOdomCommand(odometry_sys));  mine.run();
+  vex_printf("timedout %d\n", mine.last_command_timed_out());
+  vex_printf("finshed\n");
+}
+
+
+
 /*
 Auto loader side
 
@@ -93,7 +120,7 @@ CommandController prog_skills_loader_side(){
     // spin -90 degree roller
     lss.add(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 1, fwd)); //[measure]
     lss.add(DriveForwardFast(1, fwd));
-    lss.add(new SpinRollerCommandSKILLS(drive_sys, roller));
+    lss.add(new SpinRollerCommandAUTO(drive_sys, roller));
     lss.add(DriveForwardFast(4, reverse));
     
     //shoot
