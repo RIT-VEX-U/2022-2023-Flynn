@@ -1,4 +1,4 @@
-#include "robot-config.h"
+#include "../include/robot-config.h"
 
 using namespace vex;
 
@@ -33,6 +33,8 @@ CustomEncoder left_enc(Brain.ThreeWirePort.A, 2048);
 CustomEncoder right_enc(Brain.ThreeWirePort.C, 2048);
 
 inertial imu(PORT4);
+
+vex::optical colorSensor(PORT11, false);
 
 // ======== UTILS ========
 

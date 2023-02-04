@@ -1,7 +1,7 @@
-#include "competition/opcontrol.h"
-#include "automation.h"
-#include "robot-config.h"
-#include "tuning.h"
+#include "../../include/competition/opcontrol.h"
+#include "../include/automation.h"
+#include "../include/robot-config.h"
+#include "../include/tuning.h"
 
 int print_odom(){
     while(true){
@@ -11,8 +11,6 @@ int print_odom(){
     }
     return 0;
 }
-
-
 
 /**
  * Contains the main loop of the robot code while running in the driver-control period.
