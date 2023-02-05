@@ -77,6 +77,11 @@ PID::pid_config_t turn_pid_cfg = {
     .on_target_time = .2
 };
 
+FeedForward::ff_config_t turn_ff_cfg = 
+{
+    .kS = 0
+};
+
 
 
 // FeedForward::ff_config_t turn_ff_cfg = {
@@ -111,7 +116,7 @@ robot_specs_t config = {
     .drive_correction_cutoff = 4,
 
     .drive_feedback = &drive_fast_mprofile,
-    .turn_feedback = new PID(turn_pid_cfg),
+    .turn_feedback = new PIDFF(turn_pid_cfg, turn_ff_cfg),
     .correction_pid = {
         .p = .012,
         .i = 0,

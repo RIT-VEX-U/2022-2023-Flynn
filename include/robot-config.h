@@ -30,7 +30,7 @@ extern vex::optical colorSensor;
 
 
 extern PID::pid_config_t drive_pid_cfg, turn_pid_cfg;
-extern FeedForward::ff_config_t drive_ff_cfg;//, turn_ff_cfg;
+extern FeedForward::ff_config_t drive_ff_cfg, turn_ff_cfg;
 extern MotionController::m_profile_cfg_t drive_fast_mprofile_cfg, drive_slow_mprofile_cfg;
 // extern MotionController::m_profile_cfg_t turn_fast_mprofile_cfg, turn_slow_mprofile_cfg;
 

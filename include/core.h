@@ -22,6 +22,7 @@
 #include "../core/include/utils/math_util.h"
 #include "../core/include/utils/motion_controller.h"
 #include "../core/include/utils/pid.h"
+#include "../core/include/utils/pidff.h"
 #include "../core/include/utils/pure_pursuit.h"
 #include "../core/include/utils/trapezoid_profile.h"
 #include "../core/include/utils/vector2d.h"
