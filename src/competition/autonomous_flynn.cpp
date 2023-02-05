@@ -1,4 +1,4 @@
-#include "../include/autonomous_flynn.h"
+#include "competition/autonomous_flynn.h"
 #include "vision.h"
 
 #define TURN_SPEED 0.6
@@ -24,7 +24,7 @@
 #define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
 
 
-void add_single_shot_cmd(CommandController &controller, double vis_timeout=0.0)
+static void add_single_shot_cmd(CommandController &controller, double vis_timeout=0.0)
 {
     controller.add(WaitForFW);
     if(vis_timeout == 0.0)
