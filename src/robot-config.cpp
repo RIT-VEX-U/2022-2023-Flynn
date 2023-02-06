@@ -70,10 +70,10 @@ MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
 
 // Turn Tuning
 PID::pid_config_t turn_pid_cfg = {
-    .p = .012,
-    .i = 0, 
-    .d = .001,
-    .deadband = 5,
+    .p = .015,
+    .i = 0.00125, 
+    .d = .0011,
+    .deadband = 1,
     .on_target_time = .2
 };
 

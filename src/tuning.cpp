@@ -215,12 +215,17 @@ void tune_drive_pid(DriveType dt)
     if(main_controller.ButtonB.pressing())
         odometry_sys.set_position();
 
+
+    auto pos = odometry_sys.get_position();
+    printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+
+
     if (main_controller.ButtonA.pressing())
     {
         if(dt == DRIVE && (done || drive_sys.drive_to_point(24,24,fwd, drive_fast_mprofile)))
             done = true;
         
-        if(dt == TURN && (done || drive_sys.turn_to_heading(270, .6)))
+        if(dt == TURN && (done || drive_sys.turn_to_heading(270, *config.turn_feedback, 1.0)))
             done = true;
 
     }else

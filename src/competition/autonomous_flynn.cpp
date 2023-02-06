@@ -1,5 +1,6 @@
 #include "competition/autonomous_flynn.h"
 #include "vision.h"
+#include "tuning.h"
 
 #define TURN_SPEED 0.6
 #define INTAKE_VOLT 12
@@ -45,6 +46,8 @@ void test_stuff(){
   while(imu.isCalibrating()){
     vexDelay(20);
   }
+
+
 
 
   CommandController mine = prog_skills_loader_side();
@@ -160,16 +163,19 @@ CommandController prog_skills_loader_side(){
     // Arrow 2 -------------------------
     // intake corner disk
     lss.add(StartIntake);
-    lss.add(DriveToPointSlow(12, 12)); // [measure]
+    lss.add(DriveToPointSlow(8, 12)); // [measure]
+    lss.add(DriveForwardFast(4, reverse));
     lss.add(StopIntake);
 
-    lss.add(PrintOdomContinous);
 
 
     // align to 180 degree roller
-    lss.add(TurnToHeading(45));  // [measure] (shallower angle)
-    lss.add(DriveToPointFast(24, 115.0)); //[measure] for sure
+    lss.add(TurnToHeading(90));  // [measure] (shallower angle)
+    lss.add(DriveToPointFast(12, 31.0)); //[measure] for sure
     lss.add(TurnToHeading(180));  // [measure]
+
+    lss.add(PrintOdomContinous);
+
     
     // spin 180 degree roller
     lss.add(DriveForwardFast(2, fwd)); //[measure]
