@@ -149,7 +149,7 @@ CommandController prog_skills_loader_side(){
     position_t start_pos = position_t{.x = 30.5, .y = 10.2, .rot = -90};
 
     CommandController lss;
-    lss.add(new OdomSetPosition(odometry_sys, start_pos));
+    lss.add(new OdomSetPosition(odometry_sys, start_pos)); // 
 
     // Arrow 1 -------------------------
     // spin -90 degree roller
@@ -157,7 +157,7 @@ CommandController prog_skills_loader_side(){
     lss.add(new SpinRollerCommandAUTO(drive_sys, roller));
     lss.add(DriveForwardFast(4, reverse)); // [measure]
     
-    lss.add(TurnToHeading(180), 2.0); //[measure]
+    lss.add(TurnToHeading(180), 1.5); //[measure]
     
 
     // Arrow 2 -------------------------
@@ -170,9 +170,9 @@ CommandController prog_skills_loader_side(){
 
 
     // align to 180 degree roller
-    lss.add(TurnToHeading(90), 2.0);  // [measure] (shallower angle)
+    lss.add(TurnToHeading(90), 1.5);  // [measure] (shallower angle)
     lss.add(DriveToPointFast(12, 31.5)); //[measure] for sure
-    lss.add(TurnToHeading(180)), 2.0;  // [measure]
+    lss.add(TurnToHeading(180), 1.5);  // [measure]
 
 
     
@@ -181,18 +181,24 @@ CommandController prog_skills_loader_side(){
     lss.add(new SpinRollerCommandAUTO(drive_sys, roller));
     lss.add(DriveForwardFast(2, reverse)); //[measure]
 
-    lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
 
 
 
     //spin and shoot 3
-    lss.add(TurnToHeading(80)); //[measure]
-    lss.add(new SpinRPMCommand(flywheel_sys, 3500)); // [measure]
+    lss.add(TurnToHeading(90), 1.5); //[measure]
+    lss.add(DriveToPointFast(12, 76), 4.0); //[measure] for sure
+    
+    lss.add(TurnToHeading(90), 0.5); //[measure]
+    
+    lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 5));
 
-    add_single_shot_cmd(lss, 0.1);
-    add_single_shot_cmd(lss, 0.1);
-    add_single_shot_cmd(lss, 0.1);
+    add_single_shot_cmd(lss);
+    add_single_shot_cmd(lss);
+    add_single_shot_cmd(lss);
+
+    lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
+
 
     // Arrow 3 -------------------------
     lss.add(TurnToHeading(45)); //[measure]
@@ -202,7 +208,7 @@ CommandController prog_skills_loader_side(){
 
     //face hoop and fire
     lss.add(TurnToHeading(135)); // [measure]
-    lss.add(new SpinRPMCommand(flywheel_sys, 3000)); // [measure]
+    lss.add(new SpinRPMCommand(flywheel_sys, 3200)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
     lss.add(ShootDisk); // [measure]
     
