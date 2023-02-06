@@ -170,11 +170,10 @@ CommandController prog_skills_loader_side(){
 
 
     // align to 180 degree roller
-    lss.add(TurnToHeading(90));  // [measure] (shallower angle)
-    lss.add(DriveToPointFast(12, 31.0)); //[measure] for sure
-    lss.add(TurnToHeading(180));  // [measure]
+    lss.add(TurnToHeading(90), 2.0);  // [measure] (shallower angle)
+    lss.add(DriveToPointFast(12, 31.5)); //[measure] for sure
+    lss.add(TurnToHeading(180)), 2.0;  // [measure]
 
-    lss.add(PrintOdomContinous);
 
     
     // spin 180 degree roller
@@ -182,11 +181,18 @@ CommandController prog_skills_loader_side(){
     lss.add(new SpinRollerCommandAUTO(drive_sys, roller));
     lss.add(DriveForwardFast(2, reverse)); //[measure]
 
+    lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
+
+
+
     //spin and shoot 3
     lss.add(TurnToHeading(80)); //[measure]
     lss.add(new SpinRPMCommand(flywheel_sys, 3500)); // [measure]
-    lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 10));
-    lss.add(ShootDisk);
+    lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 5));
+
+    add_single_shot_cmd(lss, 0.1);
+    add_single_shot_cmd(lss, 0.1);
+    add_single_shot_cmd(lss, 0.1);
 
     // Arrow 3 -------------------------
     lss.add(TurnToHeading(45)); //[measure]
