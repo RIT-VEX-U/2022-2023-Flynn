@@ -39,13 +39,11 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
 void pleasant_opcontrol();
 
 void test_stuff(){
-  if (main_controller.ButtonA.pressing() && main_controller.ButtonB.pressing()){
-    pleasant_opcontrol();
-  }
-
-  while(imu.isCalibrating()){
+    while(imu.isCalibrating()){
     vexDelay(20);
   }
+
+
 
 
 
@@ -93,7 +91,8 @@ void pleasant_opcontrol(){
   }
 
     // ========== DRIVING CONTROLS ==========
-    drive_sys.drive_arcade(main_controller.Axis2.position(pct)/100.0, main_controller.Axis4.position(pct)/300.0);    
+    drive_sys.drive_arcade(main_controller.Axis3.position(pct)/100.0, main_controller.Axis1.position(pct)/300.0);    
+
     // ========== MANIPULATING CONTROLS ==========
 
 
@@ -188,7 +187,7 @@ CommandController prog_skills_loader_side(){
     lss.add(TurnToHeading(90), 1.5); //[measure]
     lss.add(DriveToPointFast(12, 76), 4.0); //[measure] for sure
     
-    lss.add(TurnToHeading(90), 0.5); //[measure]
+    lss.add(TurnToHeading(85), 0.5); //[measure]
     
     lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // [measure]
     lss.add(new WaitUntilUpToSpeedCommand(flywheel_sys, 5));
