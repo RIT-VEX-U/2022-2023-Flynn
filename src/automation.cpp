@@ -296,7 +296,7 @@ bool TurnToPointCommand::run(){
   double delta_y=point.y-odom.get_position().y;
 
   //get the angle
-  double axis_to_point_angle = atan2(delta_y,delta_x);
+  double heading_deg = rad2deg(atan2(delta_y,delta_x));
 
-  return drive_sys.turn_to_heading(axis_to_point_angle, feedback);
+  return drive_sys.turn_to_heading(heading_deg, feedback);
 }
