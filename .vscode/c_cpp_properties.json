@@ -24,8 +24,7 @@
 			"compilerPath": "${vex_compilerPath}",
 			"cStandard": "gnu99",
 			"cppStandard": "gnu++11",
-			"intelliSenseMode": "windows-clang-x86",
-			"compileCommands": "${workspaceFolder}/compile_commands.json"
+			"intelliSenseMode": "windows-clang-x86"
 		},
 		{
 			"name": "Mac",
@@ -42,11 +41,10 @@
 			"includePath": [
 				"${vex_sdkIncludes}"
 			],
-			"compilerPath": "${vex_compilerPath}/clang",
+			"compilerPath": "",
 			"cStandard": "gnu99",
-			"cppStandard": "gnu++17",
-			"intelliSenseMode": "linux-gcc-arm64",
-			"configurationProvider": "ms-vscode.makefile-tools"
+			"cppStandard": "gnu++11",
+			"intelliSenseMode": "linux-clang-x86"
 		}
 	],
 	"version": 4
