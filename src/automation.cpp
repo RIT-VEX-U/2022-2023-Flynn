@@ -283,7 +283,7 @@ bool VisionAimCommand::run()
  * @param drive_sys Reference to the TankDrive system
  * @param point The point we want to turn towards
 */
-TurnToPointCommand::TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &turn_feedback, Vector2D::point_t point): drive_sys(drive_sys), odom(odom), feedback(feedback), point(point){}
+TurnToPointCommand::TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &turn_feedback, Vector2D::point_t point): drive_sys(drive_sys), odom(odom), feedback(turn_feedback), point(point){}
 
 /**
  * Run the TurnToPointCommand

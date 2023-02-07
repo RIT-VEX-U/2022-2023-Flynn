@@ -9,7 +9,7 @@
 #define THRESHOLD_RPM 150
 #define SINGLE_SHOT_TIME 0.2
 #define SINGLE_SHOT_VOLT 12
-#define SINGLE_SHOT_RECOVER_DELAY 1
+#define SINGLE_SHOT_RECOVER_DELAY_MS 1
 
 // drive commands
 #define DRIVE_TO_POINT_FAST(x,y,dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, directionType::dir))
@@ -34,7 +34,7 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
     else
         controller.add(AUTO_AIM, vis_timeout);
     controller.add(SHOOT_DISK);
-    controller.add_delay(SINGLE_SHOT_RECOVER_DELAY);
+    controller.add_delay(SINGLE_SHOT_RECOVER_DELAY_MS);
 }
 
 /*
