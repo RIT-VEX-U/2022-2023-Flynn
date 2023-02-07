@@ -245,12 +245,13 @@ class TurnToPointCommand : public AutoCommand
   /**
    * COnstruct the command
   */
-    TurnToPointCommand(OdometryTank &odom, TankDrive &drive_sys ,Vector2D::point_t point);
+    TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &feedback, Vector2D::point_t point);
 
     bool run() override;
   
   private:
-    OdometryTank &odom;
     TankDrive &drive_sys;
+    OdometryTank &odom;
+    Feedback &feedback;
     Vector2D::point_t point;
 };

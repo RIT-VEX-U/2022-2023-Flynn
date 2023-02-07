@@ -13,6 +13,9 @@
 #define DriveToPointFast(x, y) new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, fwd, 1.0)
 #define DriveForwardFast(dist, dir) new DriveForwardCommand(drive_sys, drive_fast_mprofile, dist, dir, 1.0)
 #define TurnToHeading(heading_deg) new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, TURN_SPEED)
+
+#define TurnToPoint(point) new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point)
+
 #define StartIntake new StartIntakeCommand(intake, INTAKE_VOLT)
 #define StopIntake new StopIntakeCommand(intake)
 
@@ -184,8 +187,9 @@ CommandController prog_skills_loader_side(){
 
 
     //spin and shoot 3
-    lss.add(TurnToHeading(90), 1.5); //[measure]
-    lss.add(DriveToPointFast(12, 76), 4.0); //[measure] for sure
+    Vector2D::point_t shoot_point = {.x = 12, .y = 76};
+    lss.add(TurnToPoint(shoot_point), 1.5); //[measure]
+    lss.add(DriveToPointFast(shoot_point.x, shoot_point.y), 4.0); //[measure] for sure
     
     lss.add(TurnToHeading(85), 0.5); //[measure]
     
