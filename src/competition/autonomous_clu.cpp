@@ -22,7 +22,7 @@
 #define TURN_DEGREES(dir) (new TurnDegreesCommand(drive_sys, *config.turn_feedback, dir, TURN_SPEED))
 
 // shooting commands
-#define AUTO_AIM (new VisionAimCommand(cam, {RED_GOAL, BLUE_GOAL}, drive_sys))
+#define AUTO_AIM (new VisionAimCommand())
 #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, THRESHOLD_RPM))
 #define SHOOT_DISK (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 

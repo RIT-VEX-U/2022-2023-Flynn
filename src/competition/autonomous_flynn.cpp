@@ -16,7 +16,7 @@
 #define StartIntake new StartIntakeCommand(intake, INTAKE_VOLT)
 #define StopIntake new StopIntakeCommand(intake)
 
-#define VisionAim (new VisionAimCommand(cam, {RED_GOAL, BLUE_GOAL}, drive_sys))
+#define VisionAim (new VisionAimCommand())
 #define WaitForFW (new WaitUntilUpToSpeedCommand(flywheel_sys, 10))
 #define ShootDisk (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 #define SpinFWAt(rpm) (new SpinRPMCommand(flywheel_sys, rpm))
@@ -39,6 +39,15 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
 void pleasant_opcontrol();
 
 void test_stuff(){
+
+  VisionAimCommand vis_cmd;
+
+  while(true)
+  {
+    vis_cmd.run();
+    vexDelay(20);
+  }
+  return;
   if (main_controller.ButtonA.pressing() && main_controller.ButtonB.pressing()){
     pleasant_opcontrol();
   }

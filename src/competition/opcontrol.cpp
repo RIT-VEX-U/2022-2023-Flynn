@@ -2,6 +2,7 @@
 #include "../include/automation.h"
 #include "../include/robot-config.h"
 #include "../include/tuning.h"
+#include "vision.h"
 
 int print_odom(){
     while(true){
@@ -43,15 +44,15 @@ void opcontrol()
   {
     i++;
     if (i%5==0){
-    main_controller.Screen.setCursor(0, 0);
-    main_controller.Screen.clearScreen();
-    main_controller.Screen.print("fw rpm: %f", flywheel_sys.getRPM());
-    main_controller.Screen.setCursor(2, 0);
-    main_controller.Screen.print("fw temp: %.1ff", flywheel.temperature(vex::fahrenheit));
-    main_controller.Screen.setCursor(4, 0);
-    main_controller.Screen.print("bat volt: %.2fv", Brain.Battery.voltage(vex::volt));
-    
-  }
+      main_controller.Screen.setCursor(0, 0);
+      main_controller.Screen.clearScreen();
+      main_controller.Screen.print("fw rpm: %f", flywheel_sys.getRPM());
+      main_controller.Screen.setCursor(2, 0);
+      main_controller.Screen.print("fw temp: %.1ff", flywheel.temperature(vex::fahrenheit));
+      main_controller.Screen.setCursor(4, 0);
+      main_controller.Screen.print("bat volt: %.2fv", Brain.Battery.voltage(vex::volt));
+
+   }
     
     // ========== DRIVING CONTROLS ==========
     drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);

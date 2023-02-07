@@ -1,6 +1,7 @@
 #include "../include/automation.h"
 #include "../include/robot-config.h"
 #include "../core/include/utils/math_util.h"
+#include "vision.h"
 
 // Pushes the firing flap to the up position for close in shots
 void FlapUp(){
@@ -216,9 +217,8 @@ PID::pid_config_t vis_pid_cfg = {
 #define NOT_DETECTED_TIME 2
 #define MAX_SPEED 0.5
 
-VisionAimCommand::VisionAimCommand(vision &cam, initializer_list<vision::signature> sigs, TankDrive &drive_sys): cam(cam), sig_vec(sigs), drive_sys(drive_sys), pid(vis_pid_cfg) 
-{}
-VisionAimCommand::VisionAimCommand(vision &cam, vision::signature sig, TankDrive &drive_sys): cam(cam), sig_vec({sig}), drive_sys(drive_sys), pid(vis_pid_cfg)
+VisionAimCommand::VisionAimCommand()
+: pid(vis_pid_cfg) 
 {}
 
 /**
@@ -232,44 +232,65 @@ bool VisionAimCommand::run()
   if(!cam.installed())
     return true;
   
-  // cam.takeSnapshot(sig, 1);
-  if(cam.objectCount > 0)
+  // Take a snapshot with each color selected, 
+  // and store the largest found object for each in a vector
+  vision::object red_obj, blue_obj;
+
+  // Get largest red blob
+  cam.takeSnapshot(RED_GOAL);
+  int red_count = cam.objectCount;
+  if(red_count > 0)
+    red_obj = cam.largestObject;
+  
+  // Get largest blue blob
+  cam.takeSnapshot(BLUE_GOAL);
+  int blue_count = cam.objectCount;
+  if(blue_count > 0)
+    blue_obj = cam.largestObject;
+
+  double red_area = red_obj.width * red_obj.height;
+  double blue_area = blue_obj.width * blue_obj.height;
+  int x_val = 0;
+
+  if(red_area > blue_area)
+    x_val = red_obj.centerX;
+  else if(blue_area > red_area)
+    x_val = blue_obj.centerX;
+
+  // if(red_obj.exists)
+  // {
+  //   if(!blue_obj.exists || red_area > blue_area)
+  //     x_val = red_obj.centerX;
+  // } else if (blue_obj.exists)
+  // {
+  //   if(!red_obj.exists || blue_area > red_area)
+  //     x_val = blue_obj.centerX;
+  // }
+
+  printf("CenterX: %d\n", x_val);
+
+  if(x_val != 0)
   {
-    // Take a snapshot with each color selected, 
-    // and store the largest found object for each in a vector
-    vector<vision::object> found;
-    for(vision::signature s : sig_vec)
-    {
-      cam.takeSnapshot(s, 1);
-      for(int i=0; i<cam.objects.getLength(); i++)
-        found.push_back(cam.objects[i]);
-    }
-
-    // Make sure we have something
-    if(found.size() < 1)
-      return false;
-
     // Find the largest object in the "found" list
-    vision::object &largest = found[0];
-    for(int i=1; i<found.size(); i++)
-    {
-      if((found[i].width * found[i].height) > (largest.width * largest.height))
-        largest = found[i];
-    }
+    // vision::object &largest = found[0];
+
+    // printf("CenterX: %d\n", x_val);
+    return false;
 
     // Update the PID loop & drive the robot
     pid.set_target(VISION_CENTER);
     pid.set_limits(-MAX_SPEED, MAX_SPEED);
-    double out = pid.update(largest.centerX);
+    // double out = pid.update(largest.centerX);
 
-    drive_sys.drive_tank(out, -out);
+    // drive_sys.drive_tank(out, -out);
 
     if(pid.is_on_target())
       return true;
-
-  } else
+  }
+  else
   {
     drive_sys.stop();
+    printf("Nothing Found\n");
   }
 
   return false;

@@ -34,7 +34,7 @@ CustomEncoder right_enc(Brain.ThreeWirePort.C, 2048);
 
 inertial imu(PORT4);
 
-vex::optical colorSensor(PORT11, false);
+vex::optical colorSensor(PORT14, false);
 
 // ======== UTILS ========
 
