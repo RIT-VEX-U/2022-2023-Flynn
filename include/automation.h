@@ -3,6 +3,9 @@
 #include "core.h"
 #include <vector>
 #include <initializer_list>
+#include "../core/include/utils/command_structure/auto_command.h"
+#include "../core/include/subsystems/tank_drive.h"
+#include "../core/include/subsystems/odometry/odometry_tank.h"
 
 /**
  * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
@@ -227,4 +230,24 @@ class FlapDownCommand : public AutoCommand
    FlapDownCommand();
    
    bool run();
+};
+
+/**
+ * ACS Command for turning twoards a specified point
+*/
+class TurnToPointCommand : public AutoCommand
+{
+  public:
+  /**
+   * COnstruct the command
+  */
+    TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &feedback, Vector2D::point_t point);
+
+    bool run() override;
+  
+  private:
+    TankDrive &drive_sys;
+    OdometryTank &odom;
+    Feedback &feedback;
+    Vector2D::point_t point;
 };

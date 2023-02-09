@@ -1,6 +1,6 @@
-#include "../include/automation.h"
-#include "../include/robot-config.h"
-#include "../core/include/utils/math_util.h"
+#include "automation.h"
+#include "robot-config.h"
+#include "core.h"
 #include "vision.h"
 
 // Pushes the firing flap to the up position for close in shots
@@ -285,4 +285,28 @@ bool VisionAimCommand::run()
   }
 
   return false;
+}
+
+/**
+ * Constuct a TurnToPointCommand
+ * @param odom Refrence to the OdometryTank object
+ * @param drive_sys Reference to the TankDrive system
+ * @param point The point we want to turn towards
+*/
+TurnToPointCommand::TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &turn_feedback, Vector2D::point_t point): drive_sys(drive_sys), odom(odom), feedback(turn_feedback), point(point){}
+
+/**
+ * Run the TurnToPointCommand
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+*/
+bool TurnToPointCommand::run(){
+  //get differences in x and y to calculate angle relative to x axis
+  double delta_x=point.x-odom.get_position().x;
+  double delta_y=point.y-odom.get_position().y;
+
+  //get the angle
+  double heading_deg = rad2deg(atan2(delta_y,delta_x));
+
+  return drive_sys.turn_to_heading(heading_deg, feedback);
 }

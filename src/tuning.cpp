@@ -126,16 +126,16 @@ void tune_drive_ff_ks(DriveType dt)
         {
             // Initialize the function once
             tmr.reset();
-            // left_enc.resetRotation();
-            // right_enc.resetRotation();
-            left_motors.resetPosition();
-            right_motors.resetPosition();
+             left_enc.resetRotation();
+             right_enc.resetRotation();
+            //left_motors.resetPosition();
+            //right_motors.resetPosition();
             test_pct = 0.0;
             done = false;
             new_press = false;
         }
 
-        if (done || (fabs(left_motors.position(rev)) + fabs(right_motors.position(rev))) > 0)
+        if (done || (fabs(left_enc.position(rev)) + fabs(right_enc.position(rev))) > 0)
         {
             main_controller.Screen.clearScreen();
             main_controller.Screen.setCursor(1,1);
@@ -225,7 +225,7 @@ void tune_drive_pid(DriveType dt)
         if(dt == DRIVE && (done || drive_sys.drive_to_point(24,24,fwd, drive_fast_mprofile)))
             done = true;
         
-        if(dt == TURN && (done || drive_sys.turn_to_heading(270, *config.turn_feedback, 1.0)))
+        if(dt == TURN && (done || drive_sys.turn_to_heading(180, *config.turn_feedback, 1.0)))
             done = true;
 
     }else

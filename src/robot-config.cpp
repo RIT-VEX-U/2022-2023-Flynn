@@ -70,16 +70,16 @@ MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
 
 // Turn Tuning
 PID::pid_config_t turn_pid_cfg = {
-    .p = .015,
-    .i = 0.00125, 
-    .d = .0011,
-    .deadband = 1,
+    .p = .0045,
+    .i = 0.00, 
+    .d = .00012,
+    .deadband = 3,
     .on_target_time = .2
 };
 
 FeedForward::ff_config_t turn_ff_cfg = 
 {
-    .kS = 0
+    .kS = 0.13
 };
 
 
