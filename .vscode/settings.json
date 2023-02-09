@@ -1,9 +1,0 @@
-{
-    "files.associations": {
-        "cmath": "cpp",
-        "new": "cpp",
-        "initializer_list": "cpp",
-        "*.tcc": "cpp"
-    },
-    "C_Cpp.errorSquiggles": "enabled"
-}
