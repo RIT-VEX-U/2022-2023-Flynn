@@ -40,14 +40,6 @@ void pleasant_opcontrol();
 
 void test_stuff(){
 
-  VisionAimCommand vis_cmd;
-
-  while(true)
-  {
-    vis_cmd.run();
-    vexDelay(20);
-  }
-  return;
   if (main_controller.ButtonA.pressing() && main_controller.ButtonB.pressing()){
     pleasant_opcontrol();
   }
@@ -57,10 +49,8 @@ void test_stuff(){
   }
 
 
-
-
   CommandController mine = prog_skills_loader_side();
-  mine.run();
+  // mine.run();
   vex_printf("timedout %d\n", mine.last_command_timed_out());
   vex_printf("finshed\n");
 
@@ -84,11 +74,21 @@ void pleasant_opcontrol(){
   
   main_controller.ButtonB.pressed([](){odometry_sys.set_position();});
 
+  VisionAimCommand visaim;
+
   odometry_sys.end_async();
   int i = 0;
   // Periodic
   while(true)
   {
+    if(main_controller.ButtonA.pressing())
+    {
+      visaim.run();
+    }else
+    {
+      drive_sys.drive_arcade(main_controller.Axis3.position(pct)/200.0, main_controller.Axis1.position(pct)/200.0);   
+    }
+
     i++;
     if (i%5==0){
     main_controller.Screen.setCursor(0, 0);
@@ -102,7 +102,7 @@ void pleasant_opcontrol(){
   }
 
     // ========== DRIVING CONTROLS ==========
-    drive_sys.drive_arcade(main_controller.Axis2.position(pct)/100.0, main_controller.Axis4.position(pct)/300.0);    
+    // drive_sys.drive_arcade(main_controller.Axis3.position(pct)/100.0, main_controller.Axis1.position(pct)/300.0);    
     // ========== MANIPULATING CONTROLS ==========
 
 

@@ -207,18 +207,22 @@ SpinToColorCommand::SpinToColorCommand(vex::optical &colorSensor, double color, 
 
 
 PID::pid_config_t vis_pid_cfg = {
-  .p = 0,
+  .p = .003,
   .d = 0,
-  .deadband = 0,
-  .on_target_time = 0
+  .deadband = 5,
+  .on_target_time = .2
 };
 
-#define VISION_CENTER 0
-#define NOT_DETECTED_TIME 2
+FeedForward::ff_config_t vis_ff_cfg = {
+  .kS = 0.14
+};
+
+#define VISION_CENTER 140
+#define MIN_AREA 500
 #define MAX_SPEED 0.5
 
 VisionAimCommand::VisionAimCommand()
-: pid(vis_pid_cfg) 
+: pidff(vis_pid_cfg, vis_ff_cfg) 
 {}
 
 /**
@@ -248,43 +252,30 @@ bool VisionAimCommand::run()
   if(blue_count > 0)
     blue_obj = cam.largestObject;
 
+  // Compare the areas of the largest
   double red_area = red_obj.width * red_obj.height;
   double blue_area = blue_obj.width * blue_obj.height;
   int x_val = 0;
 
-  if(red_area > blue_area)
+  if(red_area > blue_area && red_area > MIN_AREA)
     x_val = red_obj.centerX;
-  else if(blue_area > red_area)
+  else if(blue_area > red_area && blue_area > MIN_AREA)
     x_val = blue_obj.centerX;
 
-  // if(red_obj.exists)
-  // {
-  //   if(!blue_obj.exists || red_area > blue_area)
-  //     x_val = red_obj.centerX;
-  // } else if (blue_obj.exists)
-  // {
-  //   if(!red_obj.exists || blue_area > red_area)
-  //     x_val = blue_obj.centerX;
-  // }
-
-  printf("CenterX: %d\n", x_val);
+  // printf("CenterX: %d\n", x_val);
 
   if(x_val != 0)
   {
-    // Find the largest object in the "found" list
-    // vision::object &largest = found[0];
-
-    // printf("CenterX: %d\n", x_val);
-    return false;
 
     // Update the PID loop & drive the robot
-    pid.set_target(VISION_CENTER);
-    pid.set_limits(-MAX_SPEED, MAX_SPEED);
-    // double out = pid.update(largest.centerX);
+    pidff.set_target(VISION_CENTER);
+    pidff.set_limits(-MAX_SPEED, MAX_SPEED);
+    double out = pidff.update(x_val);
 
-    // drive_sys.drive_tank(out, -out);
+    //Currently set up for upside-down camera. Flip signs if going backwards.
+    drive_sys.drive_tank(out, -out);
 
-    if(pid.is_on_target())
+    if(pidff.is_on_target())
       return true;
   }
   else

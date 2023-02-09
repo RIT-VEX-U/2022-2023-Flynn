@@ -1,7 +1,6 @@
 #pragma once
-#include "../core/include/subsystems/tank_drive.h"
 #include "vex.h"
-#include "../core/include/utils/command_structure/auto_command.h"
+#include "core.h"
 #include <vector>
 #include <initializer_list>
 
@@ -210,7 +209,7 @@ class VisionAimCommand : public AutoCommand
 
   private:
 
-    PID pid;
+    PIDFF pidff;
     timer tmr;
 };
 
