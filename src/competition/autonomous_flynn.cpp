@@ -5,8 +5,8 @@
 #define TURN_SPEED 0.6
 #define INTAKE_VOLT 12
 #define SHOOTING_RPM 3200
-#define SINGLE_SHOT_TIME 0.085
-#define SINGLE_SHOT_VOLT 12
+#define SINGLE_SHOT_TIME 0.02
+#define SINGLE_SHOT_VOLT 2
 #define SINGLE_SHOT_RECOVER_DELAY_MS 1000
 
 #define DriveToPointSlow(x, y) new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, fwd, 1.0)
@@ -24,7 +24,7 @@
 #define StartIntake new StartIntakeCommand(intake, INTAKE_VOLT)
 #define StopIntake new StopIntakeCommand(intake)
 
-#define VisionAim (new VisionAimCommand())
+#define VisionAim (new VisionAimCommand(true))
 #define WaitForFW (new WaitUntilUpToSpeedCommand(flywheel_sys, 10))
 #define ShootDisk (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 #define SpinFWAt(rpm) (new SpinRPMCommand(flywheel_sys, rpm))
@@ -53,8 +53,8 @@ void test_stuff()
     vexDelay(20);
   }
 
-  CommandController mine = auto_loader_side();
-  mine.run();
+  ////CommandController mine = auto_loader_side();
+  //mine.run();
 
   pleasant_opcontrol();
 
@@ -91,10 +91,16 @@ void pleasant_opcontrol()
   main_controller.ButtonB.pressed([]()
                                   { odometry_sys.set_position(); });
 
+//intake.spin(fwd, 12, volt);
+  main_controller.ButtonX.pressed([]()
+                                  {  intake.spin(fwd, 12, volt); vexDelay(5); intake.spin(fwd, 12, volt);  });
+
+
   odometry_sys.end_async();
   int i = 0;
 
   VisionAimCommand visaim;
+
 
   timer loop_timer;
   loop_timer.reset();
@@ -182,7 +188,7 @@ CommandController auto_loader_side()
   lsa.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
   lsa.add(new FunctionCommand([]()
                               {main_controller.Screen.print("beginning\n"); return true; }));
-  lsa.add(SpinFWAt(3200));
+  lsa.add(SpinFWAt(3500));
   // spin -90 degree roller
   lsa.add(DriveForwardFast(1, fwd)); //[measure]
   lsa.add(new SpinRollerCommandAUTO(drive_sys, roller));
@@ -193,9 +199,12 @@ CommandController auto_loader_side()
   lsa.add(DriveToPointFastPt(first_shoot_point));
 
   lsa.add(TurnToHeading(120.0));
+  add_single_shot_cmd(lsa);
 
+  lsa.add(TurnToHeading(120.0));
   add_single_shot_cmd(lsa);
-  add_single_shot_cmd(lsa);
+
+  lsa.add(TurnToHeading(120.0));
   add_single_shot_cmd(lsa);
 
   Vector2D::point_t disk_pos1 = {.x = 86.8, .y = 48.10};
@@ -232,6 +241,9 @@ CommandController auto_loader_side()
   Vector2D::point_t second_shoot_point = {.x = 66, .y = 50};
 
   lsa.add(TurnToPoint(second_shoot_point));
+
+  lsa.add(StopIntake);
+
   lsa.add(DriveToPointFastPt(second_shoot_point));
 
   lsa.add(TurnToHeading(120.0));
