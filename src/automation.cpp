@@ -220,9 +220,10 @@ FeedForward::ff_config_t vis_ff_cfg = {
 #define VISION_CENTER 140
 #define MIN_AREA 500
 #define MAX_SPEED 0.5
+#define FALLBACK_MAX_DEGREES 20
 
-VisionAimCommand::VisionAimCommand()
-: pidff(vis_pid_cfg, vis_ff_cfg) 
+VisionAimCommand::VisionAimCommand(bool odometry_fallback)
+: pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false)
 {}
 
 /**
@@ -232,6 +233,24 @@ VisionAimCommand::VisionAimCommand()
 */
 bool VisionAimCommand::run()
 {
+  
+  if(first_run)
+  {
+    stored_pos = odometry_sys.get_position();
+    drive_sys.reset_auto();
+    first_run = false;
+  }
+
+  if(fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES)
+  {
+    fallback_triggered = true;
+    if(drive_sys.turn_to_heading(stored_pos.rot, 0.6))
+      return true;
+    else
+      return false;    
+  }
+
+
   // If the camera isn't installed, move on to the next command
   if(!cam.installed())
     return true;

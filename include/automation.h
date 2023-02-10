@@ -214,7 +214,7 @@ public:
   /**
    * Contstruct a new VisionAimCommmand
   */
-    VisionAimCommand();
+    VisionAimCommand(bool odometry_fallback=false);
 
   bool run() override;
 
@@ -222,6 +222,10 @@ public:
 
     PIDFF pidff;
     timer tmr;
+    bool odometry_fallback;
+    bool first_run;
+    position_t stored_pos;
+    bool fallback_triggered;
 };
 
 class FlapUpCommand : public AutoCommand
