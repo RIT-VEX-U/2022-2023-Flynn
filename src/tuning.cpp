@@ -434,7 +434,8 @@ void tune_flywheel_distcalc()
         main_controller.ButtonA.pressed([](){intake.spin(fwd, 4, volt);});
         main_controller.ButtonA.released([](){intake.spin(fwd, 0, volt);});
         first_run = false;
-        printf("time setpt rpm fb_out avg err\n");
+        flywheel.setMaxTorque(100.0, vex::pct);
+        printf("time setpt rpm fb_out volts amps\n");
     }
     t+=.02;
     flywheel_sys.spinRPM(setpt_rpm);
@@ -442,5 +443,5 @@ void tune_flywheel_distcalc()
     main_controller.Screen.setCursor(1,1);
     main_controller.Screen.print("setpt: %d", setpt_rpm);
     avg_err.add_entry(fabs(flywheel_sys.getRPM() - flywheel_sys.getDesiredRPM()));
-    printf("%f %d %f %f %f\n", t, setpt_rpm, flywheel_sys.getRPM(), flywheel_sys.getFeedforwardValue() + flywheel_sys.getPIDValue(), avg_err.get_average());
+    printf("%f %d %f %f %f %f \n", t, setpt_rpm, flywheel_sys.getRPM(), flywheel_sys.getFeedforwardValue() + flywheel_sys.getPIDValue(), flywheel.voltage(volt), flywheel.current(amp));
 }

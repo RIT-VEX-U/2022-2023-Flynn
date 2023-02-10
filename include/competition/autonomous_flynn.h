@@ -5,6 +5,7 @@
 #include "automation.h"
 #include "competition/autonomous.h"
 #include "robot-config.h"
+#include <vector>
 
 
 void test_stuff();

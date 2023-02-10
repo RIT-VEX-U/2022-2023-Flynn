@@ -45,16 +45,90 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
 
 void pleasant_opcontrol();
 
+int power_stats_on_brain()
+{
+  static int page = 0;
+  const int pages = 2;
+  static const int width = 480;
+  static const int height = 240;
+
+  auto draw_page_two = []()
+  {
+    Brain.Screen.setFont(prop20);
+    int text_height = 20;
+
+    Brain.Screen.clearScreen();
+    Brain.Screen.printAt(2, 1 * text_height, "flywheel", Brain.Battery.voltage(volt));
+    Brain.Screen.printAt(2, 2 * text_height, "set: %.2f real: %.2f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
+    Brain.Screen.printAt(2, 3 * text_height, "%.4fv %.4f amps", flywheel.voltage(volt), flywheel.current(amp));
+
+    Brain.Screen.printAt(2, 5 * text_height, "battery", Brain.Battery.voltage(volt));
+    Brain.Screen.printAt(2, 6 * text_height, "%.4f volts", Brain.Battery.voltage(volt));
+    Brain.Screen.printAt(2, 7 * text_height, "%.4f amps", Brain.Battery.current(amp));
+    Brain.Screen.printAt(2, 8 * text_height, "%d%%", Brain.Battery.capacity(pct));
+  };
+  auto draw_page_one = []()
+  {
+    Brain.Screen.clearScreen();
+    Brain.Screen.setFont(prop40);
+    int text_height = 40;
+    Brain.Screen.printAt(20, 3 * text_height, "odometry");
+    auto pos = odometry_sys.get_position();
+    Brain.Screen.printAt(20, 4 * text_height, "(%.2f, %.2f) : %.2f", pos.x, pos.y, pos.rot);
+  };
+
+  while (true)
+  {
+    if (Brain.Screen.pressing())
+    {
+      if (Brain.Screen.xPosition() > width / 2)
+      {
+        page++;
+      }
+      else
+      {
+        page--;
+      }
+    }
+    if (page>pages-1){
+      page = pages-1;
+    } else if (page < 0){
+      page = 0;
+    }
+
+    if (page == 0)
+    {
+      draw_page_one();
+    }
+    else
+    {
+      draw_page_two();
+    }
+    Brain.Screen.setFont(mono20);
+    Brain.Screen.printAt(width - 5 * 10, height - 10, "(%d/%d)", page + 1, pages);
+
+    vexDelay(100);
+  }
+  return 0;
+}
+
 void test_stuff()
 {
+  vex::task power_task(power_stats_on_brain);
 
+  while (true)
+  {
+    tune_flywheel_distcalc();
+
+    vexDelay(20);
+  }
   while (imu.isCalibrating())
   {
     vexDelay(20);
   }
 
   ////CommandController mine = auto_loader_side();
-  //mine.run();
+  // mine.run();
 
   pleasant_opcontrol();
 
@@ -91,16 +165,14 @@ void pleasant_opcontrol()
   main_controller.ButtonB.pressed([]()
                                   { odometry_sys.set_position(); });
 
-//intake.spin(fwd, 12, volt);
+  // intake.spin(fwd, 12, volt);
   main_controller.ButtonX.pressed([]()
-                                  {  intake.spin(fwd, 12, volt); vexDelay(5); intake.spin(fwd, 12, volt);  });
-
+                                  {  intake.spin(fwd, 12, volt); vexDelay(5); intake.spin(fwd, 12, volt); });
 
   odometry_sys.end_async();
   int i = 0;
 
   VisionAimCommand visaim;
-
 
   timer loop_timer;
   loop_timer.reset();
@@ -123,10 +195,10 @@ void pleasant_opcontrol()
     }
 
     // ========== DRIVING CONTROLS ==========
-    if(main_controller.ButtonA.pressing())
+    if (main_controller.ButtonA.pressing())
       visaim.run();
     else
-      drive_sys.drive_arcade(main_controller.Axis3.position(pct)/100.0, main_controller.Axis1.position(pct)/300.0);    
+      drive_sys.drive_arcade(main_controller.Axis3.position(pct) / 100.0, main_controller.Axis1.position(pct) / 300.0);
 
     // ========== MANIPULATING CONTROLS ==========
 
@@ -187,7 +259,7 @@ CommandController auto_loader_side()
   CommandController lss;
   lsa.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
   lsa.add(new FunctionCommand([]()
-                              {main_controller.Screen.print("beginning\n"); return true; }));
+                              {main_controller.Screen.print("Starting\n"); return true; }));
   lsa.add(SpinFWAt(3500));
   // spin -90 degree roller
   lsa.add(DriveForwardFast(1, fwd)); //[measure]
@@ -214,29 +286,24 @@ CommandController auto_loader_side()
   Vector2D::point_t disk_prep_pos2 = {.x = 70, .y = 39};
   Vector2D::point_t disk_prep_pos3 = {.x = 70, .y = 27};
 
-  
+  // disks against right angle piece
+  lsa.add({
+      // farthest
+      TurnToPoint(disk_pos1),
+      StartIntake,
+      DriveToPointSlowPt(disk_pos1),
 
-  lsa.add(TurnToPoint(disk_pos1));
-  lsa.add(StartIntake);
+      // middle
+      DriveToPointFastPtRev(disk_prep_pos2),
+      TurnToPoint(disk_pos2),
+      DriveToPointSlowPt(disk_pos2),
 
-
-
-
-  lsa.add(DriveToPointSlowPt(disk_pos1));
-  lsa.add(DriveToPointFastPtRev(disk_prep_pos2));
-
-
-
-  lsa.add(TurnToPoint(disk_pos2));
-  lsa.add(DriveToPointSlowPt(disk_pos2));
-
-  lsa.add(DriveToPointFastPtRev(disk_prep_pos3));
-
-  lsa.add(TurnToPoint(disk_pos3));
-
-  lsa.add(DriveToPointSlowPt(disk_pos3));
-
-  lsa.add(DriveToPointFastPtRev(disk_prep_pos3));
+      // closest disk
+      DriveToPointFastPtRev(disk_prep_pos3),
+      TurnToPoint(disk_pos3),
+      DriveToPointSlowPt(disk_pos3),
+      DriveToPointFastPtRev(disk_prep_pos3),
+  });
 
   Vector2D::point_t second_shoot_point = {.x = 66, .y = 50};
 

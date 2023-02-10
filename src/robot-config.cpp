@@ -126,11 +126,11 @@ robot_specs_t config = {
 
 // Flywheel Tuning
 FeedForward::ff_config_t flywheel_ff_cfg = {
-  .kV =  0.000268 
+  .kV =  0.00029 
 };
 
 PID::pid_config_t flywheel_pid_cfg = {
-//    .p = .003,
+    .p = .0001,
 //    .d = 0.000015,
 };
 
