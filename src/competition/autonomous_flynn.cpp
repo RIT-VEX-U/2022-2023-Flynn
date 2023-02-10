@@ -24,7 +24,7 @@
 #define StartIntake new StartIntakeCommand(intake, INTAKE_VOLT)
 #define StopIntake new StopIntakeCommand(intake)
 
-#define VisionAim (new VisionAimCommand(cam, {RED_GOAL, BLUE_GOAL}, drive_sys))
+#define VisionAim (new VisionAimCommand())
 #define WaitForFW (new WaitUntilUpToSpeedCommand(flywheel_sys, 10))
 #define ShootDisk (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 #define SpinFWAt(rpm) (new SpinRPMCommand(flywheel_sys, rpm))

@@ -1,6 +1,6 @@
 #pragma once
-
 #include "vex.h"
+#include "core.h"
 #include <vector>
 #include <functional>
 #include <initializer_list>
@@ -213,18 +213,15 @@ class VisionAimCommand : public AutoCommand
 public:
   /**
    * Contstruct a new VisionAimCommmand
-   */
-  VisionAimCommand(vision &cam, std::initializer_list<vision::signature> sigs, TankDrive &drive_sys);
-  VisionAimCommand(vision &cam, vision::signature sig, TankDrive &drive_sys);
+  */
+    VisionAimCommand();
 
   bool run() override;
 
-private:
-  vision &cam;
-  std::vector<vision::signature> sig_vec;
-  TankDrive &drive_sys;
-  PID pid;
-  timer tmr;
+  private:
+
+    PIDFF pidff;
+    timer tmr;
 };
 
 class FlapUpCommand : public AutoCommand
