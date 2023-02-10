@@ -104,7 +104,10 @@ void pleasant_opcontrol(){
   }
 
     // ========== DRIVING CONTROLS ==========
-    drive_sys.drive_arcade(main_controller.Axis3.position(pct)/100.0, main_controller.Axis1.position(pct)/300.0);    
+    if(main_controller.ButtonA.pressing())
+      visaim.run();
+    else
+      drive_sys.drive_arcade(main_controller.Axis3.position(pct)/100.0, main_controller.Axis1.position(pct)/300.0);    
 
     // ========== MANIPULATING CONTROLS ==========
 

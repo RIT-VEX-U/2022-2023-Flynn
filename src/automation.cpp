@@ -207,14 +207,14 @@ SpinToColorCommand::SpinToColorCommand(vex::optical &colorSensor, double color, 
 
 
 PID::pid_config_t vis_pid_cfg = {
-  .p = .003,
-  .d = 0,
+  .p = .001,
+  // .d = .0001,
   .deadband = 5,
   .on_target_time = .2
 };
 
 FeedForward::ff_config_t vis_ff_cfg = {
-  .kS = 0.14
+  .kS = 0.1
 };
 
 #define VISION_CENTER 140
@@ -262,7 +262,7 @@ bool VisionAimCommand::run()
   else if(blue_area > red_area && blue_area > MIN_AREA)
     x_val = blue_obj.centerX;
 
-  // printf("CenterX: %d\n", x_val);
+  printf("CenterX: %d\n", x_val);
 
   if(x_val != 0)
   {
@@ -276,7 +276,10 @@ bool VisionAimCommand::run()
     drive_sys.drive_tank(out, -out);
 
     if(pidff.is_on_target())
+    {
+      drive_sys.stop();
       return true;
+    }
   }
   else
   {
