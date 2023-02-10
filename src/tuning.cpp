@@ -222,11 +222,24 @@ void tune_drive_pid(DriveType dt)
 
     if (main_controller.ButtonA.pressing())
     {
-        if(dt == DRIVE && (done || drive_sys.drive_to_point(24,24,fwd, drive_fast_mprofile)))
+        if(dt == DRIVE && (done || drive_sys.drive_to_point(24,24,fwd, drive_fast_mprofile))){
+            auto pos = odometry_sys.get_position();
+            printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+
+            printf("Finished\n");
+            fflush(stdout);
             done = true;
+        }
         
-        if(dt == TURN && (done || drive_sys.turn_to_heading(180, *config.turn_feedback, 1.0)))
+        if(dt == TURN && (done || drive_sys.turn_to_heading(180, *config.turn_feedback, 1.0))){
+            auto pos = odometry_sys.get_position();
+            printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+
+            printf("Finished\n");
+            fflush(stdout);
+
             done = true;
+        }
 
     }else
     {
@@ -333,7 +346,7 @@ void tune_drive_motion_accel(DriveType dt, double maxv)
 //1.0 0.000299
 void tune_flywheel_ff()
 { 
-    double flywheel_target_pct = 1;
+    double flywheel_target_pct = .85;
     static bool new_press = true;
     static int counter = 0;
     if(main_controller.ButtonA.pressing())
@@ -343,6 +356,7 @@ void tune_flywheel_ff()
         {
             reset_avg_counter();
             new_press = false;
+            printf("rpm kv");
         }
 
         flywheel_sys.spin_raw(flywheel_target_pct);
@@ -350,13 +364,16 @@ void tune_flywheel_ff()
         if (counter<30){
           return;
         }
-        double rpm = flywheel_sys.getRPM();
+
+        double rawRPM = 18.0 * flywheel_motors.velocity(velocityUnits::rpm); 
+
+        double rpm = rawRPM;//flywheel_sys.getRPM();
         double kv = flywheel_target_pct / continuous_avg(rpm);
 
         main_controller.Screen.clearScreen();
         main_controller.Screen.setCursor(1, 1);
         main_controller.Screen.print("kv: %f", kv);
-        printf("rpm %f kV %f\n", rpm, kv);
+        printf("%f %f\n", rpm, kv);
     }else
     {
         flywheel_sys.stop();

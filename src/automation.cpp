@@ -300,3 +300,20 @@ bool TurnToPointCommand::run(){
 
   return drive_sys.turn_to_heading(heading_deg, feedback);
 }
+
+
+
+/**
+ * Constuct a FunctionCommand
+ * @param func the function to run
+*/
+FunctionCommand::FunctionCommand(std::function<bool(void)> func): func(func){}
+
+/**
+ * Run the TurnToPointCommand
+ * Overrides run from AutoCommand
+ * @returns true when execution is complete, false otherwise
+*/
+bool FunctionCommand::run(){
+  return func();
+}
