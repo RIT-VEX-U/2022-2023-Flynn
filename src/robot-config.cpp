@@ -40,7 +40,7 @@ vex::optical colorSensor(PORT14, false);
 
 // Drive Tuning
 PID::pid_config_t drive_pid_cfg = {
-    .p = .025,
+    .p = .035,
     .i = 0, 
     .d = 0,
     .deadband = 2,
@@ -71,8 +71,8 @@ MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
 // Turn Tuning
 PID::pid_config_t turn_pid_cfg = {
     .p = .0045,
-    .i = 0.00, 
-    .d = .00012,
+    .i = 0.00001, 
+    .d = .00013,
     .deadband = 3,
     .on_target_time = .2
 };
@@ -126,12 +126,12 @@ robot_specs_t config = {
 
 // Flywheel Tuning
 FeedForward::ff_config_t flywheel_ff_cfg = {
-  .kV =  0.0003 
+  .kV =  0.000317 
 };
 
 PID::pid_config_t flywheel_pid_cfg = {
-    .p = .003,
-    .d = 0.000015,
+//    .p = .003,
+//    .d = 0.000015,
 };
 
 // ======== SUBSYSTEMS ========

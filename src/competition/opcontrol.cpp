@@ -20,6 +20,7 @@ void opcontrol()
 {
 
   test_stuff();
+
   
   // Initialization
   fflush(stdout);
