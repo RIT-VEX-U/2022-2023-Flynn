@@ -1,7 +1,8 @@
-#include "../../include/competition/opcontrol.h"
-#include "../include/automation.h"
-#include "../include/robot-config.h"
-#include "../include/tuning.h"
+#include "competition/opcontrol.h"
+#include "competition/autonomous_clu.h"
+#include "automation.h"
+#include "robot-config.h"
+#include "tuning.h"
 #include "vision.h"
 
 int print_odom(){
@@ -19,7 +20,8 @@ int print_odom(){
 void opcontrol()
 {
 
-  test_stuff();
+  // test_stuff();
+  testing();
 
   
   // Initialization

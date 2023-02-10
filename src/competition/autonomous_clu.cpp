@@ -37,6 +37,20 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
     controller.add_delay(SINGLE_SHOT_RECOVER_DELAY_MS);
 }
 
+void testing()
+{
+    while(imu.isCalibrating()) {}
+    CommandController ctrl = auto_non_loader_side();
+    ctrl.run();
+
+    while(true)
+    {
+        position_t pos = odometry_sys.get_position();
+        printf("x: %2f, y: %2f, z: %2f\n", pos.x, pos.y, pos.rot);
+        vexDelay(50);
+    }
+}
+
 /*
 Auto Non-loader side
 JOEBOT
@@ -61,55 +75,61 @@ Map from page 40 of the game manual
  Align robot to specified place and angle using NON LOADER SIDE AUTO jig
 */
 CommandController auto_non_loader_side(){
+
+    #define PAUSE return nlsa;
     CommandController nlsa;
 
     // Initialization
-    position_t start_pos = {.x=0, .y=0, .rot=90}; 
+    position_t start_pos = {.x=105.75, .y=86.5, .rot=90}; 
     nlsa.add(new OdomSetPosition(odometry_sys, start_pos));
 
-    // Arrow 1 -------------------
-    nlsa.add(DRIVE_TO_POINT_FAST(127.9, 114, fwd));
+    // Drive to roller
+    nlsa.add(DRIVE_TO_POINT_FAST(104, 113, fwd));
     nlsa.add(TURN_TO_HEADING(0));
     
-    // Arrow 2 -------------------
+    // Spin Roller
     nlsa.add(DRIVE_FORWARD_FAST(4, fwd));
     nlsa.add(new SpinRollerCommandAUTO(drive_sys, roller));
     nlsa.add(DRIVE_FORWARD_FAST(12, rev));
+    
 
     // Spin and shoot
-    nlsa.add(new SpinRPMCommand(flywheel_sys, SHOOTING_RPM)); 
-    nlsa.add(TURN_TO_HEADING(225));
-    nlsa.add(DRIVE_TO_POINT_FAST(89, 76.5, fwd));
-    nlsa.add(TURN_TO_HEADING(145));
+    // nlsa.add(new SpinRPMCommand(flywheel_sys, SHOOTING_RPM)); 
+    nlsa.add(TURN_TO_HEADING(228));
+
+    nlsa.add(DRIVE_TO_POINT_FAST(74, 83, fwd));
+    nlsa.add(TURN_TO_HEADING(153));
     add_single_shot_cmd(nlsa, 3);
     add_single_shot_cmd(nlsa, 3);
 
     // NORMAL STOP
-    return nlsa;
+    // return nlsa;
 
     // Furthur auto testing
     // Drive towards the 3 disks along the barrier
-    nlsa.add(TURN_TO_HEADING(0));
-    nlsa.add(DRIVE_TO_POINT_FAST(0, 0, fwd));
-    nlsa.add(TURN_TO_HEADING(0));
+    nlsa.add(TURN_TO_HEADING(320));
+    nlsa.add(DRIVE_TO_POINT_FAST(83.6, 72.5, fwd));
+    nlsa.add(TURN_TO_HEADING(270));
 
     // Pick up the first
     nlsa.add(new StartIntakeCommand(intake, INTAKE_VOLT));
-    nlsa.add(DRIVE_TO_POINT_SLOW(0, 0, fwd), 3);
-    nlsa.add(DRIVE_TO_POINT_FAST(0, 0, rev));
+    nlsa.add(DRIVE_TO_POINT_SLOW(83.4, 55.4, fwd), 3);
+    nlsa.add(DRIVE_TO_POINT_FAST(83.4, 66.6, rev));
 
     // Pick up second disk
-    nlsa.add(TURN_TO_HEADING(0));
-    nlsa.add(DRIVE_TO_POINT_SLOW(0, 0, fwd), 3);
-    nlsa.add(DRIVE_TO_POINT_FAST(0, 0, rev));
+    nlsa.add(TURN_TO_HEADING(302));
+    nlsa.add(DRIVE_TO_POINT_SLOW(90, 57, fwd), 3);
+    nlsa.add(DRIVE_TO_POINT_FAST(73.7, 74.6, rev));
     // Pick up third disk
-    nlsa.add(TURN_TO_HEADING(0));
-    nlsa.add(DRIVE_TO_POINT_SLOW(0, 0, fwd), 3);
-    nlsa.add(DRIVE_TO_POINT_FAST(0, 0, rev));
+    nlsa.add(TURN_TO_HEADING(270));
+    nlsa.add(DRIVE_TO_POINT_SLOW(73.7, 55.7, fwd), 3);
+    nlsa.add(DRIVE_TO_POINT_FAST(68.3, 74.7, rev));
 
     // Turn around to shoot
-    nlsa.add(TURN_TO_HEADING(0));
-    nlsa.add(DRIVE_TO_POINT_FAST(0, 0, fwd));
+    nlsa.add(TURN_TO_HEADING(147));
+
+    PAUSE
+
     nlsa.add(new StopIntakeCommand(intake));
     nlsa.add(TURN_TO_HEADING(0));
     
