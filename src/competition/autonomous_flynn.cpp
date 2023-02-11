@@ -171,9 +171,18 @@ int stats_on_brain()
 
 void test_stuff()
 {
-  vex::task screen_info_task(stats_on_brain);
 
   CALIBRATE_IMU();
+
+  while(true){
+    PIDFF *turn_pidff = static_cast<PIDFF*>(config.turn_feedback);
+    tune_generic_pid(((*turn_pidff).pid), -180, 180);
+    tune_drive_pid(TURN);
+    vexDelay(30);
+  }
+  return;
+  vex::task screen_info_task(stats_on_brain);
+
 
   ////CommandController mine = auto_loader_side();
   // mine.run();

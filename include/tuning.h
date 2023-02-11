@@ -1,5 +1,8 @@
 #pragma once
 
+#include "../core/include/utils/feedback_base.h"
+#include "../core/include/utils/graph_drawer.h"
+
 enum DriveType
 {
     DRIVE, TURN
@@ -22,3 +25,6 @@ void tune_drive_motion_accel(DriveType dt, double maxv);
 void tune_flywheel_ff();
 void tune_flywheel_pid();
 void tune_flywheel_distcalc();
+
+
+void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error_upper_bound);
