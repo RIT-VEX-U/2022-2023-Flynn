@@ -20,8 +20,8 @@ int print_odom(){
 void opcontrol()
 {
 
-  // test_stuff();
-  testing();
+  test_stuff();
+  //testing();
 
   
   // Initialization
@@ -40,7 +40,7 @@ void opcontrol()
   
   main_controller.ButtonB.pressed([](){odometry_sys.set_position();});
 
-  odometry_sys.end_async();
+  //odometry_sys.end_async();
   int i = 0;
   // Periodic
   while(true)

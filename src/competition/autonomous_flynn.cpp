@@ -2,6 +2,11 @@
 #include "vision.h"
 #include "tuning.h"
 
+#define CALIBRATE_IMU()       \
+  while (imu.isCalibrating()) \
+  {                           \
+  }
+
 #define TURN_SPEED 0.6
 #define INTAKE_VOLT 12
 #define SHOOTING_RPM 3200
@@ -45,41 +50,68 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
 
 void pleasant_opcontrol();
 
-int power_stats_on_brain()
+
+int stats_on_brain()
 {
-  static int page = 0;
-  const int pages = 2;
+  static bool wasPressing = false;
+  static int page = 2;
+  const int pages = 3;
   static const int width = 480;
   static const int height = 240;
 
+  GraphDrawer rpm_graph(Brain.Screen, 50, "time", "rpm", vex::blue, true, 0.0, 4000.0);
+  GraphDrawer setpt_graph(Brain.Screen, 50, "time", "setpt", vex::red, true, 0.0, 4000.0);
+  GraphDrawer output_graph(Brain.Screen, 50, "time", "out", vex::yellow, true, 0.0, 1.0);
+
   auto draw_page_two = []()
   {
+    Brain.Screen.setFillColor(vex::transparent);
+    Brain.Screen.setPenColor(vex::white);
     Brain.Screen.setFont(prop20);
     int text_height = 20;
 
     Brain.Screen.clearScreen();
     Brain.Screen.printAt(2, 1 * text_height, "flywheel", Brain.Battery.voltage(volt));
     Brain.Screen.printAt(2, 2 * text_height, "set: %.2f real: %.2f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
-    Brain.Screen.printAt(2, 3 * text_height, "%.4fv %.4f amps", flywheel.voltage(volt), flywheel.current(amp));
+    Brain.Screen.printAt(2, 3 * text_height, "%.3f volts %.3f amps %.3fwatts", flywheel.voltage(volt), flywheel.current(amp), flywheel.voltage(volt) * flywheel.current(amp));
+    Brain.Screen.printAt(2, 4 * text_height, "%.f F", flywheel.temperature(fahrenheit));
 
-    Brain.Screen.printAt(2, 5 * text_height, "battery", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 6 * text_height, "%.4f volts", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 7 * text_height, "%.4f amps", Brain.Battery.current(amp));
-    Brain.Screen.printAt(2, 8 * text_height, "%d%%", Brain.Battery.capacity(pct));
+    Brain.Screen.printAt(2, 6 * text_height, "battery", Brain.Battery.voltage(volt));
+    Brain.Screen.printAt(2, 7 * text_height, "%.2f volts", Brain.Battery.voltage(volt));
+    Brain.Screen.printAt(2, 8 * text_height, "%.2f amps", Brain.Battery.current(amp));
+    Brain.Screen.printAt(2, 9 * text_height, "%d%%", Brain.Battery.capacity(pct));
+    Brain.Screen.printAt(2, 10 * text_height, "%.f F", Brain.Battery.temperature(fahrenheit));
   };
   auto draw_page_one = []()
   {
     Brain.Screen.clearScreen();
+    Brain.Screen.setFillColor(vex::transparent);
+    Brain.Screen.setPenColor(vex::white);
     Brain.Screen.setFont(prop40);
     int text_height = 40;
-    Brain.Screen.printAt(20, 3 * text_height, "odometry");
+    Brain.Screen.printAt(2, 2 * text_height, "odometry");
     auto pos = odometry_sys.get_position();
-    Brain.Screen.printAt(20, 4 * text_height, "(%.2f, %.2f) : %.2f", pos.x, pos.y, pos.rot);
+    Brain.Screen.printAt(2, 2 * text_height, "(%.2f, %.2f) : %.2f", pos.x, pos.y, pos.rot);
   };
 
+  auto draw_page_three = [&rpm_graph, &setpt_graph, &output_graph]()
+  {
+    int x = 20;
+    int y = 20;
+    Brain.Screen.clearScreen();
+
+    int graph_w = 200; // width / 2 - 2 * x;
+    int graph_h = 200; // height / 2 - 2 * y;
+    rpm_graph.draw(x, y, graph_w, graph_h);
+    setpt_graph.draw(x, y, graph_w, graph_h);
+    output_graph.draw(x, y, graph_w, graph_h);
+  };
+
+  double t = 0.0;
   while (true)
   {
-    if (Brain.Screen.pressing())
+
+    if (Brain.Screen.pressing() && !wasPressing)
     {
       if (Brain.Screen.xPosition() > width / 2)
       {
@@ -90,42 +122,58 @@ int power_stats_on_brain()
         page--;
       }
     }
-    if (page>pages-1){
-      page = pages-1;
-    } else if (page < 0){
+    if (Brain.Screen.pressing())
+    {
+      wasPressing = true;
+    }
+    else
+    {
+      wasPressing = false;
+    }
+
+    if (page > pages - 1)
+    {
+      page = pages - 1;
+    }
+    else if (page < 0)
+    {
       page = 0;
     }
+
+    Vector2D::point_t p = {.x = t, .y = flywheel_sys.getRPM()};
+    Vector2D::point_t p2 = {.x = t, .y = flywheel_sys.getDesiredRPM()};
+    Vector2D::point_t p3 = {.x = t, .y = flywheel_sys.getFeedforwardValue() + flywheel_sys.getPIDValue()};
+
+    rpm_graph.add_sample(p);
+    setpt_graph.add_sample(p2);
+    output_graph.add_sample(p3);
 
     if (page == 0)
     {
       draw_page_one();
     }
-    else
+    else if (page == 1)
     {
       draw_page_two();
+    }
+    else
+    {
+      draw_page_three();
     }
     Brain.Screen.setFont(mono20);
     Brain.Screen.printAt(width - 5 * 10, height - 10, "(%d/%d)", page + 1, pages);
 
     vexDelay(100);
+    t += .1;
   }
   return 0;
 }
 
 void test_stuff()
 {
-  vex::task power_task(power_stats_on_brain);
+  vex::task screen_info_task(stats_on_brain);
 
-  while (true)
-  {
-    tune_flywheel_distcalc();
-
-    vexDelay(20);
-  }
-  while (imu.isCalibrating())
-  {
-    vexDelay(20);
-  }
+  CALIBRATE_IMU();
 
   ////CommandController mine = auto_loader_side();
   // mine.run();
@@ -142,15 +190,14 @@ void test_stuff()
 
 void pleasant_opcontrol()
 {
-  vex_printf("opcontrollin");
   // Initialization
-  double oneshot_time = .05; // Change 1 second to whatever is needed
+  double oneshot_time = .02; // Change 1 second to whatever is needed
   bool oneshotting = false;
 
   main_controller.ButtonUp.pressed([]()
-                                   { flywheel_sys.spinRPM(3500); });
+                                   { flywheel_sys.spinRPM(flywheel_sys.getDesiredRPM() + 250); });
   main_controller.ButtonDown.pressed([]()
-                                     { flywheel_sys.stop(); });
+                                     { flywheel_sys.spinRPM(flywheel_sys.getDesiredRPM() - 250); });
   main_controller.ButtonR1.pressed([]()
                                    { intake.spin(reverse, 12, volt); }); // Intake
   main_controller.ButtonR2.pressed([]()
@@ -167,9 +214,8 @@ void pleasant_opcontrol()
 
   // intake.spin(fwd, 12, volt);
   main_controller.ButtonX.pressed([]()
-                                  {  intake.spin(fwd, 12, volt); vexDelay(5); intake.spin(fwd, 12, volt); });
+                                  {  intake.spin(fwd, 12, volt); vexDelay(40); intake.spin(fwd, 0, volt); });
 
-  odometry_sys.end_async();
   int i = 0;
 
   VisionAimCommand visaim;
@@ -191,7 +237,6 @@ void pleasant_opcontrol()
       main_controller.Screen.print("fw temp: %.1ff", flywheel.temperature(vex::fahrenheit));
       main_controller.Screen.setCursor(4, 0);
       main_controller.Screen.print("bat fw : %.2fv %.2fv", Brain.Battery.voltage(vex::volt), flywheel.voltage(volt));
-      printf("loop time: %fs\n", loop_time);
     }
 
     // ========== DRIVING CONTROLS ==========

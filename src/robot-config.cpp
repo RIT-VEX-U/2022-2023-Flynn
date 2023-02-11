@@ -130,7 +130,7 @@ FeedForward::ff_config_t flywheel_ff_cfg = {
 };
 
 PID::pid_config_t flywheel_pid_cfg = {
-    .p = .0001,
+    .p = .0005,
 //    .d = 0.000015,
 };
 
