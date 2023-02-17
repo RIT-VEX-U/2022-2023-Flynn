@@ -406,8 +406,18 @@ CommandController prog_skills_loader_side()
 
   lss.add(StopIntake);
 
+  Vector2D::point_t out_of_way_point = {.x = 70, .y = 124};
+  lss.add(TurnToPoint(out_of_way_point));        // [measure]
+  lss.add(DriveToPointFastPt(out_of_way_point)); //[measure]
+
+  // drive to shooting point
+  Vector2D::point_t shoot_point2 = {.x = 46, .y = 124};
+  lss.add(TurnToPoint(shoot_point2));        // [measure]
+  lss.add(DriveToPointFastPt(shoot_point2)); //[measure]
+
+
   // face hoop and fire
-  lss.add(TurnToHeading(135));                     // [measure]
+  lss.add(TurnToHeading(180));                     // [measure]
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // [measure]
 
   add_single_shot_cmd(lss);
@@ -415,7 +425,41 @@ CommandController prog_skills_loader_side()
   add_single_shot_cmd(lss);
 
   // Arrow 4 -------------------------
-  Vector2D::point_t out_of_way_point = {.x = 70, .y = 124};
+  lss.add(TurnToPoint(out_of_way_point));        // [measure]
+  lss.add(DriveToPointFastPt(out_of_way_point)); //[measure]
+
+
+
+
+  Vector2D::point_t south_disk_pos1 = {.x = 50.0, .y = 112.0};
+  Vector2D::point_t south_disk_pos2 = {.x = 50.0, .y = 103.0};
+  Vector2D::point_t south_disk_pos3 = {.x = 50.0, .y = 95.0};
+
+  Vector2D::point_t south_disk_prep_pos1 = {.x = 66, .y = 112};
+  Vector2D::point_t south_disk_prep_pos2 = {.x = 66, .y = 106};
+  Vector2D::point_t south_disk_prep_pos3 = {.x = 66, .y = 100};
+
+  // disks against L piece
+  lss.add({
+      // farthest
+      StartIntake,
+      DriveToPointFastPtRev(south_disk_prep_pos1)->withTimeout(2.0),
+      TurnToPoint(south_disk_pos1)->withTimeout(1.5),
+      DriveToPointSlowPt(south_disk_pos1)->withTimeout(2.0),
+
+      // middle
+      DriveToPointFastPtRev(south_disk_prep_pos2)->withTimeout(2.0),
+      TurnToPoint(south_disk_pos2)->withTimeout(1.5),
+      DriveToPointSlowPt(south_disk_pos2)->withTimeout(2.0),
+
+      // closest disk
+      DriveToPointFastPtRev(south_disk_prep_pos3)->withTimeout(2.0),
+      TurnToPoint(south_disk_pos3)->withTimeout(1.5),
+      DriveToPointSlowPt(south_disk_pos3)->withTimeout(2.0),
+      DriveToPointFastPtRev(south_disk_prep_pos3)->withTimeout(2.0),
+  });
+
+
   lss.add(TurnToPoint(out_of_way_point));        // [measure]
   lss.add(DriveToPointFastPt(out_of_way_point)); //[measure]
 

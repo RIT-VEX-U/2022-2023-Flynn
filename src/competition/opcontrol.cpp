@@ -25,7 +25,6 @@ void opcontrol()
 
   
   // Initialization
-  fflush(stdout);
   double oneshot_time = .05;//Change 1 second to whatever is needed
   bool oneshotting = false;
   flywheel_sys.spinRPM(3000);
