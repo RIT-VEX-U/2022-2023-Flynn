@@ -30,11 +30,11 @@ public:
   bool run() override;
 
 private:
+  TankDrive &drive_sys;
   vex::motor &roller_motor;
   bool func_initialized;
   double start_pos;
   double target_pos;
-  TankDrive &drive_sys;
 };
 /**
  * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
@@ -290,17 +290,19 @@ private:
 #define NO_CHANGE -DBL_MAX
 class WallAlignCommand : public AutoCommand
 {
+public:
   /**
-   * Align with a wall at a certain x, y and heading. 
+   * Align with a wall at a certain x, y and heading.
    * If a value is not known at compile time, set it to NO_CHANGE and it will be filled in when the command is run
    * @param drive_sys how to drive into the wall
    * @param odom how to know where we hit a wall
    * @param x where we hit the wall in the x dimension (NO_CHANGE if this is the unknown quantity)
    * @param y where we hit the wall in the y dimension (NO_CHANGE if this is the unknown quantity)
    * @param heading the angle we want to hit the wall at (should never be no change)
-   * @param volts how fast we want it hit the wall
-  */
-  WallAlignCommand(TankDrive &drive_sys, OdometryTank &odom, double x, double y, double heading, double volts);
+   * @param drive_power how fast we want it hit the wall (negative values go backward)
+   * @param time how long we should be driving for
+   */
+  WallAlignCommand(TankDrive &drive_sys, OdometryTank &odom, double x, double y, double heading, double drive_power, double time);
 
   bool run() override;
 
@@ -308,5 +310,9 @@ private:
   TankDrive &drive_sys;
   OdometryTank &odom;
   double x, y, heading;
-  double volts;
+  double drive_power;
+  double time;
+
+  vex::timer tmr;
+  bool func_initialized;
 };

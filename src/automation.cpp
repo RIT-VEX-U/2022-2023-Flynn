@@ -373,9 +373,9 @@ bool FunctionCommand::run()
  * @param x where we hit the wall in the x dimension (NO_CHANGE if this is the unknown quantity)
  * @param y where we hit the wall in the y dimension (NO_CHANGE if this is the unknown quantity)
  * @param heading the angle we want to hit the wall at (should never be no change)
- * @param volts how fast we want it hit the wall
+ * @param drive_power how fast we want it hit the wall
  */
-WallAlignCommand::WallAlignCommand(TankDrive &drive_sys, OdometryTank &odom, double x, double y, double heading, double volts) : drive_sys(drive_sys), odom(odom), x(x), y(y), heading(heading) {}
+WallAlignCommand::WallAlignCommand(TankDrive &drive_sys, OdometryTank &odom, double x, double y, double heading, double drive_power, double time) : drive_sys(drive_sys), odom(odom), x(x), y(y), heading(heading), time(time), func_initialized(false) {}
 
 
 /**
@@ -383,6 +383,20 @@ WallAlignCommand::WallAlignCommand(TankDrive &drive_sys, OdometryTank &odom, dou
 */
 bool WallAlignCommand::run()
 {
+  // Start cutoff timer
+  if (!func_initialized){
+    tmr.reset();
+    func_initialized = true;
+  }
+
+  // If we're not cutoff, drive 
+  if (tmr.time(seconds) < time){
+    drive_sys.drive_tank(drive_power, drive_power);
+    return false;
+  }
+  // otherwise stop and reset the position
+  drive_sys.stop();
+
   position_t old_pos = odom.get_position();
   position_t newpos = {.x = x, .y = y, .rot = heading};
   if (x == NO_CHANGE)
@@ -394,6 +408,5 @@ bool WallAlignCommand::run()
     newpos.y = old_pos.y;
   }
   odom.set_position(newpos);
-
   return true;
 }
