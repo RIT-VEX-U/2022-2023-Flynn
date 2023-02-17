@@ -54,7 +54,7 @@ void pleasant_opcontrol();
 int stats_on_brain()
 {
   static bool wasPressing = false;
-  static int page = 2;
+  static int current_page = 2;
   const int pages = 3;
   static const int width = 480;
   static const int height = 240;
@@ -115,11 +115,11 @@ int stats_on_brain()
     {
       if (Brain.Screen.xPosition() > width / 2)
       {
-        page++;
+        current_page++;
       }
       else
       {
-        page--;
+        current_page--;
       }
     }
     if (Brain.Screen.pressing())
@@ -131,13 +131,13 @@ int stats_on_brain()
       wasPressing = false;
     }
 
-    if (page > pages - 1)
+    if (current_page > pages - 1)
     {
-      page = pages - 1;
+      current_page = pages - 1;
     }
-    else if (page < 0)
+    else if (current_page < 0)
     {
-      page = 0;
+      current_page = 0;
     }
 
     Vector2D::point_t p = {.x = t, .y = flywheel_sys.getRPM()};
@@ -148,11 +148,11 @@ int stats_on_brain()
     setpt_graph.add_sample(p2);
     output_graph.add_sample(p3);
 
-    if (page == 0)
+    if (current_page == 0)
     {
       draw_page_one();
     }
-    else if (page == 1)
+    else if (current_page == 1)
     {
       draw_page_two();
     }
@@ -161,7 +161,7 @@ int stats_on_brain()
       draw_page_three();
     }
     Brain.Screen.setFont(mono20);
-    Brain.Screen.printAt(width - 5 * 10, height - 10, "(%d/%d)", page + 1, pages);
+    Brain.Screen.printAt(width - 5 * 10, height - 10, "(%d/%d)", current_page + 1, pages);
 
     vexDelay(100);
     t += .1;
