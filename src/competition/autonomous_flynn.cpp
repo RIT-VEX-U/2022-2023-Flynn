@@ -310,6 +310,7 @@ CommandController prog_skills_loader_side()
 {
 
   position_t start_pos = position_t{.x = 30.5, .y = 10.2, .rot = -90};
+  const double bumper_dist = 6.0;
 
   CommandController lss;
   lss.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
@@ -395,7 +396,6 @@ CommandController prog_skills_loader_side()
 
   // Wall align
   lss.add(TurnToHeading(0));
-  const double bumper_dist = 6.0;
   lss.add(new WallAlignCommand(drive_sys, odometry_sys, bumper_dist, NO_CHANGE, 0, -1, 2.0));
 
   // Arrow 3 -------------------------
@@ -423,7 +423,6 @@ CommandController prog_skills_loader_side()
   lss.add(DriveToPointFastPt(shoot_point2)); //[measure]
 
   lss.add(TurnToHeading(-90));
-  const double bumper_dist = 6.0;
   lss.add(new WallAlignCommand(drive_sys, odometry_sys, NO_CHANGE, 140 - bumper_dist, -90, -1, 2.0));
 
   // face hoop and fire
