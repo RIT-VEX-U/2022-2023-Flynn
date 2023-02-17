@@ -1,6 +1,7 @@
 #include "competition/autonomous_flynn.h"
 #include "vision.h"
 #include "tuning.h"
+#include "../core/include/intense_milk.h"
 
 #define CALIBRATE_IMU()       \
   while (imu.isCalibrating()) \
@@ -14,20 +15,20 @@
 #define SINGLE_SHOT_VOLT 2
 #define SINGLE_SHOT_RECOVER_DELAY_MS 1000
 
-#define DriveToPointSlow(x, y) new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, fwd, 1.0)
-#define DriveToPointSlowPt(pt) new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, fwd, 1.0)
+#define DriveToPointSlow(x, y) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, fwd, 1.0))
+#define DriveToPointSlowPt(pt) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, fwd, 1.0))
 
-#define DriveToPointFast(x, y) new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, fwd, 1.0)
-#define DriveToPointFastPt(pt) new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, fwd, 1.0)
-#define DriveToPointFastPtRev(pt) new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, reverse, 1.0)
+#define DriveToPointFast(x, y) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, fwd, 1.0))
+#define DriveToPointFastPt(pt) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, fwd, 1.0))
+#define DriveToPointFastPtRev(pt) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, reverse, 1.0))
 
-#define DriveForwardFast(dist, dir) new DriveForwardCommand(drive_sys, drive_fast_mprofile, dist, dir, 1.0)
-#define TurnToHeading(heading_deg) new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, TURN_SPEED)
+#define DriveForwardFast(dist, dir) (new DriveForwardCommand(drive_sys, drive_fast_mprofile, dist, dir, 1.0))
+#define TurnToHeading(heading_deg) (new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, TURN_SPEED))
 
-#define TurnToPoint(point) new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point)
+#define TurnToPoint(point)( new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point))
 
-#define StartIntake new StartIntakeCommand(intake, INTAKE_VOLT)
-#define StopIntake new StopIntakeCommand(intake)
+#define StartIntake (new StartIntakeCommand(intake, INTAKE_VOLT))
+#define StopIntake (new StopIntakeCommand(intake))
 
 #define VisionAim (new VisionAimCommand(true))
 #define WaitForFW (new WaitUntilUpToSpeedCommand(flywheel_sys, 10))
@@ -50,11 +51,10 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
 
 void pleasant_opcontrol();
 
-
 int stats_on_brain()
 {
   static bool wasPressing = false;
-  static int page = 2;
+  static int current_page = 2;
   const int pages = 3;
   static const int width = 480;
   static const int height = 240;
@@ -63,25 +63,25 @@ int stats_on_brain()
   GraphDrawer setpt_graph(Brain.Screen, 50, "time", "setpt", vex::red, true, 0.0, 4000.0);
   GraphDrawer output_graph(Brain.Screen, 50, "time", "out", vex::yellow, true, 0.0, 1.0);
 
-  auto draw_page_two = []()
-  {
-    Brain.Screen.setFillColor(vex::transparent);
-    Brain.Screen.setPenColor(vex::white);
-    Brain.Screen.setFont(prop20);
-    int text_height = 20;
+  // auto draw_page_two = []()
+  // {
+  //   Brain.Screen.setFillColor(vex::transparent);
+  //   Brain.Screen.setPenColor(vex::white);
+  //   Brain.Screen.setFont(prop20);
+  //   int text_height = 20;
 
-    Brain.Screen.clearScreen();
-    Brain.Screen.printAt(2, 1 * text_height, "flywheel", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 2 * text_height, "set: %.2f real: %.2f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
-    Brain.Screen.printAt(2, 3 * text_height, "%.3f volts %.3f amps %.3fwatts", flywheel.voltage(volt), flywheel.current(amp), flywheel.voltage(volt) * flywheel.current(amp));
-    Brain.Screen.printAt(2, 4 * text_height, "%.f F", flywheel.temperature(fahrenheit));
+  //   Brain.Screen.clearScreen();
+  //   Brain.Screen.printAt(2, 1 * text_height, "flywheel", Brain.Battery.voltage(volt));
+  //   Brain.Screen.printAt(2, 2 * text_height, "set: %.2f real: %.2f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
+  //   Brain.Screen.printAt(2, 3 * text_height, "%.3f volts %.3f amps %.3fwatts", flywheel.voltage(volt), flywheel.current(amp), flywheel.voltage(volt) * flywheel.current(amp));
+  //   Brain.Screen.printAt(2, 4 * text_height, "%.2f F %.2f%% effeciency", flywheel.temperature(fahrenheit), flywheel.efficiency());
 
-    Brain.Screen.printAt(2, 6 * text_height, "battery", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 7 * text_height, "%.2f volts", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 8 * text_height, "%.2f amps", Brain.Battery.current(amp));
-    Brain.Screen.printAt(2, 9 * text_height, "%d%%", Brain.Battery.capacity(pct));
-    Brain.Screen.printAt(2, 10 * text_height, "%.f F", Brain.Battery.temperature(fahrenheit));
-  };
+  //   Brain.Screen.printAt(2, 6 * text_height, "battery", Brain.Battery.voltage(volt));
+  //   Brain.Screen.printAt(2, 7 * text_height, "%.2f volts", Brain.Battery.voltage(volt));
+  //   Brain.Screen.printAt(2, 8 * text_height, "%.2f amps", Brain.Battery.current(amp));
+  //   Brain.Screen.printAt(2, 9 * text_height, "%d%%", Brain.Battery.capacity(pct));
+  //   Brain.Screen.printAt(2, 10 * text_height, "%.f F", Brain.Battery.temperature(fahrenheit));
+  // };
   auto draw_page_one = []()
   {
     Brain.Screen.clearScreen();
@@ -107,6 +107,11 @@ int stats_on_brain()
     output_graph.draw(x, y, graph_w, graph_h);
   };
 
+  auto draw_page_two = []()
+  {
+    Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width, intense_milk_height);
+  };
+
   double t = 0.0;
   while (true)
   {
@@ -115,11 +120,11 @@ int stats_on_brain()
     {
       if (Brain.Screen.xPosition() > width / 2)
       {
-        page++;
+        current_page++;
       }
       else
       {
-        page--;
+        current_page--;
       }
     }
     if (Brain.Screen.pressing())
@@ -131,13 +136,13 @@ int stats_on_brain()
       wasPressing = false;
     }
 
-    if (page > pages - 1)
+    if (current_page > pages - 1)
     {
-      page = pages - 1;
+      current_page = pages - 1;
     }
-    else if (page < 0)
+    else if (current_page < 0)
     {
-      page = 0;
+      current_page = 0;
     }
 
     Vector2D::point_t p = {.x = t, .y = flywheel_sys.getRPM()};
@@ -148,11 +153,11 @@ int stats_on_brain()
     setpt_graph.add_sample(p2);
     output_graph.add_sample(p3);
 
-    if (page == 0)
+    if (current_page == 0)
     {
       draw_page_one();
     }
-    else if (page == 1)
+    else if (current_page == 1)
     {
       draw_page_two();
     }
@@ -161,7 +166,7 @@ int stats_on_brain()
       draw_page_three();
     }
     Brain.Screen.setFont(mono20);
-    Brain.Screen.printAt(width - 5 * 10, height - 10, "(%d/%d)", page + 1, pages);
+    Brain.Screen.printAt(width - 5 * 10, height - 10, "(%d/%d)", current_page + 1, pages);
 
     vexDelay(100);
     t += .1;
@@ -173,16 +178,15 @@ void test_stuff()
 {
 
   CALIBRATE_IMU();
-
-  while(true){
-    PIDFF *turn_pidff = static_cast<PIDFF*>(config.turn_feedback);
+  while (true)
+  {
+    PIDFF *turn_pidff = static_cast<PIDFF *>(config.turn_feedback);
     tune_generic_pid(((*turn_pidff).pid), -180, 180);
     tune_drive_pid(TURN);
     vexDelay(30);
   }
   return;
   vex::task screen_info_task(stats_on_brain);
-
 
   ////CommandController mine = auto_loader_side();
   // mine.run();
@@ -193,8 +197,6 @@ void test_stuff()
   // mine.run();
   // vex_printf("timedout %d\n", mine.last_command_timed_out());
   // vex_printf("finshed\n");
-
-  pleasant_opcontrol();
 }
 
 void pleasant_opcontrol()
@@ -280,103 +282,6 @@ void pleasant_opcontrol()
 }
 
 /*
-Auto loader side
-
-Map from page 40 of the game manual
-
-(R) = Red Hoop, Blue Zone
-(B) = Blue Hoop, Red Zone
- *  = Starting position for this auto
-
-           ^ 180 degrees
-  +-------------------+
-  |        |____| (R) |
-  |___           |    |
-  | * |          |    |
-  |   |          |    |  --> 90 degrees
-  |   |          |_*__|
-  |___|  ____         |
-  |(B)  |____|        |
-  +-------------------+
-           v 0 degrees
-
- Human Instructions:
- Align robot to specified place and angle using LOADER SIDE AUTO jig
-*/
-CommandController auto_loader_side()
-{
-
-  CommandController lsa;
-
-  position_t start_pos = position_t{.x = 30.5, .y = 10.2, .rot = -90};
-
-  CommandController lss;
-  lsa.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
-  lsa.add(new FunctionCommand([]()
-                              {main_controller.Screen.print("Starting\n"); return true; }));
-  lsa.add(SpinFWAt(3500));
-  // spin -90 degree roller
-  lsa.add(DriveForwardFast(1, fwd)); //[measure]
-  lsa.add(new SpinRollerCommandAUTO(drive_sys, roller));
-  lsa.add(DriveForwardFast(4, reverse)); // [measure]
-
-  Vector2D::point_t first_shoot_point = {.x = 69, .y = 47};
-  lsa.add(TurnToPoint(first_shoot_point));
-  lsa.add(DriveToPointFastPt(first_shoot_point));
-
-  lsa.add(TurnToHeading(120.0));
-  add_single_shot_cmd(lsa);
-
-  lsa.add(TurnToHeading(120.0));
-  add_single_shot_cmd(lsa);
-
-  lsa.add(TurnToHeading(120.0));
-  add_single_shot_cmd(lsa);
-
-  Vector2D::point_t disk_pos1 = {.x = 86.8, .y = 48.10};
-  Vector2D::point_t disk_pos2 = {.x = 87, .y = 39};
-  Vector2D::point_t disk_pos3 = {.x = 87, .y = 25};
-
-  Vector2D::point_t disk_prep_pos2 = {.x = 70, .y = 39};
-  Vector2D::point_t disk_prep_pos3 = {.x = 70, .y = 27};
-
-  // disks against right angle piece
-  lsa.add({
-      // farthest
-      TurnToPoint(disk_pos1),
-      StartIntake,
-      DriveToPointSlowPt(disk_pos1),
-
-      // middle
-      DriveToPointFastPtRev(disk_prep_pos2),
-      TurnToPoint(disk_pos2),
-      DriveToPointSlowPt(disk_pos2),
-
-      // closest disk
-      DriveToPointFastPtRev(disk_prep_pos3),
-      TurnToPoint(disk_pos3),
-      DriveToPointSlowPt(disk_pos3),
-      DriveToPointFastPtRev(disk_prep_pos3),
-  });
-
-  Vector2D::point_t second_shoot_point = {.x = 66, .y = 50};
-
-  lsa.add(TurnToPoint(second_shoot_point));
-
-  lsa.add(StopIntake);
-
-  lsa.add(DriveToPointFastPt(second_shoot_point));
-
-  lsa.add(TurnToHeading(120.0));
-
-  add_single_shot_cmd(lsa);
-  add_single_shot_cmd(lsa);
-  add_single_shot_cmd(lsa);
-
-  return lsa;
-}
-
-/*
 Skills loader side
 
 Map from page 40 of the game manual
@@ -447,11 +352,44 @@ CommandController prog_skills_loader_side()
 
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #19
 
-  repeat(3)
-      add_single_shot_cmd(lss); // 21, 22, 23
+  add_single_shot_cmd(lss); // 21, 22, 23
+  add_single_shot_cmd(lss); // 21, 22, 23
+  add_single_shot_cmd(lss); // 21, 22, 23
 
   lss.add_delay(1000);
   // lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
+
+  // DISKS AGAINST L PIECE
+  Vector2D::point_t disk_pos1 = {.x = 27.0, .y = 88.0};
+  Vector2D::point_t disk_pos2 = {.x = 37, .y = 88.0};
+  Vector2D::point_t disk_pos3 = {.x = 44.0, .y = 88.0};
+
+  Vector2D::point_t disk_prep_pos1 = {.x = 25, .y = 70};
+  Vector2D::point_t disk_prep_pos2 = {.x = 28, .y = 70};
+  Vector2D::point_t disk_prep_pos3 = {.x = 13, .y = 70};
+
+  // disks against L piece
+  lss.add({
+      // farthest
+      StartIntake,
+      DriveToPointFastPtRev(disk_prep_pos1)->withTimeout(2.0),
+      TurnToPoint(disk_pos1)->withTimeout(1.5),
+      DriveToPointSlowPt(disk_pos1)->withTimeout(2.0),
+
+      // middle
+      DriveToPointFastPtRev(disk_prep_pos2)->withTimeout(2.0),
+      TurnToPoint(disk_pos2)->withTimeout(1.5),
+      DriveToPointSlowPt(disk_pos2)->withTimeout(2.0),
+
+      // closest disk
+      DriveToPointFastPtRev(disk_prep_pos3)->withTimeout(2.0),
+      TurnToPoint(disk_pos3)->withTimeout(1.5),
+      DriveToPointSlowPt(disk_pos3)->withTimeout(2.0),
+      DriveToPointFastPtRev(disk_prep_pos3)->withTimeout(2.0),
+  });
+
+  lss.add(TurnToPoint(shoot_point), 1.5);        // #16
+  lss.add(DriveToPointFastPt(shoot_point), 4.0); // #17
 
   // Arrow 3 -------------------------
 
@@ -468,8 +406,18 @@ CommandController prog_skills_loader_side()
 
   lss.add(StopIntake);
 
+  Vector2D::point_t out_of_way_point = {.x = 70, .y = 124};
+  lss.add(TurnToPoint(out_of_way_point));        // [measure]
+  lss.add(DriveToPointFastPt(out_of_way_point)); //[measure]
+
+  // drive to shooting point
+  Vector2D::point_t shoot_point2 = {.x = 46, .y = 124};
+  lss.add(TurnToPoint(shoot_point2));        // [measure]
+  lss.add(DriveToPointFastPt(shoot_point2)); //[measure]
+
+
   // face hoop and fire
-  lss.add(TurnToHeading(135));                     // [measure]
+  lss.add(TurnToHeading(180));                     // [measure]
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // [measure]
 
   add_single_shot_cmd(lss);
@@ -477,7 +425,41 @@ CommandController prog_skills_loader_side()
   add_single_shot_cmd(lss);
 
   // Arrow 4 -------------------------
-  Vector2D::point_t out_of_way_point = {.x = 70, .y = 124};
+  lss.add(TurnToPoint(out_of_way_point));        // [measure]
+  lss.add(DriveToPointFastPt(out_of_way_point)); //[measure]
+
+
+
+
+  Vector2D::point_t south_disk_pos1 = {.x = 50.0, .y = 112.0};
+  Vector2D::point_t south_disk_pos2 = {.x = 50.0, .y = 103.0};
+  Vector2D::point_t south_disk_pos3 = {.x = 50.0, .y = 95.0};
+
+  Vector2D::point_t south_disk_prep_pos1 = {.x = 66, .y = 112};
+  Vector2D::point_t south_disk_prep_pos2 = {.x = 66, .y = 106};
+  Vector2D::point_t south_disk_prep_pos3 = {.x = 66, .y = 100};
+
+  // disks against L piece
+  lss.add({
+      // farthest
+      StartIntake,
+      DriveToPointFastPtRev(south_disk_prep_pos1)->withTimeout(2.0),
+      TurnToPoint(south_disk_pos1)->withTimeout(1.5),
+      DriveToPointSlowPt(south_disk_pos1)->withTimeout(2.0),
+
+      // middle
+      DriveToPointFastPtRev(south_disk_prep_pos2)->withTimeout(2.0),
+      TurnToPoint(south_disk_pos2)->withTimeout(1.5),
+      DriveToPointSlowPt(south_disk_pos2)->withTimeout(2.0),
+
+      // closest disk
+      DriveToPointFastPtRev(south_disk_prep_pos3)->withTimeout(2.0),
+      TurnToPoint(south_disk_pos3)->withTimeout(1.5),
+      DriveToPointSlowPt(south_disk_pos3)->withTimeout(2.0),
+      DriveToPointFastPtRev(south_disk_prep_pos3)->withTimeout(2.0),
+  });
+
+
   lss.add(TurnToPoint(out_of_way_point));        // [measure]
   lss.add(DriveToPointFastPt(out_of_way_point)); //[measure]
 
@@ -492,4 +474,101 @@ CommandController prog_skills_loader_side()
   lss.add(PrintOdom);
 
   return lss;
+}
+
+/*
+Auto loader side
+
+Map from page 40 of the game manual
+
+(R) = Red Hoop, Blue Zone
+(B) = Blue Hoop, Red Zone
+ *  = Starting position for this auto
+
+           ^ 180 degrees
+  +-------------------+
+  |        |____| (R) |
+  |___           |    |
+  | * |          |    |
+  |   |          |    |  --> 90 degrees
+  |   |          |_*__|
+  |___|  ____         |
+  |(B)  |____|        |
+  +-------------------+
+           v 0 degrees
+
+ Human Instructions:
+ Align robot to specified place and angle using LOADER SIDE AUTO jig
+*/
+CommandController auto_loader_side()
+{
+
+  CommandController lsa;
+
+  position_t start_pos = position_t{.x = 30.5, .y = 10.2, .rot = -90};
+
+  CommandController lss;
+  lsa.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
+  lsa.add(new FunctionCommand([]()
+                              {main_controller.Screen.print("Starting\n"); return true; }));
+  lsa.add(SpinFWAt(3000));
+  // spin -90 degree roller
+  lsa.add(DriveForwardFast(1, fwd)); //[measure]
+  lsa.add(new SpinRollerCommandAUTO(drive_sys, roller));
+  lsa.add(DriveForwardFast(4, reverse)); // [measure]
+
+  Vector2D::point_t first_shoot_point = {.x = 69, .y = 47};
+  lsa.add(TurnToPoint(first_shoot_point));
+  lsa.add(DriveToPointFastPt(first_shoot_point));
+
+  lsa.add(TurnToHeading(120.0));
+  add_single_shot_cmd(lsa);
+
+  lsa.add(TurnToHeading(120.0));
+  add_single_shot_cmd(lsa);
+
+  lsa.add(TurnToHeading(120.0));
+  add_single_shot_cmd(lsa);
+
+  Vector2D::point_t disk_pos1 = {.x = 86.8, .y = 48.10};
+  Vector2D::point_t disk_pos2 = {.x = 87, .y = 39};
+  Vector2D::point_t disk_pos3 = {.x = 87, .y = 25};
+
+  Vector2D::point_t disk_prep_pos2 = {.x = 70, .y = 39};
+  Vector2D::point_t disk_prep_pos3 = {.x = 70, .y = 27};
+
+  // disks against L piece
+  lsa.add({
+      // farthest
+      TurnToPoint(disk_pos1),
+      StartIntake,
+      DriveToPointSlowPt(disk_pos1),
+
+      // middle
+      DriveToPointFastPtRev(disk_prep_pos2),
+      TurnToPoint(disk_pos2),
+      DriveToPointSlowPt(disk_pos2),
+
+      // closest disk
+      DriveToPointFastPtRev(disk_prep_pos3),
+      TurnToPoint(disk_pos3),
+      DriveToPointSlowPt(disk_pos3),
+      DriveToPointFastPtRev(disk_prep_pos3),
+  });
+
+  Vector2D::point_t second_shoot_point = {.x = 66, .y = 50};
+
+  lsa.add(TurnToPoint(second_shoot_point));
+
+  lsa.add(StopIntake);
+
+  lsa.add(DriveToPointFastPt(second_shoot_point));
+
+  lsa.add(TurnToHeading(120.0));
+
+  add_single_shot_cmd(lsa);
+  add_single_shot_cmd(lsa);
+  add_single_shot_cmd(lsa);
+
+  return lsa;
 }

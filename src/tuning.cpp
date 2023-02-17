@@ -219,8 +219,8 @@ void tune_drive_pid(DriveType dt)
     if (main_controller.ButtonB.pressing())
         odometry_sys.set_position();
 
-    //auto pos = odometry_sys.get_position();
-    //printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+    // auto pos = odometry_sys.get_position();
+    // printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
 
     if (main_controller.ButtonA.pressing())
     {
@@ -463,7 +463,6 @@ void tune_flywheel_distcalc()
     avg_err.add_entry(fabs(flywheel_sys.getRPM() - flywheel_sys.getDesiredRPM()));
     printf("%f %d %f %f %f %f \n", t, setpt_rpm, flywheel_sys.getRPM(), flywheel_sys.getFeedforwardValue() + flywheel_sys.getPIDValue(), flywheel.voltage(volt), flywheel.current(amp));
 }
-/// p =.00363, i = 0.00001, d = 0.00003
 void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error_upper_bound)
 {
     if (pid2tune.get_type() != Feedback::FeedbackType::PIDType)
@@ -476,7 +475,7 @@ void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error
     static int selection = 0;
     static double sensitivity = 0.0001;
     static bool func_init = false;
-    
+
     if (!func_init)
     {
         main_controller.ButtonRight.pressed([]()
@@ -488,11 +487,17 @@ void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error
         main_controller.ButtonR1.pressed([]()
                                          { sensitivity *= 10.0; });
         main_controller.ButtonUp.pressed([]()
-                                         { if (selection == 0){pid.config.p += sensitivity;} else if (selection == 1){pid.config.i += sensitivity;} else {pid.config.d += sensitivity;} printf("{\n\tkP: %f\n\tkI: %f\n\tkD: %f\n\tontime: %f\n\tdeadband: %f\n}", pid.config.p, pid.config.i, pid.config.d, pid.config.on_target_time, pid.config.deadband);});
+                                         { if (selection == 0){pid.config.p += sensitivity;} else if (selection == 1){pid.config.i += sensitivity;} else {pid.config.d += sensitivity;} printf("{\n\tkP: %f\n\tkI: %f\n\tkD: %f\n\tontime: %f\n\tdeadband: %f\n}", pid.config.p, pid.config.i, pid.config.d, pid.config.on_target_time, pid.config.deadband); });
         main_controller.ButtonDown.pressed([]()
                                            { if (selection == 0){pid.config.p -= sensitivity;} else if (selection == 1){pid.config.i -= sensitivity;} else {pid.config.d -= sensitivity;}printf("{\n\tkP: %f\n\tkI: %f\n\tkD: %f\n\tontime: %f\n\tdeadband: %f\n}", pid.config.p, pid.config.i, pid.config.d, pid.config.on_target_time, pid.config.deadband); });
         main_controller.ButtonR2.pressed([]()
-                                         { if (selection == 0){pid.config.p = 0.0 ;} else if (selection == 1){pid.config.i = 0.0;} else {pid.config.d = 0.0;} printf("{\n\tkP: %f\n\tkI: %f\n\tkD: %f\n\tontime: %f\n\tdeadband: %f\n}\n", pid.config.p, pid.config.i, pid.config.d, pid.config.on_target_time, pid.config.deadband);});
+                                         { if (selection == 0){pid.config.p = 0.0 ;} else if (selection == 1){pid.config.i = 0.0;} else {pid.config.d = 0.0;} printf("{\n\tkP: %f\n\tkI: %f\n\tkD: %f\n\tontime: %f\n\tdeadband: %f\n}\n", pid.config.p, pid.config.i, pid.config.d, pid.config.on_target_time, pid.config.deadband); });
+        main_controller.ButtonL2.pressed([](){
+            pid.config.p = 0.0;
+            pid.config.i = 0.0;
+            pid.config.d = 0.0;
+        });
+
 
         func_init = true;
     }
@@ -539,16 +544,29 @@ void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error
     if (selection == 0)
     {
         cons = 'P';
+        if (pid.config.p < 0)
+        {
+            pid.config.p = 0.0;
+        }
         display_const = pid.config.p;
     }
     else if (selection == 1)
     {
         cons = 'I';
+        if (pid.config.i < 0)
+        {
+            pid.config.i = 0.0;
+        }
         display_const = pid.config.i;
     }
     else if (selection == 2)
     {
         cons = 'D';
+        if (pid.config.d < 0)
+        {
+            pid.config.d = 0.0;
+        }
+
         display_const = pid.config.d;
     }
 
@@ -558,7 +576,7 @@ void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error
     main_controller.Screen.setCursor(2, 0);
     main_controller.Screen.print("sens: %.6f", sensitivity);
     main_controller.Screen.setCursor(4, 0);
-    main_controller.Screen.print("err: %.4f%s", err, pid.is_on_target() ? "☺" : " ");
+    main_controller.Screen.print("err: %.4f%s", err, pid.is_on_target() ? " :)" : " ");
 
     t += 0.02;
 }
