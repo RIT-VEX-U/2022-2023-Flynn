@@ -41,13 +41,10 @@ void opcontrol()
   main_controller.ButtonB.pressed([](){odometry_sys.set_position();});
 
   odometry_sys.end_async();
-  int i = 0;
+
   // Periodic
   while(true)
   {
-    i++;
-
-    
     // ========== DRIVING CONTROLS ==========
     drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);
     // ========== MANIPULATING CONTROLS ==========
