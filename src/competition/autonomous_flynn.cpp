@@ -333,26 +333,27 @@ CommandController prog_skills_loader_side()
       StopIntake                                        // #10
   });
 
+  Vector2D::point_t shoot_point = {.x = 12, .y = 78};
+
   // align to 180 degree roller
   lss.add({
-      TurnToHeading(90)->withTimeout(1.5), // #11
-      DriveToPointFast(12, 31.5),          // #12
-      TurnToHeading(180)->withTimeout(1.5) // #13
+      TurnToHeading(90)->withTimeout(1.5),  // #11
+      DriveToPointFast(12, 31.5),           // #12
+      TurnToHeading(180)->withTimeout(1.5), // #13
+
+      // spin 180 degree roller
+      DriveForwardFast(2, fwd),                     // #14
+      new SpinRollerCommandAUTO(drive_sys, roller), // #15
+      DriveForwardFast(2, reverse),                 // #16
+
+      // drive to shoot point
+      TurnToPoint(shoot_point)->withTimeout(1.5),       // #17
+      DriveToPointFastPt(shoot_point)->withTimeout(2.0) // #19
   });
 
-  // spin 180 degree roller
 
-  lss.add(DriveForwardFast(2, fwd));                     // #14
-  lss.add(new SpinRollerCommandAUTO(drive_sys, roller)); // #15
-  lss.add(DriveForwardFast(2, reverse));                 // #16
-
-  // spin and shoot 3
-  Vector2D::point_t shoot_point = {.x = 12, .y = 78};
-  lss.add(TurnToPoint(shoot_point), 1.5);        // #17
-  lss.add(DriveToPointFastPt(shoot_point), 4.0); // #19
-
+  // Shoot
   lss.add(TurnToHeading(85), 0.5); // #20
-
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #21
 
   add_single_shot_cmd(lss); // 22
@@ -394,44 +395,56 @@ CommandController prog_skills_loader_side()
   lss.add(TurnToPoint(shoot_point), 1.5);        // #37
   lss.add(DriveToPointFastPt(shoot_point), 4.0); // #38
 
+  lss.add(TurnToHeading(85), 0.5); // #39
+  lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #40
+
+  add_single_shot_cmd(lss); // #41
+  add_single_shot_cmd(lss); // #42
+  add_single_shot_cmd(lss); // #43
+
   // Wall align
   lss.add(TurnToHeading(0));
-  lss.add(new WallAlignCommand(drive_sys, odometry_sys, bumper_dist, NO_CHANGE, 0, -1, 2.0));
+  //lss.add(new WallAlignCommand(drive_sys, odometry_sys, bumper_dist, NO_CHANGE, 0, -1, 2.0));
 
   // Arrow 3 -------------------------
 
   Vector2D::point_t start_of_line = {.x = 36, .y = 58};
   Vector2D::point_t end_of_line = {.x = 60, .y = 84};
-
-  lss.add(TurnToPoint(start_of_line));        // #39
-  lss.add(StartIntake);                       // #40
-  lss.add(DriveToPointSlowPt(start_of_line)); // #41
-  lss.add(DriveForwardFast(4, reverse));      // #42
-
-  lss.add(TurnToPoint(end_of_line));        // #43
-  lss.add(DriveToPointSlowPt(end_of_line)); // 44
-
-  lss.add(StopIntake); // #45
-
   Vector2D::point_t out_of_way_point = {.x = 70, .y = 124};
-  lss.add(TurnToPoint(out_of_way_point));        // [measure]
-  lss.add(DriveToPointFastPt(out_of_way_point)); //[measure]
+
+  // go to line and collect line
+  lss.add({
+      // Start of line
+      TurnToPoint(start_of_line),        // #39
+      StartIntake,                       // #40
+      DriveToPointSlowPt(start_of_line), // #41
+      DriveForwardFast(4, reverse),      // #42
+
+      // Drive to End of line
+      TurnToPoint(end_of_line),        // #43
+      DriveToPointSlowPt(end_of_line), // $44
+
+      StopIntake, // #45
+
+      TurnToPoint(out_of_way_point),       // #47
+      DriveToPointFastPt(out_of_way_point) // #48
+  });
 
   // drive to shooting point
   Vector2D::point_t shoot_point2 = {.x = 46, .y = 124};
-  lss.add(TurnToPoint(shoot_point2));        // [measure]
-  lss.add(DriveToPointFastPt(shoot_point2)); //[measure]
-
-  lss.add(TurnToHeading(-90));
-  lss.add(new WallAlignCommand(drive_sys, odometry_sys, NO_CHANGE, 140 - bumper_dist, -90, -1, 2.0));
+  lss.add(TurnToPoint(shoot_point2));        // #49
+  lss.add(DriveToPointFastPt(shoot_point2)); // #50
 
   // face hoop and fire
-  lss.add(TurnToHeading(180));                     // [measure]
-  lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // [measure]
+  lss.add(TurnToHeading(180));                     // #51
+  lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #52
 
   add_single_shot_cmd(lss);
   add_single_shot_cmd(lss);
   add_single_shot_cmd(lss);
+
+  lss.add(TurnToHeading(-90));
+  //lss.add(new WallAlignCommand(drive_sys, odometry_sys, NO_CHANGE, 140 - bumper_dist, -90, -1, 2.0));
 
   // Arrow 4 -------------------------
   lss.add(TurnToPoint(out_of_way_point));        // [measure]

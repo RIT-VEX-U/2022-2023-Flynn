@@ -20,7 +20,7 @@ int print_odom(){
 void opcontrol()
 {
 
-  test_stuff();
+  //test_stuff();
   //testing();
 
   
@@ -29,32 +29,24 @@ void opcontrol()
   bool oneshotting = false;
   flywheel_sys.spinRPM(3000);
   
-  main_controller.ButtonUp.pressed([](){flywheel_sys.spinRPM(3500);});
-  main_controller.ButtonDown.pressed([](){flywheel_sys.stop();});
+  main_controller.ButtonRight.pressed([](){flywheel_sys.spinRPM(3500);});
+  main_controller.ButtonLeft.pressed([](){flywheel_sys.stop();});
   main_controller.ButtonR1.pressed([](){intake.spin(reverse, 12, volt);}); // Intake
   main_controller.ButtonR2.pressed([](){intake.spin(fwd, 12, volt);}); // Shoot
   main_controller.ButtonL2.pressed([](){intake.spin(fwd, 12, volt);oneshot_tmr.reset();}); //Single Shoot
   main_controller.ButtonL1.pressed([](){roller.spin(vex::reverse, 12, vex::volt);}); //Roller
   main_controller.ButtonL1.released([](){roller.stop();}); //Roller
+  main_controller.ButtonUp.pressed([](){flapup_solenoid.set(!flapup_solenoid.value());});
   
   main_controller.ButtonB.pressed([](){odometry_sys.set_position();});
 
-  //odometry_sys.end_async();
+  odometry_sys.end_async();
   int i = 0;
   // Periodic
   while(true)
   {
     i++;
-    if (i%5==0){
-      main_controller.Screen.setCursor(0, 0);
-      main_controller.Screen.clearScreen();
-      main_controller.Screen.print("fw rpm: %f", flywheel_sys.getRPM());
-      main_controller.Screen.setCursor(2, 0);
-      main_controller.Screen.print("fw temp: %.1ff", flywheel.temperature(vex::fahrenheit));
-      main_controller.Screen.setCursor(4, 0);
-      main_controller.Screen.print("bat volt: %.2fv", Brain.Battery.voltage(vex::volt));
 
-   }
     
     // ========== DRIVING CONTROLS ==========
     drive_sys.drive_tank(main_controller.Axis3.position()/100.0,main_controller.Axis2.position() / 100.0);
@@ -76,6 +68,6 @@ void opcontrol()
 
     // ========== AUTOMATION ==========    
 
-    vexDelay(20);
+    vexDelay(0);
   }
 }

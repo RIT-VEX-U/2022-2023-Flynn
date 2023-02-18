@@ -7,6 +7,7 @@
 #include "competition/autonomous.h"
 #include "robot-config.h"
 #include <vector>
+#include <float.h>
 
 
 void test_stuff();
