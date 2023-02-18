@@ -4,6 +4,7 @@
 #include "robot-config.h"
 #include "tuning.h"
 #include "vision.h"
+//#include "../core/include/intense_milk.h"
 
 int print_odom(){
     while(true){
@@ -20,23 +21,27 @@ int print_odom(){
 void opcontrol()
 {
 
-  //test_stuff();
+  test_stuff();
   //testing();
+  draw_image();
+  //Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width , intense_milk_height);
+  endgame_solenoid.set(false);
+  flapup_solenoid.set(false);
 
   
   // Initialization
   double oneshot_time = .05;//Change 1 second to whatever is needed
   bool oneshotting = false;
-  flywheel_sys.spinRPM(3000);
+  flywheel_sys.spinRPM(3400);
   
-  main_controller.ButtonRight.pressed([](){flywheel_sys.spinRPM(3500);});
-  main_controller.ButtonLeft.pressed([](){flywheel_sys.stop();});
+  main_controller.ButtonUp.pressed([](){flywheel_sys.spinRPM(3400);});
+  main_controller.ButtonDown.pressed([](){flywheel_sys.stop();});
+  
   main_controller.ButtonR1.pressed([](){intake.spin(reverse, 12, volt);}); // Intake
   main_controller.ButtonR2.pressed([](){intake.spin(fwd, 12, volt);}); // Shoot
-  main_controller.ButtonL2.pressed([](){intake.spin(fwd, 12, volt);oneshot_tmr.reset();}); //Single Shoot
-  main_controller.ButtonL1.pressed([](){roller.spin(vex::reverse, 12, vex::volt);}); //Roller
-  main_controller.ButtonL1.released([](){roller.stop();}); //Roller
-  main_controller.ButtonUp.pressed([](){flapup_solenoid.set(!flapup_solenoid.value());});
+
+  main_controller.ButtonL1.pressed([](){flapup_solenoid.set(false);});// Flapup
+  main_controller.ButtonL2.pressed([](){flapup_solenoid.set(true);}); // Flaodown
   
   main_controller.ButtonB.pressed([](){odometry_sys.set_position();});
 

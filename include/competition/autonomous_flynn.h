@@ -13,3 +13,4 @@
 void test_stuff();
 CommandController prog_skills_loader_side();
 CommandController auto_loader_side();
+void draw_image();
