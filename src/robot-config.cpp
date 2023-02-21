@@ -1,3 +1,4 @@
+#include <map>
 #include "../include/robot-config.h"
 
 using namespace vex;
@@ -9,7 +10,7 @@ controller main_controller;
 // ======== OUTPUTS ========
 
 // Drive
-motor left_front(PORT20, vex::gearSetting::ratio18_1, true), left_mid(PORT8, vex::gearSetting::ratio18_1, true), left_rear(PORT9, vex::gearSetting::ratio18_1, true);
+motor left_front(PORT20, vex::gearSetting::ratio18_1, true), left_mid(PORT8, vex::gearSetting::ratio18_1, true), left_rear(PORT10, vex::gearSetting::ratio18_1, true);
 motor right_front(PORT11, vex::gearSetting::ratio18_1), right_mid(PORT1, vex::gearSetting::ratio18_1), right_rear(PORT2, vex::gearSetting::ratio18_1);
 
 motor_group left_motors(left_front, left_mid, left_rear);
@@ -18,9 +19,23 @@ motor_group right_motors(right_front, right_mid, right_rear);
 // Manipulation 
 motor flywheel(PORT12);
 motor intake(PORT19);
-motor roller(PORT5);
 
 motor_group flywheel_motors(flywheel);
+
+
+std::map<std::string, motor &> motor_names{
+    {"left front", left_front},
+    {"left mid", left_mid},
+    {"left rear", left_rear},
+
+    {"right front", right_front},
+    {"right mid", right_mid},
+    {"right rear", right_rear},
+
+    {"flywheel", flywheel},
+    {"intake", intake},
+    
+};
 
 // Other Outputs
 vex::digital_out endgame_solenoid(Brain.ThreeWirePort.H); //TODO make this an actual port
@@ -60,7 +75,7 @@ MotionController::m_profile_cfg_t drive_fast_mprofile_cfg = {
 };
 
 MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
-    .max_v = 20,
+    .max_v = 10,
     .accel = 100,
     .pid_cfg = drive_pid_cfg,
     .ff_cfg = drive_ff_cfg    

@@ -4,6 +4,7 @@
 #include "robot-config.h"
 #include "tuning.h"
 #include "vision.h"
+#include <stdio.h>
 //#include "../core/include/intense_milk.h"
 
 int print_odom(){
@@ -20,10 +21,10 @@ int print_odom(){
  */
 void opcontrol()
 {
-
-  //test_stuff();
+  StartScreen(Brain.Screen, {page_one, page_two});
+  test_stuff();
   //testing();
-  draw_image();
+  //draw_image();
   //Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width , intense_milk_height);
   endgame_solenoid.set(false);
   flapup_solenoid.set(false);

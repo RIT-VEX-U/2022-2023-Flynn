@@ -14,6 +14,9 @@ extern motor intake, roller, flywheel;
 extern motor_group left_motors, right_motors;
 extern motor_group flywheel_motors;
 
+extern std::map<std::string, motor &> motor_names;
+
+
 extern vex::digital_out endgame_solenoid;
 
 extern vex::digital_out flapdown_solenoid;

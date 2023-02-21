@@ -39,14 +39,12 @@
 #define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
 
 #define TRI_SHOT_TIME 1
-#define TRI_SHOT_VOLT 12
+#define TRI_SHOT_VOLT 8
 #define TRI_SHOT_RECOVER_DELAY_MS 200
-
 
 #define AUTO_AIM (new VisionAimCommand())
 #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
 #define TRI_SHOT_DISK (new ShootCommand(intake, TRI_SHOT_TIME, TRI_SHOT_VOLT))
-
 
 static void add_single_shot_cmd(CommandController &controller, double vis_timeout = 1.0)
 {
@@ -59,159 +57,28 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
   controller.add_delay(600);
 }
 
-static void add_tri_shot_cmd(CommandController &controller, double timeout=0.0)
+static void add_tri_shot_cmd(CommandController &controller, double timeout = 0.0)
 {
-    controller.add(WAIT_FOR_FLYWHEEL, timeout);
-    controller.add(TRI_SHOT_DISK);
-    controller.add_delay(TRI_SHOT_RECOVER_DELAY_MS);
+  controller.add(WAIT_FOR_FLYWHEEL, timeout);
+  controller.add(TRI_SHOT_DISK);
+  controller.add_delay(TRI_SHOT_RECOVER_DELAY_MS);
 }
-
 
 void pleasant_opcontrol();
 
-void draw_image()
-{
-  Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width, intense_milk_height);
-}
 
-int stats_on_brain()
-{
-  static bool wasPressing = false;
-  static int current_page = 1;
-  const int pages = 4;
-  static const int width = 480;
-  static const int height = 240;
 
-  GraphDrawer rpm_graph(Brain.Screen, 50, "time", "rpm", vex::blue, true, 0.0, 4000.0);
-  GraphDrawer setpt_graph(Brain.Screen, 50, "time", "setpt", vex::red, true, 0.0, 4000.0);
-  GraphDrawer output_graph(Brain.Screen, 50, "time", "out", vex::yellow, true, 0.0, 1.0);
-
-  auto draw_page_four = []()
-  {
-    Brain.Screen.setFillColor(vex::transparent);
-    Brain.Screen.setPenColor(vex::white);
-    Brain.Screen.setFont(prop20);
-    int text_height = 20;
-
-    Brain.Screen.clearScreen();
-    Brain.Screen.printAt(2, 1 * text_height, "flywheel", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 2 * text_height, "set: %.2f real: %.2f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
-    Brain.Screen.printAt(2, 3 * text_height, "%.3f volts %.3f amps %.3fwatts", flywheel.voltage(volt), flywheel.current(amp), flywheel.voltage(volt) * flywheel.current(amp));
-    Brain.Screen.printAt(2, 4 * text_height, "%.2f F %.2f%% effeciency", flywheel.temperature(fahrenheit), flywheel.efficiency());
-
-    Brain.Screen.printAt(2, 6 * text_height, "battery", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 7 * text_height, "%.2f volts", Brain.Battery.voltage(volt));
-    Brain.Screen.printAt(2, 8 * text_height, "%.2f amps", Brain.Battery.current(amp));
-    Brain.Screen.printAt(2, 9 * text_height, "%d%%", Brain.Battery.capacity(pct));
-    Brain.Screen.printAt(2, 10 * text_height, "%.f F", Brain.Battery.temperature(fahrenheit));
-  };
-  auto draw_page_one = []()
-  {
-    Brain.Screen.clearScreen();
-    Brain.Screen.setFillColor(vex::transparent);
-    Brain.Screen.setPenColor(vex::white);
-    Brain.Screen.setFont(prop40);
-    int text_height = 40;
-    Brain.Screen.printAt(2, 2 * text_height, "odometry");
-    auto pos = odometry_sys.get_position();
-    Brain.Screen.printAt(2, 2 * text_height, "(%.2f, %.2f) : %.2f", pos.x, pos.y, pos.rot);
-  };
-
-  auto draw_page_three = [&rpm_graph, &setpt_graph, &output_graph]()
-  {
-    int x = 20;
-    int y = 20;
-    Brain.Screen.clearScreen();
-
-    int graph_w = 200; // width / 2 - 2 * x;
-    int graph_h = 200; // height / 2 - 2 * y;
-    rpm_graph.draw(x, y, graph_w, graph_h);
-    setpt_graph.draw(x, y, graph_w, graph_h);
-    output_graph.draw(x, y, graph_w, graph_h);
-  };
-
-  auto draw_page_two = []()
-  {
-    Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width, intense_milk_height);
-  };
-
-  double t = 0.0;
-  while (true)
-  {
-
-    if (Brain.Screen.pressing() && !wasPressing)
-    {
-      if (Brain.Screen.xPosition() > width / 2)
-      {
-        current_page++;
-      }
-      else
-      {
-        current_page--;
-      }
-    }
-    if (Brain.Screen.pressing())
-    {
-      wasPressing = true;
-    }
-    else
-    {
-      wasPressing = false;
-    }
-
-    if (current_page > pages - 1)
-    {
-      current_page = pages - 1;
-    }
-    else if (current_page < 0)
-    {
-      current_page = 0;
-    }
-
-    Vector2D::point_t p = {.x = t, .y = flywheel_sys.getRPM()};
-    Vector2D::point_t p2 = {.x = t, .y = flywheel_sys.getDesiredRPM()};
-    Vector2D::point_t p3 = {.x = t, .y = flywheel_sys.getFeedforwardValue() + flywheel_sys.getPIDValue()};
-
-    rpm_graph.add_sample(p);
-    setpt_graph.add_sample(p2);
-    output_graph.add_sample(p3);
-
-    if (current_page == 0)
-    {
-      draw_page_one();
-    }
-    else if (current_page == 1)
-    {
-      draw_page_two();
-    }
-    else if (current_page == 2)
-    {
-      draw_page_three();
-    }
-    else
-    {
-      draw_page_four();
-    }
-    Brain.Screen.setFont(mono20);
-    Brain.Screen.printAt(width - 5 * 10, height - 10, "(%d/%d)", current_page + 1, pages);
-
-    vexDelay(100);
-    t += .1;
-  }
-  return 0;
-}
 
 void test_stuff()
 {
 
   CALIBRATE_IMU();
 
-  vex::task screen_info_task(stats_on_brain);
 
-  CommandController mine = prog_skills_loader_side();
-  mine.run();
-  return;
-
+  //CommandController mine = auto_loader_side();
+  //mine.run();
+  //return;
+//
   pleasant_opcontrol();
 
   // CommandController mine = prog_skills_loader_side();
@@ -326,50 +193,47 @@ Map from page 40 of the game manual
  Human Instructions:
  Align robot to specified place and angle using LOADER SIDE AUTO jig
 */
+void add_auto_roller(CommandController &cc, double roller_power, position_t set_pos)
+{
+  cc.add({
+
+      (new FunctionCommand([=]()
+                           {drive_sys.drive_tank(roller_power, roller_power);return false; }))
+          ->withTimeout(0.65),
+      (new FunctionCommand([]()
+                           {drive_sys.drive_tank(0, 0);return true; })),
+      (new OdomSetPosition(odometry_sys, set_pos)),
+      (new FunctionCommand([=]()
+                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
+          ->withTimeout(0.25),
+  });
+}
 CommandController auto_loader_side()
 {
 
   CommandController lsa;
   flapup_solenoid.set(false);
-  position_t start_pos = position_t{.x = 32.0, .y = 12.2, .rot = -90};
+  position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
+  position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
+
   static const double roller_power = .5;
 
-  CommandController lss;
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
 
-  // Roller Shenanigans
-  lsa.add({
+  add_auto_roller(lsa, roller_power, roller_in_pos);
+  add_auto_roller(lsa, roller_power, roller_in_pos);
+  add_auto_roller(lsa, roller_power, roller_in_pos);
 
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(roller_power, roller_power);return false; }))
-          ->withTimeout(0.65),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(0, 0);return true; })),
-      (new OdomSetPosition(odometry_sys, {.x = 32.0, .y = 4.16, .rot = -90})),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
-          ->withTimeout(0.25),
-
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(roller_power, roller_power);return false; }))
-          ->withTimeout(0.65),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(0, 0);return true; })),
-      (new OdomSetPosition(odometry_sys, {.x = 32.0, .y = 4.16, .rot = -90})),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
-          ->withTimeout(0.25),
-
-      DriveForwardFast(4, reverse), // #4
-  });
-
-  Vector2D::point_t pre_stack3_pos = {.x = 54.0, .y = 32.0};
-  Vector2D::point_t after_stack3_pos = {.x = 70.0, .y = 47.0};
+  Vector2D::point_t pre_stack3_pos = {.x = 50.0, .y = 28.0};
+  Vector2D::point_t after_stack3_pos = {.x = 70.0, .y = 44.0};
 
   Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
   double goal_pos1_deg = 120.0;
 
+  lsa.add(SpinFWAt(3100));
+
   lsa.add({
+      StartIntake,
       // line up to stack
       TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
       DriveToPointFastPt(pre_stack3_pos)->withTimeout(2.0),
@@ -384,17 +248,19 @@ CommandController auto_loader_side()
       // point to goal
       TurnToHeading(goal_pos1_deg)->withTimeout(2.0),
   });
-  
+
   add_tri_shot_cmd(lsa);
 
   Vector2D::point_t disk1_pos = {.x = 88.0, .y = 45.0};
-  Vector2D::point_t disk2_pos = {.x = 88.0, .y = 36.0};
+  Vector2D::point_t disk2_pos = {.x = 87.0, .y = 35.0};
   Vector2D::point_t disk3_pos = {.x = 88.0, .y = 27.0};
 
   Vector2D::point_t lineup_disk2_pos = {.x = 71.0, .y = 41.0};
   Vector2D::point_t lineup_disk3_pos = {.x = 70.0, .y = 32.0};
 
   lsa.add({
+      StartIntake,
+
       // First
       TurnToPoint(disk1_pos)->withTimeout(2.0),
       DriveToPointFastPt(disk1_pos)->withTimeout(2.0),
@@ -421,24 +287,26 @@ CommandController auto_loader_side()
 
   add_tri_shot_cmd(lsa);
 
+  return lsa;
+
   Vector2D::point_t line_disk_pos1 = {.x = 58.0, .y = 58.0};
   Vector2D::point_t line_disk_pos2 = {.x = 47.0, .y = 47.0};
-  Vector2D::point_t pre_line_disk_pos2 = {.x = 47.0, .y = 47.0};
+  Vector2D::point_t pre_line_disk_pos2 = {.x = 47.0, .y = 40.0};
   Vector2D::point_t shoot_point3 = {.x = 61, .y = 54};
   double goal_pos3_deg = 120.0;
-  
+
   // Yoink disks on line
   lsa.add({
-    TurnToPoint(line_disk_pos1)->withTimeout(2.0),
-    DriveToPointFastPt(line_disk_pos1)->withTimeout(2.0),
-    
-    DriveToPointFastPtRev(pre_line_disk_pos2)->withTimeout(2.0),
-    
-    TurnToPoint(line_disk_pos2)->withTimeout(2.0),
-    DriveToPointFastPt(line_disk_pos2)->withTimeout(2.0),
-    
-    DriveToPointFastPtRev(shoot_point3)->withTimeout(2.0),
-    TurnToHeading(goal_pos3_deg)->withTimeout(2.0),
+      TurnToPoint(line_disk_pos1)->withTimeout(2.0),
+      DriveToPointFastPt(line_disk_pos1)->withTimeout(2.0),
+
+      DriveToPointFastPtRev(pre_line_disk_pos2)->withTimeout(2.0),
+
+      TurnToPoint(line_disk_pos2)->withTimeout(2.0),
+      DriveToPointFastPt(line_disk_pos2)->withTimeout(2.0),
+
+      DriveToPointFastPtRev(shoot_point3)->withTimeout(2.0),
+      TurnToHeading(goal_pos3_deg)->withTimeout(2.0),
 
   });
 
