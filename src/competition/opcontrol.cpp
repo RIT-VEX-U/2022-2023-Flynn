@@ -13,7 +13,7 @@ int print_odom()
   {
     position_t pos = odometry_sys.get_position();
     printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
-    vexDelay(20);
+    vexDelay(100);
   }
   return 0;
 }
@@ -59,6 +59,7 @@ KnobSelection GetSelection(vex::pot selector)
  */
 void opcontrol()
 {
+  vex::task odom_print(print_odom);
   // Stats
   StartScreen(Brain.Screen, {page_one, page_two, page_three});
   //// Knob

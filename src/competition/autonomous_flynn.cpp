@@ -206,7 +206,7 @@ CommandController auto_loader_side()
 {
 
   CommandController lsa;
-  flapup_solenoid.set(false);
+  flapup_solenoid.set(true);
   position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
   position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
 
@@ -225,7 +225,9 @@ CommandController auto_loader_side()
   Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 12.0};
   Vector2D::point_t shoot_point1 = {.x = 64, .y = 52};
 
-  lsa.add(SpinFWAt(3250));
+
+  // First Shot =======================================================
+  lsa.add(SpinFWAt(3150));
   lsa.add({
       // Wa
       TurnToPoint(out_of_way_pos1)->withTimeout(2.0),
@@ -247,15 +249,15 @@ CommandController auto_loader_side()
   lsa.add(CLEAR_DISKS);
   lsa.add_delay(600);
 
-  Vector2D::point_t disk1_pos = {.x = 86.0, .y = 45.0};
-  Vector2D::point_t disk2_pos = {.x = 84.0, .y = 35.0};
-  Vector2D::point_t disk3_pos = {.x = 84.0, .y = 27.0};
+  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 45.0};
+  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 35.0};
+  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 27.0};
 
   Vector2D::point_t lineup_disk2_pos = {.x = 73.0, .y = 41.0};
   Vector2D::point_t lineup_disk3_pos = {.x = 73.0, .y = 32.0};
 
+  // Second Shot =======================================================
   lsa.add(SpinFWAt(3450));
-
   lsa.add({
       StartIntake,
 
@@ -284,7 +286,7 @@ CommandController auto_loader_side()
       TurnToPoint(shoot_point2)->withTimeout(2.0),
       DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
   });
-  lsa.add(TurnToHeading(128), 2.0);
+  lsa.add(TurnToHeading(130), 2.0);
   lsa.add(PrintOdom);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
@@ -303,8 +305,9 @@ CommandController auto_loader_side()
   // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
   // double goal_pos1_deg = 120.0;
 
-  lsa.add(SpinFWAt(3500));
+  // Third Shot =======================================================
 
+  lsa.add(SpinFWAt(3500));
   lsa.add({
       // line up to stack
       TurnToPoint(pre_stack3_pos)->withTimeout(2.0),

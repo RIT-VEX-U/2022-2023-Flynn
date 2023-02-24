@@ -88,7 +88,7 @@ PID::pid_config_t turn_pid_cfg = {
     .p = .013,
     .i = 0.00001, 
     .d = .00085,
-    .deadband = 1,
+    .deadband = 2.0,
     .on_target_time = .2
 };
 
