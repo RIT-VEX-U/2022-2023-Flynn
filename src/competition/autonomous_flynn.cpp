@@ -242,8 +242,6 @@ CommandController auto_loader_side()
 
   lsa.add(TurnToHeading(128.6), 2.0);
   lsa.add(PrintOdom);
-  lsa.add(AUTO_AIM);
-
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
   lsa.add(WaitForFW, 1.0);
@@ -331,7 +329,6 @@ CommandController auto_loader_side()
   });
 
   lsa.add(TurnToHeading(129), 2.0);
-  lsa.add(AUTO_AIM);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
   lsa.add_delay(2000);
