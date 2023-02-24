@@ -16,6 +16,8 @@ extern motor_group flywheel_motors;
 
 extern std::map<std::string, motor &> motor_names;
 
+extern vex::pot selector_pot;
+
 
 extern vex::digital_out endgame_solenoid;
 
@@ -58,6 +60,9 @@ extern std::string AutoLoaderSideDisplayName;
 extern std::string AutoNonLoaderSideDisplayName;
 extern std::string SkillsLoaderSideDisplayName;
 extern std::string SkillsNonLoaderSideDisplayName;
+
+
+
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

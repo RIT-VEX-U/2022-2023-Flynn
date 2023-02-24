@@ -12,7 +12,7 @@
 #define INTAKE_VOLT 12
 #define SHOOTING_RPM 3200
 #define SINGLE_SHOT_TIME 0.2
-#define SINGLE_SHOT_VOLT 8
+#define SINGLE_SHOT_VOLT 6
 #define SINGLE_SHOT_RECOVER_DELAY_MS 1000
 
 #define DriveToPointSlow(x, y) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, fwd, 1.0))
@@ -38,13 +38,16 @@
 #define PrintOdom (new PrintOdomCommand(odometry_sys))
 #define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
 
-#define TRI_SHOT_TIME 1
-#define TRI_SHOT_VOLT 8
+#define TRI_SHOT_TIME 1.0
+#define TRI_SHOT_VOLT 2
 #define TRI_SHOT_RECOVER_DELAY_MS 200
 
 #define AUTO_AIM (new VisionAimCommand())
 #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
 #define TRI_SHOT_DISK (new ShootCommand(intake, TRI_SHOT_TIME, TRI_SHOT_VOLT))
+
+#define SHOOT_DISK (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
+#define CLEAR_DISKS (new ShootCommand(intake, .75, SINGLE_SHOT_VOLT))
 
 static void add_single_shot_cmd(CommandController &controller, double vis_timeout = 1.0)
 {
@@ -60,25 +63,21 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
 static void add_tri_shot_cmd(CommandController &controller, double timeout = 0.0)
 {
   controller.add(WAIT_FOR_FLYWHEEL, timeout);
-  controller.add(TRI_SHOT_DISK);
+  controller.add(TRI_SHOT_DISK, 2.0);
   controller.add_delay(TRI_SHOT_RECOVER_DELAY_MS);
 }
 
 void pleasant_opcontrol();
-
-
-
 
 void test_stuff()
 {
 
   CALIBRATE_IMU();
 
-
-  //CommandController mine = auto_loader_side();
-  //mine.run();
-  //return;
-//
+  CommandController mine = auto_loader_side();
+  mine.run();
+  return;
+  //
   pleasant_opcontrol();
 
   // CommandController mine = prog_skills_loader_side();
@@ -195,18 +194,13 @@ Map from page 40 of the game manual
 */
 void add_auto_roller(CommandController &cc, double roller_power, position_t set_pos)
 {
-  cc.add({
-
-      (new FunctionCommand([=]()
-                           {drive_sys.drive_tank(roller_power, roller_power);return false; }))
-          ->withTimeout(0.65),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(0, 0);return true; })),
-      (new OdomSetPosition(odometry_sys, set_pos)),
-      (new FunctionCommand([=]()
-                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
-          ->withTimeout(0.25),
-  });
+  cc.add(new FunctionCommand([=]()
+                             {drive_sys.drive_tank(roller_power, roller_power);return false; }),
+         0.65);
+  cc.add(new DriveStopCommand(drive_sys));
+  cc.add(new OdomSetPosition(odometry_sys, set_pos));
+  // cc.add(new FunctionCommand([=](){drive_sys.drive_tank(-roller_power*.5, -roller_power*.5);return false; }), 0.15);
+  cc.add(DriveForwardFast(7, reverse));
 }
 CommandController auto_loader_side()
 {
@@ -218,45 +212,49 @@ CommandController auto_loader_side()
 
   static const double roller_power = .5;
 
+
+  // Rollers =======================================================
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
-
   add_auto_roller(lsa, roller_power, roller_in_pos);
   add_auto_roller(lsa, roller_power, roller_in_pos);
   add_auto_roller(lsa, roller_power, roller_in_pos);
+  add_auto_roller(lsa, roller_power, roller_in_pos);
 
-  Vector2D::point_t pre_stack3_pos = {.x = 50.0, .y = 28.0};
-  Vector2D::point_t after_stack3_pos = {.x = 70.0, .y = 44.0};
+  lsa.add(DriveForwardFast(2, reverse));
 
-  Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
-  double goal_pos1_deg = 120.0;
+  Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 12.0};
+  Vector2D::point_t shoot_point1 = {.x = 64, .y = 52};
 
-  lsa.add(SpinFWAt(3100));
-
+  lsa.add(SpinFWAt(3250));
   lsa.add({
-      StartIntake,
-      // line up to stack
-      TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
-      DriveToPointFastPt(pre_stack3_pos)->withTimeout(2.0),
+      // Wa
+      TurnToPoint(out_of_way_pos1)->withTimeout(2.0),
+      DriveToPointFastPt(out_of_way_pos1)->withTimeout(2.0),
 
-      // grab stack
-      DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
 
-      // to shoot point
       TurnToPoint(shoot_point1)->withTimeout(2.0),
       DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
 
-      // point to goal
-      TurnToHeading(goal_pos1_deg)->withTimeout(2.0),
   });
 
-  add_tri_shot_cmd(lsa);
+  lsa.add(TurnToHeading(128.6), 2.0);
+  lsa.add(PrintOdom);
 
-  Vector2D::point_t disk1_pos = {.x = 88.0, .y = 45.0};
-  Vector2D::point_t disk2_pos = {.x = 87.0, .y = 35.0};
-  Vector2D::point_t disk3_pos = {.x = 88.0, .y = 27.0};
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add_delay(600);
+  lsa.add(CLEAR_DISKS);
+  lsa.add_delay(600);
 
-  Vector2D::point_t lineup_disk2_pos = {.x = 71.0, .y = 41.0};
-  Vector2D::point_t lineup_disk3_pos = {.x = 70.0, .y = 32.0};
+  Vector2D::point_t disk1_pos = {.x = 86.0, .y = 45.0};
+  Vector2D::point_t disk2_pos = {.x = 84.0, .y = 35.0};
+  Vector2D::point_t disk3_pos = {.x = 84.0, .y = 27.0};
+
+  Vector2D::point_t lineup_disk2_pos = {.x = 73.0, .y = 41.0};
+  Vector2D::point_t lineup_disk3_pos = {.x = 73.0, .y = 32.0};
+
+  lsa.add(SpinFWAt(3450));
 
   lsa.add({
       StartIntake,
@@ -277,42 +275,74 @@ CommandController auto_loader_side()
   });
 
   // go shoot
-  Vector2D::point_t shoot_point2 = {.x = 64, .y = 51};
-  double goal_pos2_deg = 120.0;
+  //  Vector2D::point_t disk3_pos = {.x = 86.0, .y = 27.0};
+  Vector2D::point_t halfway = {.x = 75, .y = 39}; // turn here
+  Vector2D::point_t shoot_point2 = {.x = 62, .y = 53};
 
   lsa.add({
-      DriveToPointFastPtRev(shoot_point2)->withTimeout(2.0),
-      TurnToHeading(goal_pos2_deg)->withTimeout(2.0),
+      DriveToPointFastPtRev(halfway)->withTimeout(2.0),
+      TurnToPoint(shoot_point2)->withTimeout(2.0),
+      DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
   });
+  lsa.add(TurnToHeading(128), 2.0);
+  lsa.add(PrintOdom);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add_delay(600);
+  lsa.add(ShootDisk);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add_delay(1000);
+  lsa.add(CLEAR_DISKS);
+  lsa.add_delay(600);
 
-  add_tri_shot_cmd(lsa);
+  Vector2D::point_t pre_stack3_pos = {.x = 64.0, .y = 44.0};
+  Vector2D::point_t mid_stack3_pos = {.x = 54.0, .y = 34.0};
+  Vector2D::point_t after_stack3_pos = {.x = 42.0, .y = 22.0};
 
-  return lsa;
+  // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
+  // double goal_pos1_deg = 120.0;
 
-  Vector2D::point_t line_disk_pos1 = {.x = 58.0, .y = 58.0};
-  Vector2D::point_t line_disk_pos2 = {.x = 47.0, .y = 47.0};
-  Vector2D::point_t pre_line_disk_pos2 = {.x = 47.0, .y = 40.0};
-  Vector2D::point_t shoot_point3 = {.x = 61, .y = 54};
-  double goal_pos3_deg = 120.0;
+  lsa.add(SpinFWAt(3500));
 
-  // Yoink disks on line
   lsa.add({
-      TurnToPoint(line_disk_pos1)->withTimeout(2.0),
-      DriveToPointFastPt(line_disk_pos1)->withTimeout(2.0),
+      // line up to stack
+      TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
+      DriveToPointFastPt(pre_stack3_pos)->withTimeout(2.0),
 
-      DriveToPointFastPtRev(pre_line_disk_pos2)->withTimeout(2.0),
+      TurnToPoint(mid_stack3_pos)->withTimeout(2.0),
+      DriveToPointFastPt(mid_stack3_pos)->withTimeout(2.0),
+      new DelayCommand(200),
+      StartIntake,
 
-      TurnToPoint(line_disk_pos2)->withTimeout(2.0),
-      DriveToPointFastPt(line_disk_pos2)->withTimeout(2.0),
+      // grab stack
+      TurnToPoint(after_stack3_pos)->withTimeout(2.0),
+      DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
 
-      DriveToPointFastPtRev(shoot_point3)->withTimeout(2.0),
-      TurnToHeading(goal_pos3_deg)->withTimeout(2.0),
+      // to shoot point
+      TurnToPoint(shoot_point1)->withTimeout(2.0),
+      DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
 
   });
 
-  // Shoot line disks
-  add_tri_shot_cmd(lsa);
+  lsa.add(TurnToHeading(129), 2.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+  lsa.add_delay(2000);
+  lsa.add(ShootDisk);
+  lsa.add_delay(2200);
+  lsa.add(CLEAR_DISKS);
+  lsa.add_delay(600);
 
+  // Line up to 3 stack
+  Vector2D::point_t pre_op_lineup = {.x = 43.6, .y = 17.05};
+  lsa.add({
+      TurnToPoint(pre_op_lineup)->withTimeout(2.0),
+      DriveToPointFastPt(pre_op_lineup)->withTimeout(2.0),
+      TurnToHeading(130)->withTimeout(2.0),
+  });
+
+  // lsa.add(PrintOdomContinous, 60.0);
   return lsa;
 }
 

@@ -37,6 +37,8 @@ std::map<std::string, motor &> motor_names{
     
 };
 
+vex::pot selector_pot(Brain.ThreeWirePort.F);
+
 // Other Outputs
 vex::digital_out endgame_solenoid(Brain.ThreeWirePort.H); //TODO make this an actual port
 
@@ -48,7 +50,6 @@ CustomEncoder right_enc(Brain.ThreeWirePort.C, 2048);
 
 inertial imu(PORT4);
 
-vex::optical colorSensor(PORT14, false);
 
 // ======== UTILS ========
 
@@ -75,7 +76,7 @@ MotionController::m_profile_cfg_t drive_fast_mprofile_cfg = {
 };
 
 MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
-    .max_v = 10,
+    .max_v = 15,
     .accel = 100,
     .pid_cfg = drive_pid_cfg,
     .ff_cfg = drive_ff_cfg    
@@ -84,16 +85,16 @@ MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
 
 // Turn Tuning
 PID::pid_config_t turn_pid_cfg = {
-    .p = .0045,
+    .p = .013,
     .i = 0.00001, 
-    .d = .00013,
-    .deadband = 3,
+    .d = .00085,
+    .deadband = 1,
     .on_target_time = .2
 };
 
 FeedForward::ff_config_t turn_ff_cfg = 
 {
-    .kS = 0.13
+    .kS = 0.08
 };
 
 
@@ -140,11 +141,11 @@ robot_specs_t config = {
 
 // Flywheel Tuning
 FeedForward::ff_config_t flywheel_ff_cfg = {
-  .kV =  0.0003
+  .kV =  0.00028
 };
 
 PID::pid_config_t flywheel_pid_cfg = {
-    .p = .000,
+    .p = .0000,//5,
 //    .d = 0.000015,
 };
 
@@ -156,15 +157,11 @@ OdometryTank odometry_sys(left_motors, right_motors, config, &imu); // PUT THIS 
 
 TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 
-Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 18);
+Flywheel flywheel_sys(flywheel_motors, 0.000009, 18);
+//Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 18);
 vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
-
-std::string AutoLoaderSideDisplayName = "Auto Loader Side";
-std::string AutoNonLoaderSideDisplayName = "Auto Non Loader Side";
-std::string SkillsLoaderSideDisplayName = "Skills Loader Side";
-std::string SkillsNonLoaderSideDisplayName = "Skills Non Loader Side";
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

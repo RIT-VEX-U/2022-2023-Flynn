@@ -218,6 +218,7 @@ public:
   VisionAimCommand(bool odometry_fallback = false);
 
   bool run() override;
+  void on_timeout() override;
 
 private:
   PIDFF pidff;
