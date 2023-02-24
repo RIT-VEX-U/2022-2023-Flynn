@@ -68,7 +68,7 @@ void opcontrol()
   //{
   //   test_stuff();
   // }
-
+  
   test_stuff();
 
   // draw_image();

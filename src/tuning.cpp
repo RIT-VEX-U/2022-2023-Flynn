@@ -451,6 +451,10 @@ void tune_flywheel_distcalc()
                                         { intake.spin(fwd, 4, volt); });
         main_controller.ButtonA.released([]()
                                          { intake.spin(fwd, 0, volt); });
+                                                 main_controller.ButtonA.pressed([]()
+                                        { intake.spin(fwd, 4, volt); });
+        main_controller.ButtonA.released([]()
+                                         { intake.spin(fwd, 0, volt); });
         first_run = false;
         flywheel.setMaxTorque(100.0, vex::pct);
         printf("time setpt rpm fb_out volts amps\n");
