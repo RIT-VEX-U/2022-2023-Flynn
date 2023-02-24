@@ -1,20 +1,18 @@
+#include <cstdio>
 #include "automation.h"
 #include "robot-config.h"
-#include "core.h"
 #include "vision.h"
 
 // Pushes the firing flap to the up position for close in shots
-void FlapUp()
+void flap_up()
 {
-  flapup_solenoid.set(true);
-  flapdown_solenoid.set(false);
+  flapup_solenoid.set(false);
 }
 
 // Pushes the firing flap to the down position for far away shots
-void FlapDown()
+void flap_down()
 {
-  flapup_solenoid.set(false);
-  flapdown_solenoid.set(true);
+  flapup_solenoid.set(true);
 }
 /**
  * Construct a FlapUpCommand
@@ -23,7 +21,7 @@ void FlapDown()
 FlapUpCommand::FlapUpCommand() {}
 bool FlapUpCommand::run()
 {
-  FlapUp();
+  flap_up();
   return true;
 }
 /**
@@ -33,7 +31,7 @@ bool FlapUpCommand::run()
 FlapDownCommand::FlapDownCommand() {}
 bool FlapDownCommand::run()
 {
-  FlapDown();
+  flap_down();
   return true;
 }
 
@@ -225,15 +223,16 @@ bool SpinToColorCommand::run()
 }
 
 PID::pid_config_t vis_pid_cfg = {
-    .p = .0065,
+    .p = .003,
     // .d = .0001,
     .deadband = 5,
-    .on_target_time = .1};
+    .on_target_time = .2};
 
 FeedForward::ff_config_t vis_ff_cfg = {
-    .kS = 0.1};
+    .kS = 0.07
+    };
 
-#define VISION_CENTER 140
+#define VISION_CENTER 145
 #define MIN_AREA 500
 #define MAX_SPEED 0.5
 #define FALLBACK_MAX_DEGREES 10
@@ -258,7 +257,8 @@ bool VisionAimCommand::run()
     first_run = false;
   }
 
-  if (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES)
+  if (odometry_fallback && 
+  (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES))
   {
     fallback_triggered = true;
     if (drive_sys.turn_to_heading(stored_pos.rot, 0.6))
@@ -269,10 +269,7 @@ bool VisionAimCommand::run()
 
   // If the camera isn't installed, move on to the next command
   if (!cam.installed())
-  {
-    printf("Looking for a camera to aim with but can't find it\n");
     return true;
-  }
 
   // Take a snapshot with each color selected,
   // and store the largest found object for each in a vector
@@ -327,9 +324,6 @@ bool VisionAimCommand::run()
 
   return false;
 }
-void VisionAimCommand::on_timeout(){
-  drive_sys.stop();
-}
 
 /**
  * Constuct a TurnToPointCommand
@@ -383,21 +377,20 @@ bool FunctionCommand::run()
  */
 WallAlignCommand::WallAlignCommand(TankDrive &drive_sys, OdometryTank &odom, double x, double y, double heading, double drive_power, double time) : drive_sys(drive_sys), odom(odom), x(x), y(y), heading(heading), time(time), func_initialized(false) {}
 
+
 /**
  * reset the position to that which is specified
- */
+*/
 bool WallAlignCommand::run()
 {
   // Start cutoff timer
-  if (!func_initialized)
-  {
+  if (!func_initialized){
     tmr.reset();
     func_initialized = true;
   }
 
-  // If we're not cutoff, drive
-  if (tmr.time(seconds) < time)
-  {
+  // If we're not cutoff, drive 
+  if (tmr.time(seconds) < time){
     drive_sys.drive_tank(drive_power, drive_power);
     return false;
   }
