@@ -73,6 +73,7 @@ void test_stuff()
 {
 
   CALIBRATE_IMU();
+pleasant_opcontrol();
 
   CommandController mine = auto_loader_side();
   mine.run();
@@ -241,6 +242,7 @@ CommandController auto_loader_side()
 
   lsa.add(TurnToHeading(128.6), 2.0);
   lsa.add(PrintOdom);
+  lsa.add(AUTO_AIM);
 
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
@@ -329,6 +331,7 @@ CommandController auto_loader_side()
   });
 
   lsa.add(TurnToHeading(129), 2.0);
+  lsa.add(AUTO_AIM);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
   lsa.add_delay(2000);
