@@ -70,7 +70,7 @@ void opcontrol()
   //   test_stuff();
   // }
   
-  test_stuff();
+ // test_stuff();
 
   // draw_image();
   // Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width , intense_milk_height);
