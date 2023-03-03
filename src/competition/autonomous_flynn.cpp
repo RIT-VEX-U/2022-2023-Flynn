@@ -203,6 +203,10 @@ void add_auto_roller(CommandController &cc, double roller_power, position_t set_
   // cc.add(new FunctionCommand([=](){drive_sys.drive_tank(-roller_power*.5, -roller_power*.5);return false; }), 0.15);
   cc.add(DriveForwardFast(7, reverse));
 }
+
+
+
+
 CommandController auto_loader_side()
 {
 
@@ -248,6 +252,50 @@ CommandController auto_loader_side()
   lsa.add_delay(600);
   lsa.add(CLEAR_DISKS);
   lsa.add_delay(600);
+
+  
+  
+  Vector2D::point_t pre_stack3_pos = {.x = 64.0, .y = 44.0};
+  Vector2D::point_t mid_stack3_pos = {.x = 54.0, .y = 34.0};
+  Vector2D::point_t after_stack3_pos = {.x = 42.0, .y = 22.0};
+
+  // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
+  // double goal_pos1_deg = 120.0;
+
+  // Third Shot =======================================================
+
+  lsa.add(SpinFWAt(3500));
+  lsa.add({
+      // line up to stack
+      TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
+      DriveToPointFastPt(pre_stack3_pos)->withTimeout(2.0),
+
+      TurnToPoint(mid_stack3_pos)->withTimeout(2.0),
+      DriveToPointFastPt(mid_stack3_pos)->withTimeout(2.0),
+      new DelayCommand(200),
+      StartIntake,
+
+      // grab stack
+      TurnToPoint(after_stack3_pos)->withTimeout(2.0),
+      DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
+
+      StopIntake,
+
+      // to shoot point
+      TurnToPoint(shoot_point1)->withTimeout(2.0),
+      DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
+
+  });
+
+  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+  lsa.add_delay(2000);
+  lsa.add(ShootDisk);
+  lsa.add_delay(2200);
+  lsa.add(CLEAR_DISKS);
+  lsa.add_delay(600);
+
 
   Vector2D::point_t disk1_pos = {.x = 84.0, .y = 45.0};
   Vector2D::point_t disk2_pos = {.x = 83.0, .y = 35.0};
@@ -299,48 +347,7 @@ CommandController auto_loader_side()
   lsa.add_delay(1000);
   lsa.add(CLEAR_DISKS);
   lsa.add_delay(600);
-  
-  
-  Vector2D::point_t pre_stack3_pos = {.x = 64.0, .y = 44.0};
-  Vector2D::point_t mid_stack3_pos = {.x = 54.0, .y = 34.0};
-  Vector2D::point_t after_stack3_pos = {.x = 42.0, .y = 22.0};
 
-  // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
-  // double goal_pos1_deg = 120.0;
-
-  // Third Shot =======================================================
-
-  lsa.add(SpinFWAt(3500));
-  lsa.add({
-      // line up to stack
-      TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
-      DriveToPointFastPt(pre_stack3_pos)->withTimeout(2.0),
-
-      TurnToPoint(mid_stack3_pos)->withTimeout(2.0),
-      DriveToPointFastPt(mid_stack3_pos)->withTimeout(2.0),
-      new DelayCommand(200),
-      StartIntake,
-
-      // grab stack
-      TurnToPoint(after_stack3_pos)->withTimeout(2.0),
-      DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
-
-      StopIntake,
-
-      // to shoot point
-      TurnToPoint(shoot_point1)->withTimeout(2.0),
-      DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
-
-  });
-
-  lsa.add(TurnToHeading(125), 2.0);
-  lsa.add(WaitForFW, 1.0);
-  lsa.add(ShootDisk);
-  lsa.add_delay(2000);
-  lsa.add(ShootDisk);
-  lsa.add_delay(2200);
-  lsa.add(CLEAR_DISKS);
-  lsa.add_delay(600);
 
   // Line up to 3 stack
   Vector2D::point_t pre_op_lineup = {.x = 43.6, .y = 17.05};
