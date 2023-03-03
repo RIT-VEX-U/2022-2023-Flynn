@@ -218,8 +218,8 @@ CommandController auto_loader_side()
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
   add_auto_roller(lsa, roller_power, roller_in_pos);
   add_auto_roller(lsa, roller_power, roller_in_pos);
-  add_auto_roller(lsa, roller_power, roller_in_pos);
-  add_auto_roller(lsa, roller_power, roller_in_pos);
+  // add_auto_roller(lsa, roller_power, roller_in_pos);
+  // add_auto_roller(lsa, roller_power, roller_in_pos);
 
   lsa.add(DriveForwardFast(2, reverse));
 
@@ -240,7 +240,7 @@ CommandController auto_loader_side()
 
   });
 
-  lsa.add(TurnToHeading(128.6), 2.0);
+  lsa.add(TurnToHeading(120.6), 2.0);
   lsa.add(PrintOdom);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
@@ -259,10 +259,11 @@ CommandController auto_loader_side()
   // Second Shot =======================================================
   lsa.add(SpinFWAt(3450));
   lsa.add({
-      StartIntake,
+      
 
       // First
       TurnToPoint(disk1_pos)->withTimeout(2.0),
+      StartIntake,
       DriveToPointFastPt(disk1_pos)->withTimeout(2.0),
 
       // Second
@@ -274,6 +275,7 @@ CommandController auto_loader_side()
       DriveToPointFastPtRev(lineup_disk3_pos)->withTimeout(2.0),
       TurnToPoint(disk3_pos)->withTimeout(2.0),
       DriveToPointFastPt(disk3_pos)->withTimeout(2.0),
+      StopIntake
   });
 
   // go shoot
@@ -286,7 +288,7 @@ CommandController auto_loader_side()
       TurnToPoint(shoot_point2)->withTimeout(2.0),
       DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
   });
-  lsa.add(TurnToHeading(130), 2.0);
+  lsa.add(TurnToHeading(125), 2.0);
   lsa.add(PrintOdom);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
@@ -297,7 +299,8 @@ CommandController auto_loader_side()
   lsa.add_delay(1000);
   lsa.add(CLEAR_DISKS);
   lsa.add_delay(600);
-
+  
+  
   Vector2D::point_t pre_stack3_pos = {.x = 64.0, .y = 44.0};
   Vector2D::point_t mid_stack3_pos = {.x = 54.0, .y = 34.0};
   Vector2D::point_t after_stack3_pos = {.x = 42.0, .y = 22.0};
@@ -322,13 +325,15 @@ CommandController auto_loader_side()
       TurnToPoint(after_stack3_pos)->withTimeout(2.0),
       DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
 
+      StopIntake,
+
       // to shoot point
       TurnToPoint(shoot_point1)->withTimeout(2.0),
       DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
 
   });
 
-  lsa.add(TurnToHeading(129), 2.0);
+  lsa.add(TurnToHeading(125), 2.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
   lsa.add_delay(2000);
@@ -569,7 +574,7 @@ CommandController prog_skills_loader_side()
   lss.add(TurnToPoint(endgame_point), 1.0);        // [measure]
   lss.add(DriveToPointFastPt(endgame_point), 4.0); //[measure]
   lss.add(TurnToHeading(48), 3.0);
-  draw_image();
+  //draw_image();
 
   //// lss.add(PrintOdomContinous);
 

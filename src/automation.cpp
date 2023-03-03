@@ -249,7 +249,7 @@ VisionAimCommand::VisionAimCommand(bool odometry_fallback)
 bool VisionAimCommand::run()
 {
 
-  if (first_run)
+ if (first_run)
   {
     stored_pos = odometry_sys.get_position();
     drive_sys.reset_auto();
