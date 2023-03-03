@@ -24,8 +24,10 @@ competition comp;
  * Do NOT use for general programming or initialization.
  * Instead use competition/opcontrol.cpp, competition/autonomous.cpp, or robot-config.cpp for programming or configuration.
  */
-int main() {
+int main()
+{
   // Initializing Robot Configuration. DO NOT REMOVE!
+
   comp.autonomous(autonomous);
   comp.drivercontrol(opcontrol);
   vexcodeInit();

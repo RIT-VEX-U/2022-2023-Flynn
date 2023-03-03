@@ -50,7 +50,8 @@ void page_three(vex::brain::lcd &screen, int x, int y, int width, int height, bo
     static GraphDrawer rpm(screen, 30, "time", "rpm", vex::blue, true, 0, 4000);
     static bool func_initialized = false;
     static vex::timer tmr;
-    if (!func_initialized){
+    if (!func_initialized)
+    {
         tmr.reset();
         func_initialized = true;
     }
@@ -59,7 +60,140 @@ void page_three(vex::brain::lcd &screen, int x, int y, int width, int height, bo
     setpt.add_sample({.x = t, .y = flywheel_sys.getDesiredRPM()});
     rpm.add_sample({.x = t, .y = flywheel_sys.getRPM()});
 
-    setpt.draw(x, y, width, height-40);
-    rpm.draw(x, y, width, height-40);
-    screen.printAt(x + width/2, y + height - 30, "setpt: %.0f, rpm: %.0f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
+    setpt.draw(x, y, width, height - 40);
+    rpm.draw(x, y, width, height - 40);
+    screen.printAt(x + width / 2, y + height - 30, "setpt: %.0f, rpm: %.0f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
+}
+
+static bool inRectangle(int x, int y, int width, int height, int test_x, int test_y)
+{
+    // too left / low
+    if (test_x < x || test_y < y)
+    {
+        return false;
+    }
+
+    // too right / high
+    if (test_x > x + width || test_y > y + height)
+    {
+        return false;
+    }
+
+    // gotta be in
+    return true;
+}
+
+void page_four(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
+{
+    screen.setPenColor(vex::black);
+    screen.drawRectangle(x, y, width, height, vex::black);
+    int padding = 20;
+    int button_width = (width / 2) - (padding * 2);
+    int button_height = (height / 2) - (padding * 2);
+    // Color Picker
+    int bluex = x + padding;
+    int bluey = y + padding;
+    int redx = (x + width / 2) + padding;
+    int redy = y + padding;
+
+    screen.setPenColor(vex::white);
+    screen.setFont(mono20);
+    // Blue Button
+    screen.setFillColor(vex::blue);
+    if (target_red == false)
+    {
+        screen.setPenWidth(4);
+    }
+    else
+    {
+        screen.setPenWidth(1);
+    }
+    screen.drawRectangle(bluex, bluey, button_width, button_height);
+    screen.setPenWidth(1);
+    screen.setPenColor(vex::black);
+
+    screen.printAt(bluex + padding, bluey + padding + padding, "Blue");
+
+    // Red Button
+    screen.setFillColor(vex::red);
+    if (target_red == true)
+    {
+        screen.setPenWidth(4);
+    }
+    else
+    {
+        screen.setPenWidth(1);
+    }
+    screen.setPenColor(vex::white);
+    screen.drawRectangle(redx, redy, button_width, button_height);
+    screen.setPenWidth(1);
+    screen.setPenColor(vex::black);
+
+    screen.printAt(redx + padding, redy + padding + padding, "Red");
+
+    // Enabler
+    int onx = x + padding;
+    int ony = (y + height / 2) + padding;
+    int offx = (x + width / 2) + padding;
+    int offy = (y + height / 2) + padding;
+
+    screen.setPenColor(vex::white);
+
+    // On
+    screen.setFillColor(vex::color(50, 168, 82));
+    if (vision_enabled == true)
+    {
+        screen.setPenWidth(4);
+    }
+    else
+    {
+        screen.setPenWidth(1);
+    }
+    screen.drawRectangle(onx, ony, button_width, button_height);
+    screen.setPenWidth(1);
+    screen.setPenColor(vex::black);
+    screen.printAt(onx + padding, ony + padding + padding, "On");
+
+    // Off
+    screen.setFillColor(vex::red);
+    if (vision_enabled == false)
+    {
+        screen.setPenWidth(4);
+    }
+    else
+    {
+        screen.setPenWidth(1);
+    }
+    screen.setPenColor(vex::white);
+    screen.drawRectangle(offx, offy, button_width, button_height);
+    screen.setPenWidth(1);
+    screen.setPenColor(vex::black);
+    screen.printAt(offx + padding, offy + padding + padding, "Off");
+
+    if (screen.pressing())
+    {
+        int test_x = screen.xPosition();
+        int test_y = screen.yPosition();
+        // clicked on blue
+        if (inRectangle(bluex, bluey, button_width, button_height, test_x, test_y))
+        {
+            target_red = false;
+        }
+        // clicked on red
+        if (inRectangle(redx, redy, button_width, button_height, test_x, test_y))
+        {
+            target_red = true;
+        }
+
+        // clicked on on
+        if (inRectangle(onx, ony, button_width, button_height, test_x, test_y))
+        {
+            vision_enabled = true;
+        }
+        // clicked on off
+        if (inRectangle(offx, offy, button_width, button_height, test_x, test_y))
+        {
+            vision_enabled = false;
+        }
+    }
 }

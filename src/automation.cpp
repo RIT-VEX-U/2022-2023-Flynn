@@ -229,8 +229,7 @@ PID::pid_config_t vis_pid_cfg = {
     .on_target_time = .2};
 
 FeedForward::ff_config_t vis_ff_cfg = {
-    .kS = 0.07
-    };
+    .kS = 0.07};
 
 #define VISION_CENTER 145
 #define MIN_AREA 500
@@ -257,8 +256,8 @@ bool VisionAimCommand::run()
     first_run = false;
   }
 
-  if (odometry_fallback && 
-  (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES))
+  if (odometry_fallback &&
+      (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES))
   {
     fallback_triggered = true;
     if (drive_sys.turn_to_heading(stored_pos.rot, 0.6))
@@ -269,6 +268,9 @@ bool VisionAimCommand::run()
 
   // If the camera isn't installed, move on to the next command
   if (!cam.installed())
+    return true;
+  // If we have disabled vision on the screen, move on to the next command
+  if (!vision_enabled)
     return true;
 
   // Take a snapshot with each color selected,
@@ -292,10 +294,14 @@ bool VisionAimCommand::run()
   double blue_area = blue_obj.width * blue_obj.height;
   int x_val = 0;
 
-  if (red_area > blue_area && red_area > MIN_AREA)
+  if (red_area > blue_area && red_area > MIN_AREA && target_red)
+  {
     x_val = red_obj.centerX;
-  else if (blue_area > red_area && blue_area > MIN_AREA)
+  }
+  else if (blue_area > red_area && blue_area > MIN_AREA && !target_red)
+  {
     x_val = blue_obj.centerX;
+  }
 
   printf("CenterX: %d\n", x_val);
 
@@ -377,20 +383,21 @@ bool FunctionCommand::run()
  */
 WallAlignCommand::WallAlignCommand(TankDrive &drive_sys, OdometryTank &odom, double x, double y, double heading, double drive_power, double time) : drive_sys(drive_sys), odom(odom), x(x), y(y), heading(heading), time(time), func_initialized(false) {}
 
-
 /**
  * reset the position to that which is specified
-*/
+ */
 bool WallAlignCommand::run()
 {
   // Start cutoff timer
-  if (!func_initialized){
+  if (!func_initialized)
+  {
     tmr.reset();
     func_initialized = true;
   }
 
-  // If we're not cutoff, drive 
-  if (tmr.time(seconds) < time){
+  // If we're not cutoff, drive
+  if (tmr.time(seconds) < time)
+  {
     drive_sys.drive_tank(drive_power, drive_power);
     return false;
   }

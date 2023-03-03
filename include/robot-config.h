@@ -1,6 +1,8 @@
 #pragma once
 #include "vex.h"
 #include "core.h"
+#include "../core/include/subsystems/screen.h"
+#include "competition/comp_screen.h"
 
 using namespace vex;
 
@@ -61,7 +63,8 @@ extern std::string AutoNonLoaderSideDisplayName;
 extern std::string SkillsLoaderSideDisplayName;
 extern std::string SkillsNonLoaderSideDisplayName;
 
-
+extern bool target_red;
+extern bool vision_enabled;
 
 
 /**

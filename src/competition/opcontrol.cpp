@@ -5,7 +5,6 @@
 #include "tuning.h"
 #include "vision.h"
 #include <stdio.h>
-// #include "../core/include/intense_milk.h"
 
 int print_odom()
 {
@@ -60,17 +59,7 @@ KnobSelection GetSelection(vex::pot selector)
 void opcontrol()
 {
   vex::task odom_print(print_odom);
-  // Stats
-  StartScreen(Brain.Screen, {page_one, page_two, page_three});
-  //// Knob
-  // KnobSelection ProgramType = GetSelection(selector_pot);
-  // printf("Program Type: %d: %f \n", ProgramType, selector_pot.angle(deg));
-  // if (ProgramType == P)
-  //{
-  //   test_stuff();
-  // }
   
-  test_stuff();
 
   // draw_image();
   // Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width , intense_milk_height);
