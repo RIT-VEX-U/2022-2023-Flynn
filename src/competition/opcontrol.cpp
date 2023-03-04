@@ -17,41 +17,6 @@ int print_odom()
   return 0;
 }
 
-enum KnobSelection
-{
-  P,  // Programming
-  C,  // opControl
-  T1, // testing
-  T2  // testing2
-};
-
-const double CTop = 193; // degrees
-const double T1Top = 66; // degrees
-const double T2Top = 27; // degrees
-
-KnobSelection ProgramType;
-
-KnobSelection GetSelection(vex::pot selector)
-{
-  double ang = selector.angle(deg);
-  printf("ang; %f", ang);
-  if (ang < T2Top)
-  {
-    return T2;
-  }
-  else if (ang < T1Top)
-  {
-    return T1;
-  }
-  else if (ang < CTop)
-  {
-    return C;
-  }
-  else
-  {
-    return P;
-  }
-}
 
 /**
  * Contains the main loop of the robot code while running in the driver-control period.
@@ -59,7 +24,6 @@ KnobSelection GetSelection(vex::pot selector)
 void opcontrol()
 {
   vex::task odom_print(print_odom);
-  
 
   // draw_image();
   // Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width , intense_milk_height);

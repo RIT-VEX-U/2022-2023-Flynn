@@ -245,6 +245,7 @@ CommandController auto_loader_side()
   });
 
   lsa.add(TurnToHeading(120.6), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
   lsa.add(PrintOdom);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
@@ -288,6 +289,7 @@ CommandController auto_loader_side()
   });
 
   lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
   lsa.add_delay(2000);
@@ -336,6 +338,7 @@ CommandController auto_loader_side()
       TurnToPoint(shoot_point2)->withTimeout(2.0),
       DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
   });
+  lsa.add(AUTO_AIM, 1.0);
   lsa.add(TurnToHeading(125), 2.0);
   lsa.add(PrintOdom);
   lsa.add(WaitForFW, 1.0);
