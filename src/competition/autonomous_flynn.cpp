@@ -205,7 +205,7 @@ void add_auto_roller(CommandController &cc, double roller_power, position_t set_
 {
   cc.add(new FunctionCommand([=]()
                              {drive_sys.drive_tank(roller_power, roller_power);return false; }),
-         0.65);
+         0.45);
   cc.add(new DriveStopCommand(drive_sys));
   cc.add(new OdomSetPosition(odometry_sys, set_pos));
   // cc.add(new FunctionCommand([=](){drive_sys.drive_tank(-roller_power*.5, -roller_power*.5);return false; }), 0.15);
@@ -228,14 +228,12 @@ CommandController auto_loader_side()
 
   // Rollers =======================================================
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
-  add_auto_roller(lsa, roller_power, roller_in_pos);
-  add_auto_roller(lsa, roller_power, roller_in_pos);
-  // add_auto_roller(lsa, roller_power, roller_in_pos);
-  // add_auto_roller(lsa, roller_power, roller_in_pos);
-
+  lsa.add(new SpinRollerCommand(roller_in_pos), 10.0);
+  //lsa.add(new OdomSetPosition(odometry_sys, start_pos));
   lsa.add(DriveForwardFast(2, reverse));
 
-  Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 12.0};
+  
+  Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
   Vector2D::point_t shoot_point1 = {.x = 64, .y = 52};
 
 
@@ -263,10 +261,15 @@ CommandController auto_loader_side()
   lsa.add_delay(600);
 
   
+  auto lerp_point = [](Vector2D::point_t a, Vector2D::point_t b, float t){
+    return Vector2D::point_t{.x = a.x * t + b.x * (1-t), .y = a.y * t + b.y * (1-t)};
+  };
   
-  Vector2D::point_t pre_stack3_pos = {.x = 64.0, .y = 44.0};
-  Vector2D::point_t mid_stack3_pos = {.x = 54.0, .y = 34.0};
-  Vector2D::point_t after_stack3_pos = {.x = 42.0, .y = 22.0};
+  Vector2D::point_t pre_stack3_pos = {.x = 69.0, .y = 36.0};
+  Vector2D::point_t after_stack3_pos = {.x = 40.0, .y = 18.0};
+
+  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .5);
+  
 
   // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
   // double goal_pos1_deg = 120.0;

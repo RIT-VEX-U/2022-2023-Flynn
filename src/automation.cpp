@@ -40,47 +40,39 @@ bool FlapDownCommand::run()
  * @param drive_sys the drive train that will allow us to apply pressure on the rollers
  * @param roller_motor The motor that will spin the roller
  */
-SpinRollerCommandAUTO::SpinRollerCommandAUTO(TankDrive &drive_sys, vex::motor &roller_motor) : drive_sys(drive_sys), roller_motor(roller_motor) {}
+SpinRollerCommand::SpinRollerCommand(position_t my_align_pos): align_pos(my_align_pos) {}
 
 /**
  * Run roller controller to spin the roller to our color
  * Overrides run from AutoCommand
  * @returns true when execution is complete, false otherwise
  */
-bool SpinRollerCommandAUTO::run()
+bool SpinRollerCommand::run()
 {
-  const double roller_cutoff_threshold = .05;      // revolutions // [measure]
-  const double num_revolutions_to_spin_motor = -2; // revolutions // [measure]
-  const double drive_power = .2;                   // [measure]
-
-  // Initialize start and end position if not already
-  if (!func_initialized)
+  if(check_pos)
   {
-    start_pos = roller_motor.position(vex::rev);
-    target_pos = start_pos + num_revolutions_to_spin_motor;
-    func_initialized = true;
+    Pepsi cur_roller = scan_roller();
+    if((cur_roller == RED && target_red)
+      || cur_roller == BLUE && !target_red)
+    {
+      drive_sys.stop();
+      return true; 
+    }
+
+    check_pos = false;    
   }
 
-  // Calculate error
-  double current_pos = roller_motor.position(vex::rev);
-  double error = target_pos - current_pos;
+  CommandController cmd;
+  cmd.add({
+     (new DriveForwardCommand(drive_sys, drive_slow_mprofile, 12, directionType::fwd))->withTimeout(.75),
+     (new DelayCommand(100)),
+     (new OdomSetPosition(odometry_sys, align_pos)),
+     (new PrintOdomCommand(odometry_sys)),
+     (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 6, directionType::rev))->withTimeout(9999999999999999999)
+  });
 
-  // If we're close enough, call it here.
-  if (fabs(error) > roller_cutoff_threshold < roller_cutoff_threshold)
-  {
-    func_initialized = false;
-    roller_motor.stop();
-    return true;
-  }
-
-  vex::directionType dir = fwd;
-  if (error < 0)
-  {
-    dir = reverse;
-  }
-  // otherwise, do a P controller
-  roller_motor.spin(dir, 8, vex::volt);
-  drive_sys.drive_tank(drive_power, drive_power);
+  cmd.run();
+  
   return false;
 }
 
@@ -193,35 +185,6 @@ bool PrintOdomContinousCommand::run()
  * @param rollerMotor The rollor motor to spin the roller
  * @param error Error for color detection color+-error
  */
-SpinToColorCommand::SpinToColorCommand(vex::optical &colorSensor, double color, vex::motor &rollerMotor, double error) : colorSensor(colorSensor), color(color), rollerMotor(rollerMotor), error(error) {}
-
-/**
- * Run the StopIntakeCommand
- * Overrides run from AutoCommand
- * @returns true when execution is complete, false otherwise
- */
-bool SpinToColorCommand::run()
-{
-  // To deal with wrap around
-  if (color <= error)
-  {
-    if (colorSensor.hue() > color + 15 && colorSensor.hue() < wrap_angle_deg(color - error))
-    {
-      return false;
-    }
-  }
-  // no wrap around
-  else if (colorSensor.hue() < wrap_angle_deg(color - error) || colorSensor.hue() > wrap_angle_deg(color + error))
-  {
-    rollerMotor.spin(vex::directionType::fwd);
-    return false;
-  }
-
-  rollerMotor.stop();
-
-  return true;
-}
-
 PID::pid_config_t vis_pid_cfg = {
     .p = .003,
     // .d = .0001,
@@ -416,4 +379,38 @@ bool WallAlignCommand::run()
   }
   odom.set_position(newpos);
   return true;
+}
+
+#define ROLLER_AREA_CUTOFF 1000
+
+Pepsi scan_roller()
+{
+  if(!cam.installed())
+  {
+    printf("Cam Disconnected!\n");
+    return NEUTRAL;
+  }
+
+  // SCAN FOR RED
+  cam.takeSnapshot(RED_GOAL);
+  vex::vision::object red_obj = cam.largestObject;
+  int red_area = red_obj.width * red_obj.height;
+  int red_y = red_obj.centerY;
+
+  if(cam.objectCount < 1 || red_area < ROLLER_AREA_CUTOFF)
+      return NEUTRAL;
+  
+  // SCAN FOR BLUE
+  cam.takeSnapshot(BLUE_GOAL);
+  vex::vision::object blue_obj = cam.largestObject;
+  int blue_area = blue_obj.width * blue_obj.height;
+  int blue_y = blue_obj.centerY;
+
+  if(cam.objectCount < 1 || blue_area < ROLLER_AREA_CUTOFF)
+      return NEUTRAL;
+  
+  if(red_y > blue_y)
+      return RED;
+  else
+      return BLUE;
 }

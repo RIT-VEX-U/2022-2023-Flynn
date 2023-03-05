@@ -82,6 +82,7 @@ Map from page 40 of the game manual
  Human Instructions:
  Align robot to specified place and angle using NON LOADER SIDE AUTO jig
 */
+/*
 CommandController auto_non_loader_side(){
 
     #define PAUSE return nlsa;
@@ -156,7 +157,7 @@ CommandController auto_non_loader_side(){
     
 }
 
-
+*/
 /*
 Skills Non-loader side
 
@@ -181,6 +182,7 @@ Map from page 40 of the game manual
  Human Instructions:
  Align robot to specified place and angle using NON LOADER SIDE SKILLS jig
 */
+/*
 CommandController prog_skills_non_loader_side(){
 
     CommandController nlss;
@@ -352,4 +354,4 @@ CommandController prog_skills_non_loader_side(){
     nlss.add(new EndgameCommand(endgame_solenoid));
 
   return nlss;
-}
+}*/

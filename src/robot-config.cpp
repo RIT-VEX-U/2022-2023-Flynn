@@ -148,8 +148,8 @@ vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
 
-bool target_red = false;
-bool vision_enabled = false;
+bool target_red = true;
+bool vision_enabled = true;
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
  *
