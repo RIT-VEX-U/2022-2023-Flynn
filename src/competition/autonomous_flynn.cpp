@@ -28,6 +28,7 @@
 #define TurnToPoint(point) (new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point))
 
 #define StartIntake (new StartIntakeCommand(intake, INTAKE_VOLT))
+//#define StopIntake (new StartIntakeCommand(intake, -INTAKE_VOLT))
 #define StopIntake (new StopIntakeCommand(intake))
 
 #define VisionAim (new VisionAimCommand(true))
@@ -223,22 +224,22 @@ CommandController auto_loader_side()
   position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
   position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
 
-  static const double roller_power = .5;
-
 
   // Rollers =======================================================
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
-  lsa.add(new SpinRollerCommand(roller_in_pos), 10.0);
+  lsa.add(new SpinRollerCommand(roller_in_pos), 5.0);
   //lsa.add(new OdomSetPosition(odometry_sys, start_pos));
   lsa.add(DriveForwardFast(2, reverse));
+  Vector2D::point_t roller_out_pos = {.x = 36, .y = 16.0};
+  lsa.add(DriveToPointFastPtRev(roller_out_pos));
 
   
   Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
-  Vector2D::point_t shoot_point1 = {.x = 64, .y = 52};
+  Vector2D::point_t shoot_point1 = {.x = 64, .y = 54};
 
 
   // First Shot =======================================================
-  lsa.add(SpinFWAt(3150));
+  lsa.add(SpinFWAt(3350));
   lsa.add({
       // Wa
       TurnToPoint(out_of_way_pos1)->withTimeout(2.0),
@@ -262,13 +263,13 @@ CommandController auto_loader_side()
 
   
   auto lerp_point = [](Vector2D::point_t a, Vector2D::point_t b, float t){
-    return Vector2D::point_t{.x = a.x * t + b.x * (1-t), .y = a.y * t + b.y * (1-t)};
+    return Vector2D::point_t{.x = a.x * (1-t) + b.x * t, .y = a.y * (1-t) + b.y * t};
   };
   
-  Vector2D::point_t pre_stack3_pos = {.x = 69.0, .y = 36.0};
-  Vector2D::point_t after_stack3_pos = {.x = 40.0, .y = 18.0};
+  Vector2D::point_t pre_stack3_pos = {.x = 70.0, .y = 48.0};
+  Vector2D::point_t after_stack3_pos = {.x = 44.0, .y = 20.0};
 
-  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .5);
+  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .2);
   
 
   // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
@@ -291,11 +292,12 @@ CommandController auto_loader_side()
       TurnToPoint(after_stack3_pos)->withTimeout(2.0),
       DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
 
-      StopIntake,
 
       // to shoot point
       TurnToPoint(shoot_point1)->withTimeout(2.0),
       DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
+      StopIntake,
+
 
   });
 
@@ -310,15 +312,15 @@ CommandController auto_loader_side()
   lsa.add_delay(600);
 
 
-  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 45.0};
-  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 35.0};
-  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 27.0};
+  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 47.0};
+  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 37.0};
+  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 29.0};
 
   Vector2D::point_t lineup_disk2_pos = {.x = 73.0, .y = 41.0};
   Vector2D::point_t lineup_disk3_pos = {.x = 73.0, .y = 32.0};
 
   // Second Shot =======================================================
-  lsa.add(SpinFWAt(3450));
+  lsa.add(SpinFWAt(3500));
   lsa.add({
       
 
@@ -336,7 +338,6 @@ CommandController auto_loader_side()
       DriveToPointFastPtRev(lineup_disk3_pos)->withTimeout(2.0),
       TurnToPoint(disk3_pos)->withTimeout(2.0),
       DriveToPointFastPt(disk3_pos)->withTimeout(2.0),
-      StopIntake
   });
 
   // go shoot
@@ -346,9 +347,12 @@ CommandController auto_loader_side()
 
   lsa.add({
       DriveToPointFastPtRev(halfway)->withTimeout(2.0),
+      StopIntake,
       TurnToPoint(shoot_point2)->withTimeout(2.0),
       DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
   });
+  
+
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(TurnToHeading(125), 2.0);
   lsa.add(PrintOdom);

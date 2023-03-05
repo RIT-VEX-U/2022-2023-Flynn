@@ -148,7 +148,7 @@ vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
 
-bool target_red = true;
+bool target_red = false;
 bool vision_enabled = true;
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
@@ -157,7 +157,7 @@ bool vision_enabled = true;
  */
 void vexcodeInit(void)
 {
-    StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four, page_five}, 3);
+    StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four, page_five}, 4);
 
     endgame_solenoid.set(false); // TODO figure out if false or true shoots
     imu.calibrate();
