@@ -6,27 +6,12 @@
 #include "vision.h"
 #include <stdio.h>
 
-int print_odom()
-{
-  while (true)
-  {
-    position_t pos = odometry_sys.get_position();
-    printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
-    vexDelay(100);
-  }
-  return 0;
-}
-
 
 /**
  * Contains the main loop of the robot code while running in the driver-control period.
  */
 void opcontrol()
 {
-  vex::task odom_print(print_odom);
-
-  // draw_image();
-  // Brain.Screen.drawImageFromBuffer(&intense_milk[0], 0, 0, intense_milk_width , intense_milk_height);
   endgame_solenoid.set(false);
   flapup_solenoid.set(false);
 

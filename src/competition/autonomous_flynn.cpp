@@ -69,22 +69,30 @@ static void add_tri_shot_cmd(CommandController &controller, double timeout = 0.0
 
 void pleasant_opcontrol();
 
+int print_odom()
+{
+  while (true)
+  {
+    position_t pos = odometry_sys.get_position();
+    printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+    vexDelay(100);
+  }
+  return 0;
+}
+
+
 void test_stuff()
 {
-
   CALIBRATE_IMU();
-pleasant_opcontrol();
+
+  vex::task odom_print(print_odom);
+
 
   CommandController mine = auto_loader_side();
   mine.run();
   return;
   //
   pleasant_opcontrol();
-
-  // CommandController mine = prog_skills_loader_side();
-  // mine.run();
-  // vex_printf("timedout %d\n", mine.last_command_timed_out());
-  // vex_printf("finshed\n");
 }
 
 void pleasant_opcontrol()

@@ -157,7 +157,7 @@ bool vision_enabled = false;
  */
 void vexcodeInit(void)
 {
-    StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four}, 3);
+    StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four, page_five}, 3);
 
     endgame_solenoid.set(false); // TODO figure out if false or true shoots
     imu.calibrate();
