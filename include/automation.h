@@ -28,6 +28,7 @@ public:
    * @returns true when execution is complete, false otherwise
    */
   bool run() override;
+  void on_timeout() override;
 
 private:  
   position_t align_pos;

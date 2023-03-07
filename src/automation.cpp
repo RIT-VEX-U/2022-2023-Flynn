@@ -47,26 +47,36 @@ SpinRollerCommand::SpinRollerCommand(position_t my_align_pos) : align_pos(my_ali
  * Overrides run from AutoCommand
  * @returns true when execution is complete, false otherwise
  */
+
 bool SpinRollerCommand::run()
 {
+  vexDelay(100);
   Pepsi cur_roller = scan_roller();
-  if ((cur_roller == RED && target_red) || cur_roller == BLUE && !target_red)
+  printf("%s\n", cur_roller==RED?"red":cur_roller==BLUE?"blue":"neutral");
+  if((cur_roller == RED && target_red)
+    || cur_roller == BLUE && !target_red)
   {
     drive_sys.stop();
-    return true;
+    return true; 
   }
 
   CommandController cmd;
-  cmd.add({(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd))->withTimeout(.5),
-           (new DelayCommand(100)),
-           (new OdomSetPosition(odometry_sys, align_pos)),
-           (new PrintOdomCommand(odometry_sys)),
-           (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 6, directionType::rev))->withTimeout(9999999999999999999)});
+  cmd.add({
+     (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd))->withTimeout(0.5),
+     (new DelayCommand(100)),
+     (new OdomSetPosition(odometry_sys, align_pos)),
+     (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 6, directionType::rev))
+  });
 
   cmd.run();
-
+  
   return false;
 }
+
+void SpinRollerCommand::on_timeout(){
+  drive_sys.stop();
+}
+
 
 /**
  * Construct a ShootCommand

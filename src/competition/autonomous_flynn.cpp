@@ -28,7 +28,7 @@
 #define TurnToPoint(point) (new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point))
 
 #define StartIntake (new StartIntakeCommand(intake, INTAKE_VOLT))
-//#define StopIntake (new StartIntakeCommand(intake, -INTAKE_VOLT))
+// #define StopIntake (new StartIntakeCommand(intake, -INTAKE_VOLT))
 #define StopIntake (new StopIntakeCommand(intake))
 
 #define VisionAim (new VisionAimCommand(true))
@@ -76,11 +76,10 @@ int print_odom()
   {
     position_t pos = odometry_sys.get_position();
     printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
-    vexDelay(100);
+    vexDelay(1000);
   }
   return 0;
 }
-
 
 void test_stuff()
 {
@@ -88,8 +87,7 @@ void test_stuff()
 
   vex::task odom_print(print_odom);
 
-
-  CommandController mine = auto_loader_side();
+  CommandController mine = prog_skills_loader_side();
   mine.run();
   return;
   //
@@ -178,206 +176,6 @@ void pleasant_opcontrol()
   }
 }
 
-/*
-Auto loader side
-
-Map from page 40 of the game manual
-
-(R) = Red Hoop, Blue Zone
-(B) = Blue Hoop, Red Zone
- *  = Starting position for this auto
-
-           ^ 180 degrees
-  +-------------------+
-  |        |____| (R) |
-  |___           |    |
-  | * |          |    |
-  |   |          |    |  --> 90 degrees
-  |   |          |_*__|
-  |___|  ____         |
-  |(B)  |____|        |
-  +-------------------+
-           v 0 degrees
-
- Human Instructions:
- Align robot to specified place and angle using LOADER SIDE AUTO jig
-*/
-void add_auto_roller(CommandController &cc, double roller_power, position_t set_pos)
-{
-  cc.add(new FunctionCommand([=]()
-                             {drive_sys.drive_tank(roller_power, roller_power);return false; }),
-         0.45);
-  cc.add(new DriveStopCommand(drive_sys));
-  cc.add(new OdomSetPosition(odometry_sys, set_pos));
-  // cc.add(new FunctionCommand([=](){drive_sys.drive_tank(-roller_power*.5, -roller_power*.5);return false; }), 0.15);
-  cc.add(DriveForwardFast(7, reverse));
-}
-
-
-
-
-CommandController auto_loader_side()
-{
-
-  CommandController lsa;
-  flapup_solenoid.set(true);
-  position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
-  position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
-
-
-  // Rollers =======================================================
-  lsa.add(new OdomSetPosition(odometry_sys, start_pos));
-  lsa.add(new SpinRollerCommand(roller_in_pos), 5.0);
-  //lsa.add(new OdomSetPosition(odometry_sys, start_pos));
-  lsa.add(DriveForwardFast(2, reverse));
-  Vector2D::point_t roller_out_pos = {.x = 36, .y = 16.0};
-  lsa.add(DriveToPointFastPtRev(roller_out_pos));
-
-  
-  Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
-  Vector2D::point_t shoot_point1 = {.x = 64, .y = 54};
-
-
-  // First Shot =======================================================
-  lsa.add(SpinFWAt(3350));
-  lsa.add({
-      // Wa
-      TurnToPoint(out_of_way_pos1)->withTimeout(2.0),
-      DriveToPointFastPt(out_of_way_pos1)->withTimeout(2.0),
-
-
-      TurnToPoint(shoot_point1)->withTimeout(2.0),
-      DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
-
-  });
-
-  lsa.add(TurnToHeading(120.6), 2.0);
-  lsa.add(AUTO_AIM, 1.0);
-  lsa.add(PrintOdom);
-  lsa.add(WaitForFW, 1.0);
-  lsa.add(ShootDisk);
-  lsa.add(WaitForFW, 1.0);
-  lsa.add_delay(600);
-  lsa.add(CLEAR_DISKS);
-  lsa.add_delay(600);
-
-  
-  auto lerp_point = [](Vector2D::point_t a, Vector2D::point_t b, float t){
-    return Vector2D::point_t{.x = a.x * (1-t) + b.x * t, .y = a.y * (1-t) + b.y * t};
-  };
-  
-  Vector2D::point_t pre_stack3_pos = {.x = 70.0, .y = 48.0};
-  Vector2D::point_t after_stack3_pos = {.x = 44.0, .y = 20.0};
-
-  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .2);
-  
-
-  // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
-  // double goal_pos1_deg = 120.0;
-
-  // Third Shot =======================================================
-
-  lsa.add(SpinFWAt(3500));
-  lsa.add({
-      // line up to stack
-      TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
-      DriveToPointFastPt(pre_stack3_pos)->withTimeout(2.0),
-
-      TurnToPoint(mid_stack3_pos)->withTimeout(2.0),
-      DriveToPointFastPt(mid_stack3_pos)->withTimeout(2.0),
-      new DelayCommand(200),
-      StartIntake,
-
-      // grab stack
-      TurnToPoint(after_stack3_pos)->withTimeout(2.0),
-      DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
-
-
-      // to shoot point
-      TurnToPoint(shoot_point1)->withTimeout(2.0),
-      DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
-      StopIntake,
-
-
-  });
-
-  lsa.add(TurnToHeading(125), 2.0);
-  lsa.add(AUTO_AIM, 1.0);
-  lsa.add(WaitForFW, 1.0);
-  lsa.add(ShootDisk);
-  lsa.add_delay(2000);
-  lsa.add(ShootDisk);
-  lsa.add_delay(2200);
-  lsa.add(CLEAR_DISKS);
-  lsa.add_delay(600);
-
-
-  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 47.0};
-  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 37.0};
-  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 29.0};
-
-  Vector2D::point_t lineup_disk2_pos = {.x = 73.0, .y = 41.0};
-  Vector2D::point_t lineup_disk3_pos = {.x = 73.0, .y = 32.0};
-
-  // Second Shot =======================================================
-  lsa.add(SpinFWAt(3500));
-  lsa.add({
-      
-
-      // First
-      TurnToPoint(disk1_pos)->withTimeout(2.0),
-      StartIntake,
-      DriveToPointFastPt(disk1_pos)->withTimeout(2.0),
-
-      // Second
-      DriveToPointFastPtRev(lineup_disk2_pos)->withTimeout(2.0),
-      TurnToPoint(disk2_pos)->withTimeout(2.0),
-      DriveToPointFastPt(disk2_pos)->withTimeout(2.0),
-
-      // Third
-      DriveToPointFastPtRev(lineup_disk3_pos)->withTimeout(2.0),
-      TurnToPoint(disk3_pos)->withTimeout(2.0),
-      DriveToPointFastPt(disk3_pos)->withTimeout(2.0),
-  });
-
-  // go shoot
-  //  Vector2D::point_t disk3_pos = {.x = 86.0, .y = 27.0};
-  Vector2D::point_t halfway = {.x = 75, .y = 39}; // turn here
-  Vector2D::point_t shoot_point2 = {.x = 62, .y = 53};
-
-  lsa.add({
-      DriveToPointFastPtRev(halfway)->withTimeout(2.0),
-      StopIntake,
-      TurnToPoint(shoot_point2)->withTimeout(2.0),
-      DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
-  });
-  
-
-  lsa.add(AUTO_AIM, 1.0);
-  lsa.add(TurnToHeading(125), 2.0);
-  lsa.add(PrintOdom);
-  lsa.add(WaitForFW, 1.0);
-  lsa.add(ShootDisk);
-  lsa.add(WaitForFW, 1.0);
-  lsa.add_delay(600);
-  lsa.add(ShootDisk);
-  lsa.add(WaitForFW, 1.0);
-  lsa.add_delay(1000);
-  lsa.add(CLEAR_DISKS);
-  lsa.add_delay(600);
-
-
-  // Line up to 3 stack
-  Vector2D::point_t pre_op_lineup = {.x = 43.6, .y = 17.05};
-  lsa.add({
-      TurnToPoint(pre_op_lineup)->withTimeout(2.0),
-      DriveToPointFastPt(pre_op_lineup)->withTimeout(2.0),
-      TurnToHeading(130)->withTimeout(2.0),
-  });
-
-  // lsa.add(PrintOdomContinous, 60.0);
-  return lsa;
-}
 
 /*
 Skills loader side
@@ -406,87 +204,49 @@ Map from page 40 of the game manual
 
 CommandController prog_skills_loader_side()
 {
+  target_red = true;
   flapup_solenoid.set(false);
-  position_t start_pos = position_t{.x = 32.0, .y = 12.2, .rot = -90};
+  position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
+
+  position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
 
   CommandController lss;
   lss.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
-  // lss.add(PrintOdomContinous);
 
-  static const double roller_power = .5;
   // spin -90 degree roller
-  Vector2D::point_t corner_disk_point = {.x = 8, .y = 12};
-  lss.add({
+  lss.add(new SpinRollerCommand(roller_in_pos), 5.0);
+  lss.add(DriveForwardFast(6, reverse));
 
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(roller_power, roller_power);return false; }))
-          ->withTimeout(0.65),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(0, 0);return true; })),
-      (new OdomSetPosition(odometry_sys, {.x = 32.0, .y = 4.16, .rot = -90})),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
-          ->withTimeout(0.25),
-
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(roller_power, roller_power);return false; }))
-          ->withTimeout(0.65),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(0, 0);return true; })),
-      (new OdomSetPosition(odometry_sys, {.x = 32.0, .y = 4.16, .rot = -90})),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
-          ->withTimeout(0.25),
-
-      DriveForwardFast(4, reverse), // #4
-  });
+  Vector2D::point_t corner_disk_point = {.x = 10, .y = 12};
 
   // intake corner disk
   lss.add({
       TurnToPoint(corner_disk_point)->withTimeout(1.5), // #5
       StartIntake,                                      // #6
-      DriveToPointSlowPt(corner_disk_point),            // #7
-      DriveForwardFast(4, reverse),                     // #8
-      new DelayCommand(1000),                           // #9
+      DriveToPointSlowPt(corner_disk_point)->withTimeout(1.5),            // #7
+      DriveForwardFast(4, reverse)->withTimeout(1.5),                     // #8
       StopIntake                                        // #10
   });
-  lss.add(PrintOdom);
 
   Vector2D::point_t shoot_point = {.x = 10.5, .y = 93};
 
   // align to 180 degree roller
-  lss.add(new SpinRPMCommand(flywheel_sys, 3300)); // #21
+  lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #21
+
+  Vector2D::point_t roller_out_pos2 = {.x = 14, .y = 33};
+  position_t roller_in_pos2 = {.x = 4.20, .y = 33, .rot = 180};
 
   lss.add({
-      TurnToHeading(90)->withTimeout(1.5),  // #11
-      DriveToPointFast(12, 35),             // #12
+      TurnToPoint(roller_out_pos2)->withTimeout(1.5),
+      DriveToPointFastPt(roller_out_pos2)->withTimeout(1.5),             // #12
       TurnToHeading(180)->withTimeout(1.5), // #13
 
+
       // spin 180 degree roller
-      DriveForwardFast(2, fwd), // #14
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(+roller_power, +roller_power);return false; }))
-          ->withTimeout(0.5),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(0, 0);return true; })),
-      new OdomSetPosition(odometry_sys, {.x = 5.25, .y = 32.82, .rot = 180}),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
-          ->withTimeout(0.25),
-
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(+roller_power, +roller_power);return false; }))
-          ->withTimeout(0.5),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(0, 0);return true; })),
-      new OdomSetPosition(odometry_sys, {.x = 5.25, .y = 32.82, .rot = 180}),
-      (new FunctionCommand([]()
-                           {drive_sys.drive_tank(-roller_power, -roller_power);return false; }))
-          ->withTimeout(0.25),
-      DriveForwardFast(8, reverse), // #16
-
+      new SpinRollerCommand(roller_in_pos2),
       // drive to shoot point
       TurnToPoint(shoot_point)->withTimeout(1.5),       // #17
+      //PrintOdomContinous->withTimeout(18888),
       DriveToPointFastPt(shoot_point)->withTimeout(2.0) // #19
   });
 
@@ -501,8 +261,8 @@ CommandController prog_skills_loader_side()
   // lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
 
   // DISKS AGAINST L PIECE
-  Vector2D::point_t disk_pos1 = {.x = 24.0, .y = 84.0};
-  Vector2D::point_t disk_pos2 = {.x = 33.0, .y = 84.0};
+  Vector2D::point_t disk_pos1 = {.x = 24.0, .y = 83.0};
+  Vector2D::point_t disk_pos2 = {.x = 33.0, .y = 83.0};
   Vector2D::point_t disk_pos3 = {.x = 42.0, .y = 83.0};
 
   Vector2D::point_t disk_prep_pos1 = {.x = 25, .y = 70};
@@ -530,9 +290,13 @@ CommandController prog_skills_loader_side()
   });
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #40
 
+
+  Vector2D::point_t pre_shoot_point_other = {.x = 10.5, .y = 70};
   Vector2D::point_t shoot_point_other = {.x = 10.5, .y = 93};
 
-  lss.add(TurnToPoint(shoot_point), 1.5);              // #37
+  lss.add(TurnToPoint(pre_shoot_point_other), 1.5);              // #37
+  lss.add(DriveToPointFastPt(pre_shoot_point_other), 4.0); // #38
+  lss.add(TurnToPoint(shoot_point_other), 1.5);              // #37
   lss.add(DriveToPointFastPt(shoot_point_other), 4.0); // #38
 
   lss.add(TurnToHeading(69), 0.5); // #39
@@ -599,7 +363,7 @@ CommandController prog_skills_loader_side()
   lss.add(TurnToPoint(endgame_point), 1.0);        // [measure]
   lss.add(DriveToPointFastPt(endgame_point), 4.0); //[measure]
   lss.add(TurnToHeading(48), 3.0);
-  //draw_image();
+  // draw_image();
 
   //// lss.add(PrintOdomContinous);
 
@@ -647,4 +411,200 @@ CommandController prog_skills_loader_side()
   lss.add(PrintOdom);
 
   return lss;
+}
+
+/*
+Auto loader side
+
+Map from page 40 of the game manual
+
+(R) = Red Hoop, Blue Zone
+(B) = Blue Hoop, Red Zone
+ *  = Starting position for this auto
+
+           ^ 180 degrees
+  +-------------------+
+  |        |____| (R) |
+  |___           |    |
+  | * |          |    |
+  |   |          |    |  --> 90 degrees
+  |   |          |_*__|
+  |___|  ____         |
+  |(B)  |____|        |
+  +-------------------+
+           v 0 degrees
+
+ Human Instructions:
+ Align robot to specified place and angle using LOADER SIDE AUTO jig
+*/
+void add_auto_roller(CommandController &cc, double roller_power, position_t set_pos)
+{
+  cc.add(new FunctionCommand([=]()
+                             {drive_sys.drive_tank(roller_power, roller_power);return false; }),
+         0.45);
+  cc.add(new DriveStopCommand(drive_sys));
+  cc.add(new OdomSetPosition(odometry_sys, set_pos));
+  // cc.add(new FunctionCommand([=](){drive_sys.drive_tank(-roller_power*.5, -roller_power*.5);return false; }), 0.15);
+  cc.add(DriveForwardFast(7, reverse));
+}
+
+CommandController auto_loader_side()
+{
+
+  CommandController lsa;
+  flapup_solenoid.set(true);
+  position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
+  position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
+
+  // Rollers =======================================================
+  lsa.add(new OdomSetPosition(odometry_sys, start_pos));
+  lsa.add(new SpinRollerCommand(roller_in_pos), 5.0);
+  // lsa.add(new OdomSetPosition(odometry_sys, start_pos));
+  lsa.add(DriveForwardFast(2, reverse));
+  Vector2D::point_t roller_out_pos = {.x = 36, .y = 16.0};
+  lsa.add(DriveToPointFastPtRev(roller_out_pos));
+
+  Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
+  Vector2D::point_t shoot_point1 = {.x = 64, .y = 54};
+
+  // First Shot =======================================================
+  lsa.add(SpinFWAt(3150));
+  lsa.add({
+      // Wa
+      TurnToPoint(out_of_way_pos1)->withTimeout(2.0),
+      DriveToPointFastPt(out_of_way_pos1)->withTimeout(2.0),
+
+      TurnToPoint(shoot_point1)->withTimeout(2.0),
+      DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
+
+  });
+
+  lsa.add(TurnToHeading(120.6), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+
+  lsa.add(TurnToHeading(120.6), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(CLEAR_DISKS);
+
+  auto lerp_point = [](Vector2D::point_t a, Vector2D::point_t b, float t)
+  {
+    return Vector2D::point_t{.x = a.x * (1 - t) + b.x * t, .y = a.y * (1 - t) + b.y * t};
+  };
+
+  Vector2D::point_t pre_stack3_pos = {.x = 70.0, .y = 48.0};
+  Vector2D::point_t after_stack3_pos = {.x = 44.0, .y = 20.0};
+
+  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .2);
+
+  // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
+  // double goal_pos1_deg = 120.0;
+
+  // Third Shot =======================================================
+
+  lsa.add(SpinFWAt(3450));
+  lsa.add({
+      // line up to stack
+      TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
+      DriveToPointFastPt(pre_stack3_pos)->withTimeout(2.0),
+
+      TurnToPoint(mid_stack3_pos)->withTimeout(2.0),
+      DriveToPointFastPt(mid_stack3_pos)->withTimeout(2.0),
+      new DelayCommand(200),
+      StartIntake,
+
+      // grab stack
+      TurnToPoint(after_stack3_pos)->withTimeout(2.0),
+      DriveToPointSlowPt(after_stack3_pos)->withTimeout(2.0),
+
+      // to shoot point
+      TurnToPoint(shoot_point1)->withTimeout(2.0),
+      DriveToPointFastPt(shoot_point1)->withTimeout(2.0),
+      StopIntake,
+
+  });
+
+  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+
+  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+
+  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(CLEAR_DISKS);
+  lsa.add_delay(600);
+
+  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 47.0};
+  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 37.0};
+  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 30.0};
+
+  Vector2D::point_t lineup_disk2_pos = {.x = 73.0, .y = 41.0};
+  Vector2D::point_t lineup_disk3_pos = {.x = 73.0, .y = 32.0};
+
+  // Second Shot =======================================================
+  lsa.add(SpinFWAt(3500));
+  lsa.add({
+
+      // First
+      TurnToPoint(disk1_pos)->withTimeout(2.0),
+      StartIntake,
+      DriveToPointFastPt(disk1_pos)->withTimeout(2.0),
+
+      // Second
+      DriveToPointFastPtRev(lineup_disk2_pos)->withTimeout(2.0),
+      TurnToPoint(disk2_pos)->withTimeout(2.0),
+      DriveToPointFastPt(disk2_pos)->withTimeout(2.0),
+
+      // Third
+      DriveToPointFastPtRev(lineup_disk3_pos)->withTimeout(2.0),
+      TurnToPoint(disk3_pos)->withTimeout(2.0),
+      DriveToPointFastPt(disk3_pos)->withTimeout(2.0),
+  });
+
+  // go shoot
+  //  Vector2D::point_t disk3_pos = {.x = 86.0, .y = 27.0};
+  Vector2D::point_t halfway = {.x = 75, .y = 39}; // turn here
+  Vector2D::point_t shoot_point2 = {.x = 62, .y = 53};
+
+  lsa.add({
+      DriveToPointFastPtRev(halfway)->withTimeout(2.0),
+      StopIntake,
+      TurnToPoint(shoot_point2)->withTimeout(2.0),
+      DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
+  });
+
+  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+
+  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(WaitForFW, 1.0);
+  lsa.add(ShootDisk);
+  lsa.add(WaitForFW, 1.0);
+
+  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(AUTO_AIM, 1.0);
+  lsa.add(CLEAR_DISKS);
+  lsa.add_delay(600);
+
+  // Line up to 3 stack
+  Vector2D::point_t pre_op_lineup = {.x = 43.6, .y = 24.05};
+  lsa.add({
+      TurnToPoint(pre_op_lineup)->withTimeout(2.0),
+      DriveToPointFastPt(pre_op_lineup)->withTimeout(2.0),
+      TurnToHeading(130)->withTimeout(2.0),
+  });
+
+  // lsa.add(PrintOdomContinous, 60.0);
+  return lsa;
 }
