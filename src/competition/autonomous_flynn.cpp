@@ -176,7 +176,6 @@ void pleasant_opcontrol()
   }
 }
 
-
 /*
 Skills loader side
 
@@ -221,11 +220,11 @@ CommandController prog_skills_loader_side()
 
   // intake corner disk
   lss.add({
-      TurnToPoint(corner_disk_point)->withTimeout(1.5), // #5
-      StartIntake,                                      // #6
-      DriveToPointSlowPt(corner_disk_point)->withTimeout(1.5),            // #7
-      DriveForwardFast(4, reverse)->withTimeout(1.5),                     // #8
-      StopIntake                                        // #10
+      TurnToPoint(corner_disk_point)->withTimeout(1.5),        // #5
+      StartIntake,                                             // #6
+      DriveToPointSlowPt(corner_disk_point)->withTimeout(1.5), // #7
+      DriveForwardFast(4, reverse)->withTimeout(1.5),          // #8
+      StopIntake                                               // #10
   });
 
   Vector2D::point_t shoot_point = {.x = 10.5, .y = 93};
@@ -238,15 +237,14 @@ CommandController prog_skills_loader_side()
 
   lss.add({
       TurnToPoint(roller_out_pos2)->withTimeout(1.5),
-      DriveToPointFastPt(roller_out_pos2)->withTimeout(1.5),             // #12
-      TurnToHeading(180)->withTimeout(1.5), // #13
-
+      DriveToPointFastPt(roller_out_pos2)->withTimeout(1.5), // #12
+      TurnToHeading(180)->withTimeout(1.5),                  // #13
 
       // spin 180 degree roller
       new SpinRollerCommand(roller_in_pos2),
       // drive to shoot point
-      TurnToPoint(shoot_point)->withTimeout(1.5),       // #17
-      //PrintOdomContinous->withTimeout(18888),
+      TurnToPoint(shoot_point)->withTimeout(1.5), // #17
+      // PrintOdomContinous->withTimeout(18888),
       DriveToPointFastPt(shoot_point)->withTimeout(2.0) // #19
   });
 
@@ -290,14 +288,13 @@ CommandController prog_skills_loader_side()
   });
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #40
 
-
   Vector2D::point_t pre_shoot_point_other = {.x = 10.5, .y = 70};
   Vector2D::point_t shoot_point_other = {.x = 10.5, .y = 93};
 
-  lss.add(TurnToPoint(pre_shoot_point_other), 1.5);              // #37
+  lss.add(TurnToPoint(pre_shoot_point_other), 1.5);        // #37
   lss.add(DriveToPointFastPt(pre_shoot_point_other), 4.0); // #38
-  lss.add(TurnToPoint(shoot_point_other), 1.5);              // #37
-  lss.add(DriveToPointFastPt(shoot_point_other), 4.0); // #38
+  lss.add(TurnToPoint(shoot_point_other), 1.5);            // #37
+  lss.add(DriveToPointFastPt(shoot_point_other), 4.0);     // #38
 
   lss.add(TurnToHeading(69), 0.5); // #39
 
@@ -311,14 +308,14 @@ CommandController prog_skills_loader_side()
 
   // Arrow 3 -------------------------
 
-  Vector2D::point_t start_of_line = {.x = 36, .y = 57};
-  Vector2D::point_t end_of_line = {.x = 63, .y = 84};
-  Vector2D::point_t out_of_way_point = {.x = 90, .y = 124};
+  Vector2D::point_t start_of_line = {.x = 34.5, .y = 49};
+  Vector2D::point_t end_of_line = {.x = 63, .y = 82};
+  Vector2D::point_t out_of_way_point = {.x = 73, .y = 123};
 
   // go to line and collect line
   lss.add({
       DriveToPointFastPtRev(disk_prep_pos1)->withTimeout(2.0), // #27
-
+      StartIntake,
       // Start of line
       TurnToPoint(start_of_line), // #39
       // StartIntake,                       // #40
@@ -326,30 +323,29 @@ CommandController prog_skills_loader_side()
       // DriveForwardFast(2, reverse),      // #42
 
       // Drive to End of line
-      // TurnToPoint(end_of_line),        // #43
-      // DriveToPointSlowPt(end_of_line), // $44
+      TurnToPoint(end_of_line),        // #43
+      DriveToPointSlowPt(end_of_line), // $44
 
-      // StopIntake, // #45
-
-      TurnToPoint(out_of_way_point),       // #47
-      DriveToPointFastPt(out_of_way_point) // #48
+      StopIntake, // #45
   });
 
+  lss.add(TurnToPoint(out_of_way_point), 2.5);        // #49
+  lss.add(DriveToPointFastPt(out_of_way_point), 2.5); // #50
+
   // drive to shooting point
-  // Vector2D::point_t shoot_point2 = {.x = 56, .y = 128};
-  // lss.add(TurnToPoint(shoot_point2));        // #49
-  // lss.add(DriveToPointFastPt(shoot_point2)); // #50
+  Vector2D::point_t shoot_point2 = {.x = 50, .y = 123};
+  lss.add(TurnToPoint(shoot_point2), 1.5);        // #49
+  lss.add(DriveToPointFastPt(shoot_point2), 1.5); // #50
 
   // face hoop and fire
-  // lss.add(TurnToHeading(180));                     // #51
-  // lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #52
+  lss.add(TurnToHeading(180));                     // #51
+  
+  add_single_shot_cmd(lss);
+  add_single_shot_cmd(lss);
+  add_single_shot_cmd(lss);
+  lss.add(DriveForwardFast(6, reverse));
 
-  // add_single_shot_cmd(lss);
-  // add_single_shot_cmd(lss);
-  // add_single_shot_cmd(lss);
-  // //lss.add(DriveForwardFast(6, reverse));
-
-  // lss.add(TurnToHeading(0));
+  lss.add(TurnToHeading(0));
   //  lss.add(new WallAlignCommand(drive_sys, odometry_sys, NO_CHANGE, 140 - bumper_dist, -90, -1, 2.0));
 
   // Vector2D::point_t out_of_way_point2 = {.x = 95, .y = 122};
