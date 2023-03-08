@@ -51,6 +51,8 @@ inertial imu(PORT4);
 
 // ======== UTILS ========
 
+
+
 // Drive Tuning
 PID::pid_config_t drive_pid_cfg = {
     .p = .035,
@@ -75,6 +77,16 @@ MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
     .accel = 100,
     .pid_cfg = drive_pid_cfg,
     .ff_cfg = drive_ff_cfg};
+
+
+MotionController::m_profile_cfg_t drive_super_fast_mprofile_cfg = {
+    .max_v = 40,  // MAX = 48,
+    .accel = 150, // MAX = 200
+    .pid_cfg = drive_pid_cfg,
+    .ff_cfg = drive_ff_cfg};
+
+
+
 
 // Turn Tuning
 PID::pid_config_t turn_pid_cfg = {
@@ -108,7 +120,7 @@ FeedForward::ff_config_t turn_ff_cfg =
 //     .ff_cfg = turn_ff_cfg
 // };
 
-MotionController drive_fast_mprofile(drive_fast_mprofile_cfg), drive_slow_mprofile(drive_slow_mprofile_cfg);
+MotionController drive_fast_mprofile(drive_fast_mprofile_cfg), drive_slow_mprofile(drive_slow_mprofile_cfg), drive_super_fast_mprofile(drive_fast_mprofile_cfg);
 // MotionController turn_fast_mprofile(turn_fast_mprofile_cfg), turn_slow_mprofile(turn_slow_mprofile_cfg);
 
 robot_specs_t config = {
@@ -148,7 +160,7 @@ vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
 
-bool target_red = false;
+bool target_red = true;
 bool vision_enabled = true;
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

@@ -67,8 +67,8 @@ bool SpinRollerCommand::run()
      (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd))->withTimeout(0.5),
      (new DelayCommand(100)),
      (new OdomSetPosition(odometry_sys, align_pos)),
-     //(new DriveForwardCommand(drive_sys, drive_slow_mprofile, 6, directionType::rev)),
-     (new DriveToPointCommand(drive_sys, *config.turn_feedback, start_pose.x, start_pose.y, fwd, 1.0)),
+     (new DriveForwardCommand(drive_sys, drive_slow_mprofile, 6, directionType::rev)),
+     //(new DriveToPointCommand(drive_sys, *config.turn_feedback, start_pose.x, start_pose.y, fwd, 1.0)),
      (new TurnToHeadingCommand(drive_sys, *config.turn_feedback, start_pose.rot, 1.0))
   });
 

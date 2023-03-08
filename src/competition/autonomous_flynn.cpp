@@ -87,7 +87,7 @@ void test_stuff()
 
   vex::task odom_print(print_odom);
 
-  CommandController mine = prog_skills_loader_side();
+  CommandController mine = auto_loader_side();//prog_skills_loader_side();
   mine.run();
   return;
   //
@@ -241,9 +241,9 @@ CommandController prog_skills_loader_side()
 
       StopIntake,
 
-
       // spin 180 degree roller
-      new SpinRollerCommand(roller_in_pos2),
+      (new SpinRollerCommand(roller_in_pos2))->withTimeout(6.0),
+      DriveForwardFast(4.0, reverse)->withTimeout(1.5),
       // drive to shoot point
       TurnToPoint(shoot_point)->withTimeout(1.5), // #17
       // PrintOdomContinous->withTimeout(18888),
@@ -267,9 +267,9 @@ CommandController prog_skills_loader_side()
   // lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
 
   // DISKS AGAINST L PIECE
-  Vector2D::point_t disk_pos1 = {.x = 24.0, .y = 83.0};
-  Vector2D::point_t disk_pos2 = {.x = 32.0, .y = 83.0};
-  Vector2D::point_t disk_pos3 = {.x = 42.0, .y = 83.0};
+  Vector2D::point_t disk_pos1 = {.x = 24.0, .y = 81.5};
+  Vector2D::point_t disk_pos2 = {.x = 32.0, .y = 81.5};
+  Vector2D::point_t disk_pos3 = {.x = 42.0, .y = 81.5};
 
   Vector2D::point_t disk_prep_pos1 = {.x = 25, .y = 70};
   Vector2D::point_t disk_prep_pos2 = {.x = 28, .y = 70};
@@ -296,26 +296,33 @@ CommandController prog_skills_loader_side()
   });
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #40
 
-  Vector2D::point_t pre_shoot_point_other = {.x = 10.5, .y = 70};
-  Vector2D::point_t shoot_point_other = {.x = 10.5, .y = 90};
+  // Vector2D::point_t pre_shoot_point_other = {.x = 10.5, .y = 70};
+  // Vector2D::point_t shoot_point_other = {.x = 10.5, .y = 90};
 
-  lss.add(TurnToPoint(pre_shoot_point_other), 1.5);        // #37
-  lss.add(DriveToPointFastPt(pre_shoot_point_other), 4.0); // #38
-  lss.add(TurnToPoint(shoot_point_other), 1.5);            // #37
-  lss.add(DriveToPointFastPt(shoot_point_other), 4.0);     // #38
+  // lss.add(TurnToPoint(pre_shoot_point_other), 1.5);        // #37
+  // lss.add(DriveToPointFastPt(pre_shoot_point_other), 4.0); // #38
+  // lss.add(TurnToPoint(shoot_point_other), 1.5);            // #37
+  // lss.add(DriveToPointFastPt(shoot_point_other), 4.0);     // #38
+  lss.add(new FlapDownCommand());
 
-  lss.add(TurnToHeading(75), 0.5); // #39
+  // lss.add(TurnToHeading(75), 0.5); // #39
+  Vector2D::point_t hoop_point_early = {.x = 17, .y = 123};
+  lss.add(TurnToPoint(hoop_point_early));
 
-  lss.add(WaitForFW, 1.0);
-  lss.add(ShootDisk);
-  lss.add_delay(1000);
+  add_single_shot_cmd(lss);
+  add_single_shot_cmd(lss);
+  add_single_shot_cmd(lss);
 
-  lss.add(WaitForFW, 1.0);
-  lss.add(ShootDisk);
-  lss.add_delay(1000);
+  // lss.add(WaitForFW, 1.0);
+  // lss.add(ShootDisk);
+  // lss.add_delay(750);
 
-  lss.add(WaitForFW, 1.0);
-  lss.add(CLEAR_DISKS);
+  // lss.add(WaitForFW, 1.0);
+  // lss.add(ShootDisk);
+  // lss.add_delay(750);
+
+  // lss.add(WaitForFW, 1.0);
+  // lss.add(CLEAR_DISKS);
 
   // lss.add(DriveForwardFast(4, reverse));
   //  Wall align
@@ -324,35 +331,44 @@ CommandController prog_skills_loader_side()
   // Arrow 3 -------------------------
 
   Vector2D::point_t start_of_line = {.x = 34.5, .y = 49};
-  Vector2D::point_t end_of_line = {.x = 63, .y = 82};
+  Vector2D::point_t end_of_line = {.x = 65, .y = 82};
   Vector2D::point_t out_of_way_point = {.x = 73, .y = 118};
 
   // go to line and collect line
   lss.add({
-      DriveToPointFastPtRev(disk_prep_pos1)->withTimeout(2.0), // #27
+      // DriveToPointFastPtRev(disk_prep_pos1)->withTimeout(2.0), // #27
       StartIntake,
       // Start of line
-      TurnToPoint(start_of_line), // #39
+      TurnToPoint(start_of_line)->withTimeout(2.0), // #39
       // StartIntake,                       // #40
-      DriveToPointFastPt(start_of_line), // #41
+      DriveToPointFastPt(start_of_line)->withTimeout(2.0), // #41
       // DriveForwardFast(2, reverse),      // #42
 
       // Drive to End of line
-      TurnToPoint(end_of_line),        // #43
-      DriveToPointFastPt(end_of_line), // $44
+      TurnToPoint(end_of_line)->withTimeout(2.0),        // #43
+      DriveToPointFastPt(end_of_line)->withTimeout(2.0), // $44
 
   });
 
+  Vector2D::point_t hoop_point = {.x = 17, .y = 123};
+  lss.add(TurnToPoint(hoop_point), 1.0);
+
+  lss.add(new FlapDownCommand());
+  add_single_shot_cmd(lss);
+  add_single_shot_cmd(lss);
+  add_single_shot_cmd(lss);
+
+  /*
   lss.add(TurnToPoint(out_of_way_point), 2.5);        // #49
   lss.add(DriveToPointFastPt(out_of_way_point), 2.5); // #50
+  lss.add(StopIntake);
 
   // drive to shooting point
   Vector2D::point_t shoot_point3 = {.x = 46, .y = 118};
   lss.add(TurnToPoint(shoot_point3), 1.5);        // #49
   lss.add(DriveToPointFastPt(shoot_point3), 1.5); // #50
-  lss.add(StopIntake);
   // face hoop and fire
-  lss.add(TurnToHeading(188)); // #51
+  lss.add(TurnToHeading(190)); // #51
 
   lss.add(WaitForFW, 1.0);
   lss.add(ShootDisk);
@@ -368,7 +384,7 @@ CommandController prog_skills_loader_side()
 
   Vector2D::point_t backup_point = {.x = 72, .y = 110};
   lss.add(DriveToPointFastPtRev(backup_point));
-
+  */
 
   // Arrow 4 -------------------------
   Vector2D::point_t endgame_point = {.x = 116.36, .y = 106.23};
@@ -376,7 +392,6 @@ CommandController prog_skills_loader_side()
   lss.add(TurnToPoint(endgame_point), 1.0);        // [measure]
   lss.add(DriveToPointFastPt(endgame_point), 4.0); //[measure]
   lss.add(TurnToHeading(48), 3.0);
-
 
   lss.add(new EndgameCommand(endgame_solenoid));
   lss.add(PrintOdom);
