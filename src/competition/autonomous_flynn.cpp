@@ -31,7 +31,9 @@
 // #define StopIntake (new StartIntakeCommand(intake, -INTAKE_VOLT))
 #define StopIntake (new StopIntakeCommand(intake))
 
-#define VisionAim (new VisionAimCommand(true))
+int glbl_vision_center = 135;
+
+#define VisionAim (new VisionAimCommand(true, glbl_vision_center))
 #define WaitForFW (new WaitUntilUpToSpeedCommand(flywheel_sys, 10))
 #define ShootDisk (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 #define SpinFWAt(rpm) (new SpinRPMCommand(flywheel_sys, rpm))
@@ -43,7 +45,7 @@
 #define TRI_SHOT_VOLT 2
 #define TRI_SHOT_RECOVER_DELAY_MS 200
 
-#define AUTO_AIM (new VisionAimCommand())
+#define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center))
 #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
 #define TRI_SHOT_DISK (new ShootCommand(intake, TRI_SHOT_TIME, TRI_SHOT_VOLT))
 
@@ -87,7 +89,7 @@ void test_stuff()
 
   vex::task odom_print(print_odom);
 
-  CommandController mine = auto_loader_side();
+  CommandController mine = prog_skills_loader_side();
   mine.run();
   return;
   //
@@ -124,7 +126,7 @@ void pleasant_opcontrol()
 
   int i = 0;
 
-  VisionAimCommand visaim;
+  VisionAimCommand visaim(false, 145);
 
   timer loop_timer;
   loop_timer.reset();
@@ -134,16 +136,6 @@ void pleasant_opcontrol()
   while (true)
   {
     i++;
-    if (i % 5 == 0)
-    {
-      main_controller.Screen.setCursor(0, 0);
-      main_controller.Screen.clearScreen();
-      main_controller.Screen.print("fw rpm: %f", flywheel_sys.getRPM());
-      main_controller.Screen.setCursor(2, 0);
-      main_controller.Screen.print("fw temp: %.1ff", flywheel.temperature(vex::fahrenheit));
-      main_controller.Screen.setCursor(4, 0);
-      main_controller.Screen.print("bat fw : %.2fv %.2fv", Brain.Battery.voltage(vex::volt), flywheel.voltage(volt));
-    }
 
     // ========== DRIVING CONTROLS ==========
     if (main_controller.ButtonA.pressing())
@@ -203,6 +195,7 @@ Map from page 40 of the game manual
 
 CommandController prog_skills_loader_side()
 {
+  glbl_vision_center = 125;
   target_red = true;
   flapup_solenoid.set(false);
   position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
@@ -431,12 +424,15 @@ CommandController auto_loader_side()
 {
 
   CommandController lsa;
-  flapup_solenoid.set(true);
+
+  flap_down();
+
   position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
-  position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
+  position_t roller_in_pos = {.x = 36.0, .y = 5.16, .rot = -90};
 
   // Rollers =======================================================
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
+  lsa.add(SpinFWAt(3250));
   lsa.add(new SpinRollerCommand(roller_in_pos), 5.0);
   // lsa.add(new OdomSetPosition(odometry_sys, start_pos));
   lsa.add(DriveForwardFast(2, reverse));
@@ -444,10 +440,9 @@ CommandController auto_loader_side()
   lsa.add(DriveToPointFastPtRev(roller_out_pos));
 
   Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
-  Vector2D::point_t shoot_point1 = {.x = 64, .y = 54};
+  Vector2D::point_t shoot_point1 = {.x = 65, .y = 50};
 
   // First Shot =======================================================
-  lsa.add(SpinFWAt(3150));
   lsa.add({
       // Wa
       TurnToPoint(out_of_way_pos1)->withTimeout(2.0),
@@ -458,7 +453,7 @@ CommandController auto_loader_side()
 
   });
 
-  lsa.add(TurnToHeading(125.6), 2.0);
+  lsa.add(TurnToHeading(126.6), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
@@ -468,6 +463,7 @@ CommandController auto_loader_side()
   lsa.add(WaitForFW, 1.0);
   lsa.add(CLEAR_DISKS);
 
+  
   auto lerp_point = [](Vector2D::point_t a, Vector2D::point_t b, float t)
   {
     return Vector2D::point_t{.x = a.x * (1 - t) + b.x * t, .y = a.y * (1 - t) + b.y * t};
@@ -476,7 +472,7 @@ CommandController auto_loader_side()
   Vector2D::point_t pre_stack3_pos = {.x = 70.0, .y = 48.0};
   Vector2D::point_t after_stack3_pos = {.x = 44.0, .y = 20.0};
 
-  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .2);
+  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .6);
 
   // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
   // double goal_pos1_deg = 120.0;
@@ -522,9 +518,10 @@ CommandController auto_loader_side()
   lsa.add(CLEAR_DISKS);
   lsa.add_delay(600);
 
-  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 47.0};
-  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 37.0};
-  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 30.0};
+
+  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 46.0};
+  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 36.0};
+  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 27.0};
 
   Vector2D::point_t lineup_disk2_pos = {.x = 70.0, .y = 41.0};
   Vector2D::point_t lineup_disk3_pos = {.x = 70.0, .y = 32.0};
@@ -552,7 +549,7 @@ CommandController auto_loader_side()
   // go shoot
   //  Vector2D::point_t disk3_pos = {.x = 86.0, .y = 27.0};
   Vector2D::point_t halfway = {.x = 75, .y = 39}; // turn here
-  Vector2D::point_t shoot_point2 = {.x = 62, .y = 53};
+  Vector2D::point_t shoot_point2 = {.x = 64, .y = 51};
 
   lsa.add({
       DriveToPointFastPtRev(halfway)->withTimeout(2.0),

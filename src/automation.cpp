@@ -40,7 +40,7 @@ bool FlapDownCommand::run()
  * @param drive_sys the drive train that will allow us to apply pressure on the rollers
  * @param roller_motor The motor that will spin the roller
  */
-SpinRollerCommand::SpinRollerCommand(position_t my_align_pos) : align_pos(my_align_pos) {}
+SpinRollerCommand::SpinRollerCommand(position_t align_pos): align_pos(align_pos), roller_count(0) {}
 
 /**
  * Run roller controller to spin the roller to our color
@@ -50,29 +50,29 @@ SpinRollerCommand::SpinRollerCommand(position_t my_align_pos) : align_pos(my_ali
 
 bool SpinRollerCommand::run()
 {
+
   vexDelay(100);
   Pepsi cur_roller = scan_roller();
   printf("%s\n", cur_roller==RED?"red":cur_roller==BLUE?"blue":"neutral");
-  if((cur_roller == RED && target_red)
-    || (cur_roller == BLUE && !target_red))
+  if(vision_enabled && (cur_roller == RED && target_red)
+    || cur_roller == BLUE && !target_red)
   {
     drive_sys.stop();
     return true; 
   }
-
-  position_t start_pose = odometry_sys.get_position();
 
   CommandController cmd;
   cmd.add({
      (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd))->withTimeout(0.5),
      (new DelayCommand(100)),
      (new OdomSetPosition(odometry_sys, align_pos)),
-     (new DriveForwardCommand(drive_sys, drive_slow_mprofile, 6, directionType::rev)),
-     //(new DriveToPointCommand(drive_sys, *config.turn_feedback, start_pose.x, start_pose.y, fwd, 1.0)),
-     (new TurnToHeadingCommand(drive_sys, *config.turn_feedback, start_pose.rot, 1.0))
+     (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 6, directionType::rev))
   });
 
   cmd.run();
+
+  if(!vision_enabled && ++roller_count >= 2)
+    return true;
   
   return false;
 }
@@ -200,13 +200,12 @@ PID::pid_config_t vis_pid_cfg = {
 FeedForward::ff_config_t vis_ff_cfg = {
     .kS = 0.07};
 
-#define VISION_CENTER 135 // (higher ai too far right, lower aim left)
 #define MIN_AREA 500
 #define MAX_SPEED 0.5
-#define FALLBACK_MAX_DEGREES 35
+#define FALLBACK_MAX_DEGREES 35a
 
-VisionAimCommand::VisionAimCommand(bool odometry_fallback)
-    : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false)
+VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center)
+    : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false), vision_center(vision_center)
 {
 }
 
@@ -217,7 +216,6 @@ VisionAimCommand::VisionAimCommand(bool odometry_fallback)
  */
 bool VisionAimCommand::run()
 {
-  Brain.Screen.clearScreen(vex::blue);
   if (first_run)
   {
     stored_pos = odometry_sys.get_position();
@@ -228,7 +226,6 @@ bool VisionAimCommand::run()
   if (odometry_fallback &&
       (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES))
   {
-      Brain.Screen.clearScreen(vex::red);
 
     fallback_triggered = true;
     if (drive_sys.turn_to_heading(stored_pos.rot, 0.6))
@@ -280,7 +277,7 @@ bool VisionAimCommand::run()
   {
 
     // Update the PID loop & drive the robot
-    pidff.set_target(VISION_CENTER);
+    pidff.set_target(vision_center);
     pidff.set_limits(-MAX_SPEED, MAX_SPEED);
     double out = pidff.update(x_val);
 
