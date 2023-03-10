@@ -54,7 +54,7 @@ bool SpinRollerCommand::run()
   Pepsi cur_roller = scan_roller();
   printf("%s\n", cur_roller==RED?"red":cur_roller==BLUE?"blue":"neutral");
   if((cur_roller == RED && target_red)
-    || cur_roller == BLUE && !target_red)
+    || (cur_roller == BLUE && !target_red))
   {
     drive_sys.stop();
     return true; 
@@ -186,10 +186,10 @@ bool PrintOdomContinousCommand::run()
 }
 /**
  * Construct a StartIntakeCommand
- * @param colorSensor The color sensor being used
- * @param color The hue value of the color being detected
- * @param rollerMotor The rollor motor to spin the roller
- * @param error Error for color detection color+-error
+ * colorSensor The color sensor being used
+ * color The hue value of the color being detected
+ * rollerMotor The rollor motor to spin the roller
+ * error Error for color detection color+-error
  */
 PID::pid_config_t vis_pid_cfg = {
     .p = .003,
@@ -200,10 +200,10 @@ PID::pid_config_t vis_pid_cfg = {
 FeedForward::ff_config_t vis_ff_cfg = {
     .kS = 0.07};
 
-#define VISION_CENTER 145
+#define VISION_CENTER 135 // (higher ai too far right, lower aim left)
 #define MIN_AREA 500
 #define MAX_SPEED 0.5
-#define FALLBACK_MAX_DEGREES 10
+#define FALLBACK_MAX_DEGREES 35
 
 VisionAimCommand::VisionAimCommand(bool odometry_fallback)
     : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false)
@@ -217,7 +217,7 @@ VisionAimCommand::VisionAimCommand(bool odometry_fallback)
  */
 bool VisionAimCommand::run()
 {
-
+  Brain.Screen.clearScreen(vex::blue);
   if (first_run)
   {
     stored_pos = odometry_sys.get_position();
@@ -228,6 +228,8 @@ bool VisionAimCommand::run()
   if (odometry_fallback &&
       (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES))
   {
+      Brain.Screen.clearScreen(vex::red);
+
     fallback_triggered = true;
     if (drive_sys.turn_to_heading(stored_pos.rot, 0.6))
       return true;

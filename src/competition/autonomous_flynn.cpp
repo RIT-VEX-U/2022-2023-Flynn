@@ -87,7 +87,7 @@ void test_stuff()
 
   vex::task odom_print(print_odom);
 
-  CommandController mine = auto_loader_side();//prog_skills_loader_side();
+  CommandController mine = auto_loader_side();
   mine.run();
   return;
   //
@@ -229,7 +229,7 @@ CommandController prog_skills_loader_side()
   Vector2D::point_t shoot_point = {.x = 10.5, .y = 93};
 
   // align to 180 degree roller
-  lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #21
+  lss.add(new SpinRPMCommand(flywheel_sys, 2900)); // #21
 
   Vector2D::point_t roller_out_pos2 = {.x = 14, .y = 33};
   position_t roller_in_pos2 = {.x = 4.20, .y = 33, .rot = 180};
@@ -251,7 +251,9 @@ CommandController prog_skills_loader_side()
   });
 
   // Shoot
-  lss.add(TurnToHeading(75), 0.5); // #20
+  lss.add(TurnToHeading(81), 0.85); // #20
+
+  lss.add_delay(1000);
 
   lss.add(WaitForFW, 1.0);
   lss.add(ShootDisk);
@@ -273,7 +275,7 @@ CommandController prog_skills_loader_side()
 
   Vector2D::point_t disk_prep_pos1 = {.x = 25, .y = 70};
   Vector2D::point_t disk_prep_pos2 = {.x = 28, .y = 70};
-  Vector2D::point_t disk_prep_pos3 = {.x = 31, .y = 70};
+  Vector2D::point_t disk_prep_pos3 = {.x = 33, .y = 70};
 
   // disks against L piece
   lss.add({
@@ -350,8 +352,9 @@ CommandController prog_skills_loader_side()
 
   });
 
-  Vector2D::point_t hoop_point = {.x = 17, .y = 123};
+  Vector2D::point_t hoop_point = {.x = 17, .y = 113};
   lss.add(TurnToPoint(hoop_point), 1.0);
+  lss.add(DriveForwardFast(6, reverse));
 
   lss.add(new FlapDownCommand());
   add_single_shot_cmd(lss);
@@ -423,16 +426,6 @@ Map from page 40 of the game manual
  Human Instructions:
  Align robot to specified place and angle using LOADER SIDE AUTO jig
 */
-void add_auto_roller(CommandController &cc, double roller_power, position_t set_pos)
-{
-  cc.add(new FunctionCommand([=]()
-                             {drive_sys.drive_tank(roller_power, roller_power);return false; }),
-         0.45);
-  cc.add(new DriveStopCommand(drive_sys));
-  cc.add(new OdomSetPosition(odometry_sys, set_pos));
-  // cc.add(new FunctionCommand([=](){drive_sys.drive_tank(-roller_power*.5, -roller_power*.5);return false; }), 0.15);
-  cc.add(DriveForwardFast(7, reverse));
-}
 
 CommandController auto_loader_side()
 {
@@ -465,12 +458,12 @@ CommandController auto_loader_side()
 
   });
 
-  lsa.add(TurnToHeading(120.6), 2.0);
+  lsa.add(TurnToHeading(125.6), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
 
-  lsa.add(TurnToHeading(120.6), 2.0);
+  //lsa.add(TurnToHeading(125.6), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(CLEAR_DISKS);
@@ -490,7 +483,7 @@ CommandController auto_loader_side()
 
   // Third Shot =======================================================
 
-  lsa.add(SpinFWAt(3450));
+  lsa.add(SpinFWAt(3550));
   lsa.add({
       // line up to stack
       TurnToPoint(pre_stack3_pos)->withTimeout(2.0),
@@ -512,17 +505,18 @@ CommandController auto_loader_side()
 
   });
 
-  lsa.add(TurnToHeading(125), 2.0);
+
+  lsa.add(TurnToHeading(128), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
 
-  lsa.add(TurnToHeading(125), 2.0);
+  //lsa.add(TurnToHeading(128), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
 
-  lsa.add(TurnToHeading(125), 2.0);
+  //lsa.add(TurnToHeading(128), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(CLEAR_DISKS);
@@ -532,8 +526,8 @@ CommandController auto_loader_side()
   Vector2D::point_t disk2_pos = {.x = 83.0, .y = 37.0};
   Vector2D::point_t disk3_pos = {.x = 83.0, .y = 30.0};
 
-  Vector2D::point_t lineup_disk2_pos = {.x = 73.0, .y = 41.0};
-  Vector2D::point_t lineup_disk3_pos = {.x = 73.0, .y = 32.0};
+  Vector2D::point_t lineup_disk2_pos = {.x = 70.0, .y = 41.0};
+  Vector2D::point_t lineup_disk3_pos = {.x = 70.0, .y = 32.0};
 
   // Second Shot =======================================================
   lsa.add(SpinFWAt(3500));
@@ -567,18 +561,16 @@ CommandController auto_loader_side()
       DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
   });
 
-  lsa.add(TurnToHeading(125), 2.0);
+  lsa.add(TurnToHeading(128), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
 
-  lsa.add(TurnToHeading(125), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);
   lsa.add(WaitForFW, 1.0);
 
-  lsa.add(TurnToHeading(125), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(CLEAR_DISKS);
   lsa.add_delay(600);
