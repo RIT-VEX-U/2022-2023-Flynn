@@ -89,7 +89,7 @@ void test_stuff()
 
   vex::task odom_print(print_odom);
 
-  CommandController mine = prog_skills_loader_side();
+  CommandController mine = auto_loader_side();
   mine.run();
   return;
   //

@@ -202,7 +202,7 @@ FeedForward::ff_config_t vis_ff_cfg = {
 
 #define MIN_AREA 500
 #define MAX_SPEED 0.5
-#define FALLBACK_MAX_DEGREES 35a
+#define FALLBACK_MAX_DEGREES 35
 
 VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center)
     : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false), vision_center(vision_center)
