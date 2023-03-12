@@ -162,6 +162,7 @@ AutoChooser autochooser(Brain);
 
 bool target_red = true;
 bool vision_enabled = true;
+int num_roller_fallback = 2;
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
  *
@@ -169,7 +170,7 @@ bool vision_enabled = true;
  */
 void vexcodeInit(void)
 {
-    StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four, page_five}, 4);
+    StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four, page_five, page_six}, 4);
 
     endgame_solenoid.set(false); // TODO figure out if false or true shoots
     imu.calibrate();

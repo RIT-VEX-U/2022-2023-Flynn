@@ -87,6 +87,8 @@ void test_stuff()
 {
   CALIBRATE_IMU();
 
+
+
   vex::task odom_print(print_odom);
 
   CommandController mine = auto_loader_side();
@@ -244,7 +246,7 @@ CommandController prog_skills_loader_side()
   });
 
   // Shoot
-  lss.add(TurnToHeading(81), 0.85); // #20
+  lss.add(TurnToHeading(84), 0.85); // #20
 
   lss.add_delay(1000);
 
@@ -328,6 +330,8 @@ CommandController prog_skills_loader_side()
   Vector2D::point_t start_of_line = {.x = 34.5, .y = 49};
   Vector2D::point_t end_of_line = {.x = 65, .y = 82};
   Vector2D::point_t out_of_way_point = {.x = 73, .y = 118};
+
+  lss.add(new SpinRPMCommand(flywheel_sys, 3200)); // #40
 
   // go to line and collect line
   lss.add({
@@ -558,7 +562,7 @@ CommandController auto_loader_side()
       DriveToPointFastPt(shoot_point2)->withTimeout(2.0),
   });
 
-  lsa.add(TurnToHeading(128), 2.0);
+  lsa.add(TurnToHeading(130), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WaitForFW, 1.0);
   lsa.add(ShootDisk);

@@ -15,3 +15,5 @@ void page_three(vex::brain::lcd &screen, int x, int y, int width, int height, bo
 void page_four(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run);
 
 void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run);
+
+void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run);

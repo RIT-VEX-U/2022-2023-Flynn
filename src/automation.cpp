@@ -71,7 +71,7 @@ bool SpinRollerCommand::run()
 
   cmd.run();
 
-  if(!vision_enabled && ++roller_count >= 2)
+  if(!vision_enabled && ++roller_count >= num_roller_fallback)
     return true;
   
   return false;

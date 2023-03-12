@@ -314,15 +314,13 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
     drawInchLine(screen, bl, fl);
     // draw direction indicator
     point_t front_pos = {(fr + br).x / 2.0, (fr + br).y / 2.0}; // we should get lerp and division by scalar on point_t. lerp is so cool
-    point_t fronter_pos = {front_pos.x + cos(deg2rad(pose.rot))*100, front_pos.y + sin(deg2rad(pose.rot))*100 };
-    
+    point_t fronter_pos = {front_pos.x + cos(deg2rad(pose.rot)) * 100, front_pos.y + sin(deg2rad(pose.rot)) * 100};
 
     drawInchLine(screen, front_pos, fronter_pos);
 
     screen.setFillColor(vex::black);
     screen.setPenColor(vex::black);
     screen.drawCircle(pixel_x(front_pos), pixel_y(front_pos), 4);
-
 
     // Save last 10 reading
     // Only update that list once every 1/4 second or so
@@ -331,7 +329,7 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
     // things to ponder...
     // perhaps a replay button
 
-    // 
+    //
     screen.setFillColor(white);
     screen.setPenColor(black);
     screen.setFont(mono20);
@@ -340,4 +338,50 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
     screen.printAt(300, 100, "rot = %.f deg", pose.rot);
 
 #undef point_t
+}
+
+// num fall back rollers
+void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
+{
+    screen.setPenColor(vex::black);
+    screen.setPenColor(vex::black);
+    screen.drawRectangle(x, y, width, height);
+
+    screen.setPenColor(vex::color::white);
+    screen.setFont(mono60);
+    screen.printAt(x + width / 2, y + height / 2 + 60, "%d", num_roller_fallback);
+
+    int test_x = screen.xPosition();
+    int test_y = screen.yPosition();
+
+    int mod_width = 60;
+
+    screen.setPenColor(vex::color::purple);
+    screen.setFillColor(vex::color::purple);
+    screen.drawRectangle(x, y, mod_width, height);
+    screen.drawRectangle(x + width - mod_width, y, mod_width, height);
+
+    screen.setFillColor(vex::black);
+    screen.setPenColor(vex::color::white);
+    screen.setFont(mono60);
+
+
+    screen.printAt(x + (mod_width/2) - 15, y + height/2 , "-");
+    screen.printAt(x + width - mod_width + (mod_width/2), y + height/2 , "+");
+
+
+    static bool was_pressing = false;
+    bool pressing = screen.pressing();
+    if (pressing & !was_pressing)
+    {
+        if (inRectangle(x, y, x + mod_width, height, test_x, test_y))
+        {
+            num_roller_fallback--;
+        }
+        if (inRectangle(x + width - mod_width, y, mod_width, height, test_x, test_y))
+        {
+            num_roller_fallback++;
+        }
+    }
+    was_pressing = pressing;
 }

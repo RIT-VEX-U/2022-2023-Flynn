@@ -65,7 +65,7 @@ extern std::string SkillsNonLoaderSideDisplayName;
 
 extern bool target_red;
 extern bool vision_enabled;
-
+extern int num_roller_fallback;
 
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.

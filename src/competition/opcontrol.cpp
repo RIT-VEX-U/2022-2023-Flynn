@@ -12,7 +12,7 @@
  */
 void opcontrol()
 {
-  test_stuff();
+  //test_stuff();
 
   endgame_solenoid.set(false);
   flapup_solenoid.set(false);
