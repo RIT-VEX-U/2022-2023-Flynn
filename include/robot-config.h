@@ -17,6 +17,7 @@ extern motor_group left_motors, right_motors;
 extern motor_group flywheel_motors;
 
 extern std::map<std::string, motor &> motor_names;
+extern std::map<std::string, device&> device_names;
 
 extern vex::pot selector_pot;
 

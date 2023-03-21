@@ -36,6 +36,10 @@ std::map<std::string, motor &> motor_names{
 
 };
 
+std::map<std::string, device&> device_names{
+    {"imu", imu},
+};
+
 vex::pot selector_pot(Brain.ThreeWirePort.F);
 
 // Other Outputs

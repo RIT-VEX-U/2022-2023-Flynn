@@ -10,24 +10,33 @@ void page_one(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     // Column header
     draw_mot_header(screen, x, 0, width / 2);
 
+    static int animation_tick = 0;
+    animation_tick++;
+
     const int line_height = 20;
     int row_num = 1;
     // motors and their information
     for (auto const &name_and_motor : motor_names)
     {
-        draw_mot_stats(screen, x, row_num * line_height, width / 2, name_and_motor.first.c_str(), name_and_motor.second);
+        draw_mot_stats(screen, x, row_num * line_height, width / 2, name_and_motor.first.c_str(), name_and_motor.second, animation_tick);
+        row_num++;
+    }
+
+    for (auto const &name_and_device : device_names){
+        auto device = name_and_device.second;
+        draw_dev_stats(screen, x, row_num * line_height, width/2, name_and_device.first.c_str(), name_and_device.second, animation_tick);
         row_num++;
     }
 
     // Battery stuff
     double bat_voltage = Brain.Battery.voltage();
     double bat_percentage = Brain.Battery.capacity();
-    draw_battery_stats(screen, x, 180, bat_voltage, bat_percentage);
+    draw_battery_stats(screen, x, row_num * line_height, bat_voltage, bat_percentage);
 
     // Program Type
 
     // Right Top
-    screen.drawImageFromBuffer(splash_little, 48 + width / 2, 0, width / 2, 100);
+    screen.drawImageFromBuffer(splash_little, 48 + width / 2, 0, splash_little_width, 100);
 }
 
 void page_two(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
@@ -60,8 +69,8 @@ void page_three(vex::brain::lcd &screen, int x, int y, int width, int height, bo
     setpt.add_sample({.x = t, .y = flywheel_sys.getDesiredRPM()});
     rpm.add_sample({.x = t, .y = flywheel_sys.getRPM()});
 
-    setpt.draw(x, y, width, height - 40);
-    rpm.draw(x, y, width, height - 40);
+    setpt.draw(x+4, y, width-8, height - 40);
+    rpm.draw(x+4, y, width-8, height - 40);
     screen.printAt(x + width / 2, y + height - 30, "setpt: %.0f, rpm: %.0f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
 }
 
@@ -349,15 +358,17 @@ void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool
 
     screen.setPenColor(vex::color::white);
     screen.setFont(mono60);
-    screen.printAt(x + width / 2, y + height / 2 + 60, "%d", num_roller_fallback);
+    screen.printAt(x + width / 2, y + height / 2, "%d", num_roller_fallback);
+    screen.setFont(mono30);
+    screen.printAt(x + width/2 - (screen.getStringWidth("Roller Hits")/2), y +  190, "Roller Hits");
 
     int test_x = screen.xPosition();
     int test_y = screen.yPosition();
 
     int mod_width = 60;
 
-    screen.setPenColor(vex::color::purple);
-    screen.setFillColor(vex::color::purple);
+    screen.setPenColor(vex::color::black);
+    screen.setFillColor(vex::color::black);
     screen.drawRectangle(x, y, mod_width, height);
     screen.drawRectangle(x + width - mod_width, y, mod_width, height);
 
@@ -366,8 +377,8 @@ void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     screen.setFont(mono60);
 
 
-    screen.printAt(x + (mod_width/2) - 15, y + height/2 , "-");
-    screen.printAt(x + width - mod_width + (mod_width/2), y + height/2 , "+");
+    screen.printAt(x + (mod_width/4), y + height/2 , "-");
+    screen.printAt(x + width - mod_width + (mod_width/4), y + height/2 , "+");
 
 
     static bool was_pressing = false;
