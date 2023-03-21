@@ -4,6 +4,7 @@
 #include "vex.h"
 #include "core.h"
 
+
 void flap_up();
 
 void flap_down();
@@ -31,7 +32,6 @@ public:
 
 private:
   position_t align_pos;
-  // Pepsi cur_roller = NEUTRAL;
   bool check_pos = true;
   int roller_count;
 };
@@ -187,7 +187,7 @@ public:
   /**
    * Contstruct a new VisionAimCommmand
    */
-  VisionAimCommand(bool odometry_fallback, int vision_center);
+  VisionAimCommand(bool odometry_fallback, int vision_center, int fallback_degrees);
 
   bool run() override;
   void on_timeout() override;
@@ -200,6 +200,7 @@ private:
   position_t stored_pos;
   bool fallback_triggered;
   int vision_center;
+  int fallback_degrees;
 };
 
 class FlapUpCommand : public AutoCommand

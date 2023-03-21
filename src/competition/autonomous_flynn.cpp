@@ -33,7 +33,7 @@
 
 int glbl_vision_center = 135;
 
-#define VisionAim (new VisionAimCommand(true, glbl_vision_center))
+#define VisionAim (new VisionAimCommand(true, glbl_vision_center, 10))
 #define WaitForFW (new WaitUntilUpToSpeedCommand(flywheel_sys, 10))
 #define ShootDisk (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 #define SpinFWAt(rpm) (new SpinRPMCommand(flywheel_sys, rpm))
@@ -45,7 +45,7 @@ int glbl_vision_center = 135;
 #define TRI_SHOT_VOLT 2
 #define TRI_SHOT_RECOVER_DELAY_MS 200
 
-#define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center))
+#define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center, 10))
 #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
 #define TRI_SHOT_DISK (new ShootCommand(intake, TRI_SHOT_TIME, TRI_SHOT_VOLT))
 
@@ -128,7 +128,7 @@ void pleasant_opcontrol()
 
   int i = 0;
 
-  VisionAimCommand visaim(false, 145);
+  VisionAimCommand visaim(false, 145, 5);
 
   timer loop_timer;
   loop_timer.reset();

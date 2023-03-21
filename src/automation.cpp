@@ -54,8 +54,7 @@ bool SpinRollerCommand::run()
   vexDelay(100);
   Pepsi cur_roller = scan_roller();
   printf("%s\n", cur_roller==RED?"red":cur_roller==BLUE?"blue":"neutral");
-  if(vision_enabled && (cur_roller == RED && target_red)
-    || cur_roller == BLUE && !target_red)
+  if(vision_enabled && (cur_roller == RED && target_red) || cur_roller == BLUE && !target_red)
   {
     drive_sys.stop();
     return true; 
@@ -77,10 +76,10 @@ bool SpinRollerCommand::run()
   return false;
 }
 
-void SpinRollerCommand::on_timeout(){
+void SpinRollerCommand::on_timeout()
+{
   drive_sys.stop();
 }
-
 
 /**
  * Construct a ShootCommand
@@ -184,13 +183,6 @@ bool PrintOdomContinousCommand::run()
   printf("(%.2f, %.2f), %.2f\n", pos.x, pos.y, pos.rot);
   return false;
 }
-/**
- * Construct a StartIntakeCommand
- * colorSensor The color sensor being used
- * color The hue value of the color being detected
- * rollerMotor The rollor motor to spin the roller
- * error Error for color detection color+-error
- */
 PID::pid_config_t vis_pid_cfg = {
     .p = .003,
     // .d = .0001,
@@ -202,10 +194,9 @@ FeedForward::ff_config_t vis_ff_cfg = {
 
 #define MIN_AREA 500
 #define MAX_SPEED 0.5
-#define FALLBACK_MAX_DEGREES 35
 
-VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center)
-    : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false), vision_center(vision_center)
+VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center, int fallback_degrees)
+    : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false), vision_center(vision_center), fallback_degrees(fallback_degrees)
 {
 }
 
@@ -216,6 +207,7 @@ VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center)
  */
 bool VisionAimCommand::run()
 {
+
   if (first_run)
   {
     stored_pos = odometry_sys.get_position();
@@ -224,9 +216,8 @@ bool VisionAimCommand::run()
   }
 
   if (odometry_fallback &&
-      (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > FALLBACK_MAX_DEGREES))
+      (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > fallback_degrees))
   {
-
     fallback_triggered = true;
     if (drive_sys.turn_to_heading(stored_pos.rot, 0.6))
       return true;
@@ -298,6 +289,7 @@ bool VisionAimCommand::run()
 
   return false;
 }
+
 void VisionAimCommand::on_timeout()
 {
   drive_sys.stop();
@@ -390,7 +382,7 @@ bool WallAlignCommand::run()
   return true;
 }
 
-#define ROLLER_AREA_CUTOFF 1000
+#define ROLLER_AREA_CUTOFF 1500
 
 Pepsi scan_roller()
 {
