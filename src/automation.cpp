@@ -236,31 +236,43 @@ bool VisionAimCommand::run()
   // and store the largest found object for each in a vector
   vision::object red_obj, blue_obj;
 
-  // Get largest red blob
-  cam.takeSnapshot(RED_GOAL);
-  int red_count = cam.objectCount;
-  if (red_count > 0)
-    red_obj = cam.largestObject;
-
-  // Get largest blue blob
-  cam.takeSnapshot(BLUE_GOAL);
-  int blue_count = cam.objectCount;
-  if (blue_count > 0)
-    blue_obj = cam.largestObject;
-
-  // Compare the areas of the largest
-  double red_area = red_obj.width * red_obj.height;
-  double blue_area = blue_obj.width * blue_obj.height;
   int x_val = 0;
+  // Get largest red blob
+  
+  // int red_count = cam.objectCount;
+  // if (red_count > 0){
+    
+  // }
+  if(target_red){
+    cam.takeSnapshot(RED_GOAL);
+  } else {
+    cam.takeSnapshot(BLUE_GOAL);
+  }
 
-  if (red_area > blue_area && red_area > MIN_AREA && target_red)
-  {
-    x_val = red_obj.centerX;
-  }
-  else if (blue_area > red_area && blue_area > MIN_AREA && !target_red)
-  {
-    x_val = blue_obj.centerX;
-  }
+  for(int i = 0; i < cam.objectCount; i++){
+    double blob_1_area = cam.objects[i].width * cam.objects[i].height;
+      for(int j = i+1; j < cam.objectCount; i++){
+        double blob_2_area = cam.objects[j].width * cam.objects[j].height;
+        if(fabs(cam.objects[i].centerX - cam.objects[j].centerX) < 10 && (blob_1_area + blob_2_area) > MIN_AREA){
+          x_val = cam.objects[i].centerX;
+        }
+      }
+    }
+
+
+  // // Compare the areas of the largest
+  // double red_area = red_obj.width * red_obj.height;
+  // double blue_area = blue_obj.width * blue_obj.height;
+  
+
+  // if (red_area > blue_area && red_area > MIN_AREA && target_red)
+  // {
+  //   x_val = red_obj.centerX;
+  // }
+  // else if (blue_area > red_area && blue_area > MIN_AREA && !target_red)
+  // {
+  //   x_val = blue_obj.centerX;
+  // }
 
   printf("CenterX: %d\n", x_val);
 
