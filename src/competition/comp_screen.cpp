@@ -36,7 +36,7 @@ void page_one(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     // Program Type
 
     // Right Top
-    screen.drawImageFromBuffer(splash_little, 48 + width / 2, 0, splash_little_width, 100);
+    screen.drawImageFromBuffer(splash_little, 44 + width / 2, 0, splash_little_width, 100);
 }
 
 void page_two(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
@@ -352,7 +352,7 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
 // num fall back rollers
 void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
 {
-    screen.setPenColor(vex::black);
+    screen.setFillColor(vex::black);
     screen.setPenColor(vex::black);
     screen.drawRectangle(x, y, width, height);
 
@@ -371,7 +371,9 @@ void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     screen.setFillColor(vex::color::black);
     screen.drawRectangle(x, y, mod_width, height);
     screen.drawRectangle(x + width - mod_width, y, mod_width, height);
-
+    screen.drawLine(x + mod_width, 0, x + mod_width, height);
+    screen.drawLine(x + width - mod_width, 0, x + width - mod_width, height);
+    
     screen.setFillColor(vex::black);
     screen.setPenColor(vex::color::white);
     screen.setFont(mono60);

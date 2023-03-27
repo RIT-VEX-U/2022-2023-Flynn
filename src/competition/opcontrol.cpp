@@ -5,14 +5,37 @@
 #include "tuning.h"
 #include "vision.h"
 #include <stdio.h>
+#include "vex_global.h"
+#include "v5_api.h"
 
+int controller_screen()
+{
+  while (1)
+  {
+    uint32_t bat = (uint32_t)Brain.Battery.capacity();
+    printf("bat %d\n", bat);
+    double f = flywheel_motors.temperature(celsius);
+    double i = intake.temperature(celsius);
+    double d = (left_motors.temperature(celsius) + right_motors.temperature(celsius)) / 2;
 
+    main_controller.Screen.setCursor(1, 1);
+    main_controller.Screen.print("F: %.0f        B: %d%%", f, bat);
+
+    main_controller.Screen.setCursor(2, 1);
+    main_controller.Screen.print("I: %.0f        V: %.1fb", intake.temperature(celsius), Brain.Battery.voltage());
+    main_controller.Screen.setCursor(3, 1);
+
+    main_controller.Screen.print("D: %.0f", intake.temperature(celsius));
+    vexDelay(500);
+  }
+}
 /**
  * Contains the main loop of the robot code while running in the driver-control period.
  */
 void opcontrol()
 {
-  //test_stuff();
+
+  vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);
   flapup_solenoid.set(false);
@@ -69,6 +92,6 @@ void opcontrol()
 
     // ========== AUTOMATION ==========
 
-    vexDelay(0);
+    vexDelay(10);
   }
 }
