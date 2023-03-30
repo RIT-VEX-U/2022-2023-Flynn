@@ -14,39 +14,39 @@ const double SHOOTING_RPM = 3200;
 const double SINGLE_SHOT_TIME  = 0.2;
 const double SINGLE_SHOT_VOLT =  6;
 const double SINGLE_SHOT_RECOVER_DELAY_MS = 1000;
+const double THRESHOLD_RPM = 150; 
 int glbl_vision_center = 135;
 
-#define DRIVE_TO_POINT_SLOW(x, y, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, directionType::dir))
-#define DRIVE_TO_POINT_SLOW_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, dir))
+// #define DRIVE_TO_POINT_SLOW(x, y, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, directionType::dir))
+// #define DRIVE_TO_POINT_SLOW_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, dir))
 
-#define DRIVE_TO_POINT_FAST(x, y, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, directionType::dir))
-#define DRIVE_TO_POINT_FAST_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, dir))
+// #define DRIVE_TO_POINT_FAST(x, y, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, directionType::dir))
+// #define DRIVE_TO_POINT_FAST_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, dir))
 
-#define DRIVE_FORWARD_FAST(in, dir) (new DriveForwardCommand(drive_sys, drive_fast_mprofile, in, directionType::dir))
-#define TURN_TO_HEADING(heading_deg) (new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, TURN_SPEED))
+// #define DRIVE_FORWARD_FAST(in, dir) (new DriveForwardCommand(drive_sys, drive_fast_mprofile, in, directionType::dir))
+// #define TURN_TO_HEADING(heading_deg) (new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, TURN_SPEED))
 
-#define TURN_TO_POINT(point) (new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point))
+// #define TURN_TO_POINT(point) (new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point))
 
-#define START_INTAKE (new StartIntakeCommand(intake, INTAKE_VOLT))
-#define STOP_INTAKE (new StopIntakeCommand(intake))
+// #define START_INTAKE (new StartIntakeCommand(intake, INTAKE_VOLT))
+// #define STOP_INTAKE (new StopIntakeCommand(intake))
 
 
-#define ShootDisk (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
-#define SpinFWAt(rpm) (new SpinRPMCommand(flywheel_sys, rpm))
+// #define SHOOT_DISK (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
+// #define SPIN_FW_AT(rpm) (new SpinRPMCommand(flywheel_sys, rpm))
 
-#define PrintOdom (new PrintOdomCommand(odometry_sys))
-#define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
+// #define PrintOdom (new PrintOdomCommand(odometry_sys))
+// #define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
 
 const double TRI_SHOT_TIME = 1.0;
 const double TRI_SHOT_VOLT = 2;
 const double TRI_SHOT_RECOVER_DELAY_MS = 200; 
 
-#define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center, 10))
-#define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
-#define TRI_SHOT_DISK (new ShootCommand(intake, TRI_SHOT_TIME, TRI_SHOT_VOLT))
+// #define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center, 10))
+// #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
+// #define TRI_SHOT_DISK (new ShootCommand(intake, TRI_SHOT_TIME, TRI_SHOT_VOLT))
 
-#define SHOOT_DISK (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
-#define CLEAR_DISKS (new ShootCommand(intake, .75, SINGLE_SHOT_VOLT))
+// #define SHOOT_DISK (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 
 static void add_single_shot_cmd(CommandController &controller, double vis_timeout = 1.0)
 {
@@ -55,7 +55,7 @@ static void add_single_shot_cmd(CommandController &controller, double vis_timeou
     controller.add(AUTO_AIM);
   else
     controller.add(AUTO_AIM, vis_timeout);
-  controller.add(ShootDisk);
+  controller.add(SHOOT_DISK);
   controller.add_delay(600);
 }
 
@@ -245,11 +245,11 @@ CommandController prog_skills_loader_side()
   lss.add_delay(1000);
 
   lss.add(WAIT_FOR_FLYWHEEL, 1.0);
-  lss.add(ShootDisk);
+  lss.add(SHOOT_DISK);
   lss.add_delay(1000);
 
   lss.add(WAIT_FOR_FLYWHEEL, 1.0);
-  lss.add(ShootDisk);
+  lss.add(SHOOT_DISK);
   lss.add_delay(1000);
 
   lss.add(WAIT_FOR_FLYWHEEL, 1.0);
@@ -343,7 +343,7 @@ CommandController prog_skills_loader_side()
   lss.add(TURN_TO_HEADING(48), 3.0);
 
   lss.add(new EndgameCommand(endgame_solenoid));
-  lss.add(PrintOdom);
+  lss.add(new PrintOdomCommand(odometry_sys));
 
   return lss;
 }
@@ -385,7 +385,7 @@ CommandController auto_loader_side()
 
   // Rollers =======================================================
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
-  lsa.add(SpinFWAt(3250));
+  lsa.add(SPIN_FW_AT(3250));
   lsa.add(new SpinRollerCommand(roller_in_pos), 5.0);
   // lsa.add(new OdomSetPosition(odometry_sys, start_pos));
   lsa.add(DRIVE_FORWARD_FAST(2, rev));
@@ -409,7 +409,7 @@ CommandController auto_loader_side()
   lsa.add(TURN_TO_HEADING(126.6), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
-  lsa.add(ShootDisk);
+  lsa.add(SHOOT_DISK);
 
   // lsa.add(TURN_TO_HEADING(125.6), 2.0);
   lsa.add(AUTO_AIM, 1.0);
@@ -431,7 +431,7 @@ CommandController auto_loader_side()
 
   // Third Shot =======================================================
 
-  lsa.add(SpinFWAt(3550));
+  lsa.add(SPIN_FW_AT(3550));
   lsa.add({
       // line up to stack
       TURN_TO_POINT(pre_stack3_pos)->withTimeout(2.0),
@@ -456,11 +456,11 @@ CommandController auto_loader_side()
   lsa.add(TURN_TO_HEADING(128), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
-  lsa.add(ShootDisk);
+  lsa.add(SHOOT_DISK);
 
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
-  lsa.add(ShootDisk);
+  lsa.add(SHOOT_DISK);
 
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
@@ -475,7 +475,7 @@ CommandController auto_loader_side()
   Vector2D::point_t lineup_disk3_pos = {.x = 70.0, .y = 32.0};
 
   // Second Shot =======================================================
-  lsa.add(SpinFWAt(3500));
+  lsa.add(SPIN_FW_AT(3500));
   lsa.add({
 
       // First
@@ -509,11 +509,11 @@ CommandController auto_loader_side()
   lsa.add(TURN_TO_HEADING(130), 2.0);
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
-  lsa.add(ShootDisk);
+  lsa.add(SHOOT_DISK);
 
   lsa.add(AUTO_AIM, 1.0);
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
-  lsa.add(ShootDisk);
+  lsa.add(SHOOT_DISK);
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
 
   lsa.add(AUTO_AIM, 1.0);
