@@ -17,7 +17,7 @@ const double SINGLE_SHOT_RECOVER_DELAY_MS = 1000;
 int glbl_vision_center = 135;
 
 #define DRIVE_TO_POINT_SLOW(x, y, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, directionType::dir))
-#define DRIVE_TO_POINT_SLOW_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, directionType::dir))
+#define DRIVE_TO_POINT_SLOW_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, dir))
 
 #define DRIVE_TO_POINT_FAST(x, y, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, directionType::dir))
 #define DRIVE_TO_POINT_FAST_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, dir))
@@ -39,7 +39,7 @@ int glbl_vision_center = 135;
 
 const double TRI_SHOT_TIME = 1.0;
 const double TRI_SHOT_VOLT = 2;
-const double TRI_SHOT_RECOVER_DELAY_MS = 200;
+const double TRI_SHOT_RECOVER_DELAY_MS = 200; 
 
 #define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center, 10))
 #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
@@ -269,21 +269,21 @@ CommandController prog_skills_loader_side()
   // disks against L piece
   lss.add({
       // farthest
-      DRIVE_TO_POINT_FAST_PT(disk_prep_pos1, rev)->withTimeout(2.0), // #27
+      DRIVE_TO_POINT_FAST_PT(disk_prep_pos1, vex::reverse)->withTimeout(2.0), // #27
       START_INTAKE,                                                   // #26
       TURN_TO_POINT(disk_pos1)->withTimeout(1.5),                      // #28
       DRIVE_TO_POINT_SLOW_PT(disk_pos1, fwd)->withTimeout(2.0),               // #29
 
       // middle
-      DRIVE_TO_POINT_FAST_PT(disk_prep_pos2, rev)->withTimeout(2.0), // #30
+      DRIVE_TO_POINT_FAST_PT(disk_prep_pos2, vex::reverse)->withTimeout(2.0), // #30
       TURN_TO_POINT(disk_pos2)->withTimeout(1.5),                      // #31
       DRIVE_TO_POINT_SLOW_PT(disk_pos2, fwd)->withTimeout(2.0),               // #32
 
       // closest disk
-      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, rev)->withTimeout(2.0), // #33
+      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, vex::reverse)->withTimeout(2.0), // #33
       TURN_TO_POINT(disk_pos3)->withTimeout(1.5),                      // #34
-      DRIVE_TO_POINT_SLOW_PT(disk_pos3, fwd)->withTimeout(2.0),               // #35
-      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, rev)->withTimeout(2.0), // #36
+      DRIVE_TO_POINT_SLOW_PT(disk_pos3, vex::directionType::fwd)->withTimeout(2.0),               // #35
+      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, vex::reverse)->withTimeout(2.0), // #36
   });
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #40
 
@@ -390,7 +390,7 @@ CommandController auto_loader_side()
   // lsa.add(new OdomSetPosition(odometry_sys, start_pos));
   lsa.add(DRIVE_FORWARD_FAST(2, rev));
   Vector2D::point_t roller_out_pos = {.x = 36, .y = 16.0};
-  lsa.add(DRIVE_TO_POINT_FAST_PT(roller_out_pos, rev));
+  lsa.add(DRIVE_TO_POINT_FAST_PT(roller_out_pos, vex::reverse));
 
   Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
   Vector2D::point_t shoot_point1 = {.x = 65, .y = 50};
@@ -484,12 +484,12 @@ CommandController auto_loader_side()
       DRIVE_TO_POINT_FAST_PT(disk1_pos, fwd)->withTimeout(2.0),
 
       // Second
-      DRIVE_TO_POINT_FAST_PT(lineup_disk2_pos, rev)->withTimeout(2.0),
+      DRIVE_TO_POINT_FAST_PT(lineup_disk2_pos, vex::reverse)->withTimeout(2.0),
       TURN_TO_POINT(disk2_pos)->withTimeout(2.0),
       DRIVE_TO_POINT_FAST_PT(disk2_pos, fwd)->withTimeout(2.0),
 
       // Third
-      DRIVE_TO_POINT_FAST_PT(lineup_disk3_pos, rev)->withTimeout(2.0),
+      DRIVE_TO_POINT_FAST_PT(lineup_disk3_pos, vex::reverse)->withTimeout(2.0),
       TURN_TO_POINT(disk3_pos)->withTimeout(2.0),
       DRIVE_TO_POINT_FAST_PT(disk3_pos, fwd)->withTimeout(2.0),
   });
@@ -500,7 +500,7 @@ CommandController auto_loader_side()
   Vector2D::point_t shoot_point2 = {.x = 64, .y = 51};
 
   lsa.add({
-      DRIVE_TO_POINT_FAST_PT(halfway, rev)->withTimeout(2.0),
+      DRIVE_TO_POINT_FAST_PT(halfway, vex::reverse)->withTimeout(2.0),
       STOP_INTAKE,
       TURN_TO_POINT(shoot_point2)->withTimeout(2.0),
       DRIVE_TO_POINT_FAST_PT(shoot_point2, fwd)->withTimeout(2.0),
@@ -563,6 +563,7 @@ CommandController auto_loader_side_disks_last()
   point_t post_3_stack = {52, 30};
   point_t pre_roller_pt = {31, 10};
 
+
   CommandController lsdl;
   lsdl.add({
     new OdomSetPosition(odometry_sys, start_point_odom),
@@ -585,6 +586,7 @@ CommandController auto_loader_side_disks_last()
     TURN_TO_HEADING(270),
     // DO LE ROLLERS
   });
+  return lsdl;
 
   #undef point_t
 }
