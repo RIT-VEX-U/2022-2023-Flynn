@@ -37,9 +37,9 @@ int glbl_vision_center = 135;
 #define PrintOdom (new PrintOdomCommand(odometry_sys))
 #define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
 
-#define TRI_SHOT_TIME 1.0
-#define TRI_SHOT_VOLT 2
-#define TRI_SHOT_RECOVER_DELAY_MS 200
+const double TRI_SHOT_TIME = 1.0;
+const double TRI_SHOT_VOLT = 2;
+const double TRI_SHOT_RECOVER_DELAY_MS = 200;
 
 #define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center, 10))
 #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
