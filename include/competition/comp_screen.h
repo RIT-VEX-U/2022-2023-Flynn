@@ -5,6 +5,7 @@
 #include "splash_image_small.h"
 #include "../core/include/utils/graph_drawer.h"
 #include "../core/include/utils/vector2d.h"
+#include <array>
 extern bool keep_collecting;
 
 void page_one(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run);

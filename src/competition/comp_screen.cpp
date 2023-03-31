@@ -253,7 +253,7 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
 #define point_t Vector2D::point_t
     const int num_points = 20;
     static int points_index = 0;
-    static std::array<point_t, num_points> points;
+    static std::array<point_t, num_points> points = {};
     auto add_point_to_path = [](point_t pt)
     {
         points[points_index] = pt;
