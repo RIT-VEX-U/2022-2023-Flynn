@@ -21,7 +21,7 @@ void autonomous()
 
     CommandController current_auto = prog_skills_loader_side();
     current_auto.run();
-    
+    keep_collecting = false;
     while(true){
         drive_sys.stop();
     }

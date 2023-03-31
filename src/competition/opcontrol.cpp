@@ -34,7 +34,6 @@ int controller_screen()
  */
 void opcontrol()
 {
-
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);

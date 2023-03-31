@@ -17,36 +17,11 @@ const double SINGLE_SHOT_RECOVER_DELAY_MS = 1000;
 const double THRESHOLD_RPM = 150; 
 int glbl_vision_center = 135;
 
-// #define DRIVE_TO_POINT_SLOW(x, y, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, x, y, directionType::dir))
-// #define DRIVE_TO_POINT_SLOW_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, dir))
-
-// #define DRIVE_TO_POINT_FAST(x, y, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, directionType::dir))
-// #define DRIVE_TO_POINT_FAST_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, dir))
-
-// #define DRIVE_FORWARD_FAST(in, dir) (new DriveForwardCommand(drive_sys, drive_fast_mprofile, in, directionType::dir))
-// #define TURN_TO_HEADING(heading_deg) (new TurnToHeadingCommand(drive_sys, *config.turn_feedback, heading_deg, TURN_SPEED))
-
-// #define TURN_TO_POINT(point) (new TurnToPointCommand(drive_sys, odometry_sys, *config.turn_feedback, point))
-
-// #define START_INTAKE (new StartIntakeCommand(intake, INTAKE_VOLT))
-// #define STOP_INTAKE (new StopIntakeCommand(intake))
-
-
-// #define SHOOT_DISK (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
-// #define SPIN_FW_AT(rpm) (new SpinRPMCommand(flywheel_sys, rpm))
-
-// #define PrintOdom (new PrintOdomCommand(odometry_sys))
-// #define PrintOdomContinous (new PrintOdomContinousCommand(odometry_sys))
 
 const double TRI_SHOT_TIME = 1.0;
 const double TRI_SHOT_VOLT = 2;
 const double TRI_SHOT_RECOVER_DELAY_MS = 200; 
 
-// #define AUTO_AIM (new VisionAimCommand(true, glbl_vision_center, 10))
-// #define WAIT_FOR_FLYWHEEL (new WaitUntilUpToSpeedCommand(flywheel_sys, 150))
-// #define TRI_SHOT_DISK (new ShootCommand(intake, TRI_SHOT_TIME, TRI_SHOT_VOLT))
-
-// #define SHOOT_DISK (new ShootCommand(intake, SINGLE_SHOT_TIME, SINGLE_SHOT_VOLT))
 
 static void add_single_shot_cmd(CommandController &controller, double vis_timeout = 1.0)
 {
@@ -85,7 +60,7 @@ void test_stuff()
 
   vex::task odom_print(print_odom);
 
-  CommandController mine = auto_loader_side();
+  CommandController mine = auto_loader_side_disks_last();
   mine.run();
   return;
   //
@@ -549,7 +524,7 @@ CommandController auto_loader_side()
 // turn to preroller
 // turn to roller
 // we do a little rolling.jpeg
-#define SHOOT_3 SHOOT_DISK, new DelayCommand(1000), STOP_INTAKE
+#define SHOOT_3(time_ms) SHOOT_DISK, new DelayCommand(time_ms), STOP_INTAKE
 #define TURN_TO_AND_DRIVE_TO_FAST(pt, timeout) (TURN_TO_POINT(pt)->withTimeout(timeout)),(DRIVE_TO_POINT_FAST_PT(pt, fwd)->withTimeout(timeout))
 CommandController auto_loader_side_disks_last()
 {
@@ -568,22 +543,22 @@ CommandController auto_loader_side_disks_last()
   lsdl.add({
     new OdomSetPosition(odometry_sys, start_point_odom),
     TURN_TO_POINT(goal_point),
-    SHOOT_3,
+    SHOOT_3(1500),
     TURN_TO_POINT(disk_line_end),
     START_INTAKE,
-    DRIVE_TO_POINT_FAST_PT(disk_line_end, vex::forward),
+    DRIVE_TO_POINT_SLOW_PT(disk_line_end, vex::forward),
     DRIVE_TO_POINT_FAST_PT(start_point, vex::reverse),
     STOP_INTAKE,
     TURN_TO_AND_DRIVE_TO_FAST(pre_3_stack, 2.0),
     TURN_TO_POINT(goal_point),
-    SHOOT_3,
+    SHOOT_3(1500),
     START_INTAKE,
     TURN_TO_AND_DRIVE_TO_FAST(post_3_stack, 2.0),
     STOP_INTAKE,
-    TURN_TO_POINT(goal_point),
-    SHOOT_3,
+    TURN_TO_POINT(goal_point)->withTimeout(2.0),
+    SHOOT_3(1500),
     TURN_TO_AND_DRIVE_TO_FAST(pre_roller_pt, 2.0),
-    TURN_TO_HEADING(270),
+    TURN_TO_HEADING(270)->withTimeout(2.0),
     // DO LE ROLLERS
   });
   return lsdl;

@@ -22,9 +22,10 @@ void page_one(vex::brain::lcd &screen, int x, int y, int width, int height, bool
         row_num++;
     }
 
-    for (auto const &name_and_device : device_names){
+    for (auto const &name_and_device : device_names)
+    {
         auto device = name_and_device.second;
-        draw_dev_stats(screen, x, row_num * line_height, width/2, name_and_device.first.c_str(), name_and_device.second, animation_tick);
+        draw_dev_stats(screen, x, row_num * line_height, width / 2, name_and_device.first.c_str(), name_and_device.second, animation_tick);
         row_num++;
     }
 
@@ -69,8 +70,8 @@ void page_three(vex::brain::lcd &screen, int x, int y, int width, int height, bo
     setpt.add_sample({.x = t, .y = flywheel_sys.getDesiredRPM()});
     rpm.add_sample({.x = t, .y = flywheel_sys.getRPM()});
 
-    setpt.draw(x+4, y, width-8, height - 40);
-    rpm.draw(x+4, y, width-8, height - 40);
+    setpt.draw(x + 4, y, width - 8, height - 40);
+    rpm.draw(x + 4, y, width - 8, height - 40);
     screen.printAt(x + width / 2, y + height - 30, "setpt: %.0f, rpm: %.0f", flywheel_sys.getDesiredRPM(), flywheel_sys.getRPM());
 }
 
@@ -206,6 +207,8 @@ void page_four(vex::brain::lcd &screen, int x, int y, int width, int height, boo
         }
     }
 }
+
+bool keep_collecting = true;
 const float paddingx = 50;
 const float paddingy = 10;
 Vector2D::point_t offset_from_corner_px = {20, 20};
@@ -248,6 +251,32 @@ Vector2D::point_t rotate2D(Vector2D::point_t p, double dir_radians)
 void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
 {
 #define point_t Vector2D::point_t
+    const int num_points = 20;
+    static int points_index = 0;
+    static std::array<point_t, num_points> points;
+    auto add_point_to_path = [](point_t pt)
+    {
+        points[points_index] = pt;
+        points_index = (points_index + 1) % num_points;
+    };
+    auto get_point_from_path = [](int index)
+    {
+        return points[(index + points_index) % num_points];
+    };
+
+    // count up and only save points on 0
+    static int count = 0;
+    const int save_every = 20; // iterations
+
+    position_t pose = odometry_sys.get_position();
+
+    bool isZeroPos = pose.x==odometry_sys.zero_pos.x && pose.y==odometry_sys.zero_pos.y && pose.rot==odometry_sys.zero_pos.rot;
+
+    if (keep_collecting && count == 0 && !isZeroPos)
+    {
+        add_point_to_path({pose.x, pose.y});
+    }
+
     offset_from_corner_px = {x + paddingx, y + paddingy};
     point_t origin = {0, 0};
     point_t plus_y = {0, field_width_inches};
@@ -310,7 +339,6 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
     screen.setPenWidth(3);
     screen.setFillColor(vex::purple);
     screen.setPenColor(vex::purple);
-    position_t pose = odometry_sys.get_position();
     point_t pos = {pose.x, pose.y};
     point_t fl = (rotate2D({-rob_width / 2, -rob_height / 2}, deg2rad(pose.rot)) + pos);
     point_t fr = (rotate2D({rob_width / 2, -rob_height / 2}, deg2rad(pose.rot)) + pos);
@@ -346,6 +374,19 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
     screen.printAt(300, 80, "(%.1f, %.1f)", pose.x, pose.y);
     screen.printAt(300, 100, "rot = %.f deg", pose.rot);
 
+    // Draw Path
+    screen.setFillColor(vex::orange);
+    screen.setPenColor(vex::orange);
+    for (int i = 0; i < num_points - 1; i++)
+    {
+        auto p1 = get_point_from_path(i);
+        auto p2 = get_point_from_path(i + 1);
+        drawInchLine(screen, p1, p2);
+    }
+
+    count++;
+    count %= save_every;
+
 #undef point_t
 }
 
@@ -360,7 +401,7 @@ void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     screen.setFont(mono60);
     screen.printAt(x + width / 2, y + height / 2, "%d", num_roller_fallback);
     screen.setFont(mono30);
-    screen.printAt(x + width/2 - (screen.getStringWidth("Roller Hits")/2), y +  190, "Roller Hits");
+    screen.printAt(x + width / 2 - (screen.getStringWidth("Roller Hits") / 2), y + 190, "Roller Hits");
 
     int test_x = screen.xPosition();
     int test_y = screen.yPosition();
@@ -373,15 +414,13 @@ void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     screen.drawRectangle(x + width - mod_width, y, mod_width, height);
     screen.drawLine(x + mod_width, 0, x + mod_width, height);
     screen.drawLine(x + width - mod_width, 0, x + width - mod_width, height);
-    
+
     screen.setFillColor(vex::black);
     screen.setPenColor(vex::color::white);
     screen.setFont(mono60);
 
-
-    screen.printAt(x + (mod_width/4), y + height/2 , "-");
-    screen.printAt(x + width - mod_width + (mod_width/4), y + height/2 , "+");
-
+    screen.printAt(x + (mod_width / 4), y + height / 2, "-");
+    screen.printAt(x + width - mod_width + (mod_width / 4), y + height / 2, "+");
 
     static bool was_pressing = false;
     bool pressing = screen.pressing();
