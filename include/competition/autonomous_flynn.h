@@ -14,4 +14,5 @@ void test_stuff();
 CommandController prog_skills_loader_side();
 CommandController auto_loader_side();
 CommandController auto_loader_side_disks_last();
+CommandController skills_rollers_last();
 void draw_image();

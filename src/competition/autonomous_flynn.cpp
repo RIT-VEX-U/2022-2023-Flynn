@@ -3,25 +3,26 @@
 #include "tuning.h"
 #include "../core/include/splash.h"
 
+#define DRIVE_TO_POINT_SLOW_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, dir))
+#define DRIVE_TO_POINT_FAST_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, dir))
+
 #define CALIBRATE_IMU()       \
   while (imu.isCalibrating()) \
   {                           \
   }
 
 const double TURN_SPEED = 0.6;
-const double INTAKE_VOLT =  12;
-const double SHOOTING_RPM = 3200;
-const double SINGLE_SHOT_TIME  = 0.2;
-const double SINGLE_SHOT_VOLT =  6;
-const double SINGLE_SHOT_RECOVER_DELAY_MS = 1000;
-const double THRESHOLD_RPM = 150; 
+const double INTAKE_VOLT = 12;
+// const double SHOOTING_RPM = 3200;
+const double SINGLE_SHOT_TIME = 0.2;
+const double SINGLE_SHOT_VOLT = 6;
+// const double SINGLE_SHOT_RECOVER_DELAY_MS = 1000;
+const double THRESHOLD_RPM = 150;
 int glbl_vision_center = 135;
-
 
 const double TRI_SHOT_TIME = 1.0;
 const double TRI_SHOT_VOLT = 2;
-const double TRI_SHOT_RECOVER_DELAY_MS = 200; 
-
+const double TRI_SHOT_RECOVER_DELAY_MS = 200;
 
 static void add_single_shot_cmd(CommandController &controller, double vis_timeout = 1.0)
 {
@@ -184,8 +185,8 @@ CommandController prog_skills_loader_side()
 
   // intake corner disk
   lss.add({
-      TURN_TO_POINT(corner_disk_point)->withTimeout(1.5),                 // #5
-      START_INTAKE,                                                      // #6
+      TURN_TO_POINT(corner_disk_point)->withTimeout(1.5),               // #5
+      START_INTAKE,                                                     // #6
       DRIVE_TO_POINT_SLOW_PT(corner_disk_point, fwd)->withTimeout(1.5), // #7
       DRIVE_FORWARD_FAST(4, rev)->withTimeout(1.5),                     // #8
   });
@@ -201,7 +202,7 @@ CommandController prog_skills_loader_side()
   lss.add({
       TURN_TO_POINT(roller_out_pos2)->withTimeout(1.5),
       DRIVE_TO_POINT_FAST_PT(roller_out_pos2, fwd)->withTimeout(1.5), // #12
-      TURN_TO_HEADING(180)->withTimeout(1.5),                           // #13
+      TURN_TO_HEADING(180)->withTimeout(1.5),                         // #13
 
       STOP_INTAKE,
 
@@ -245,20 +246,20 @@ CommandController prog_skills_loader_side()
   lss.add({
       // farthest
       DRIVE_TO_POINT_FAST_PT(disk_prep_pos1, vex::reverse)->withTimeout(2.0), // #27
-      START_INTAKE,                                                   // #26
-      TURN_TO_POINT(disk_pos1)->withTimeout(1.5),                      // #28
+      START_INTAKE,                                                           // #26
+      TURN_TO_POINT(disk_pos1)->withTimeout(1.5),                             // #28
       DRIVE_TO_POINT_SLOW_PT(disk_pos1, fwd)->withTimeout(2.0),               // #29
 
       // middle
       DRIVE_TO_POINT_FAST_PT(disk_prep_pos2, vex::reverse)->withTimeout(2.0), // #30
-      TURN_TO_POINT(disk_pos2)->withTimeout(1.5),                      // #31
+      TURN_TO_POINT(disk_pos2)->withTimeout(1.5),                             // #31
       DRIVE_TO_POINT_SLOW_PT(disk_pos2, fwd)->withTimeout(2.0),               // #32
 
       // closest disk
-      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, vex::reverse)->withTimeout(2.0), // #33
-      TURN_TO_POINT(disk_pos3)->withTimeout(1.5),                      // #34
-      DRIVE_TO_POINT_SLOW_PT(disk_pos3, vex::directionType::fwd)->withTimeout(2.0),               // #35
-      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, vex::reverse)->withTimeout(2.0), // #36
+      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, vex::reverse)->withTimeout(2.0),       // #33
+      TURN_TO_POINT(disk_pos3)->withTimeout(1.5),                                   // #34
+      DRIVE_TO_POINT_SLOW_PT(disk_pos3, vex::directionType::fwd)->withTimeout(2.0), // #35
+      DRIVE_TO_POINT_FAST_PT(disk_prep_pos3, vex::reverse)->withTimeout(2.0),       // #36
   });
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #40
 
@@ -296,7 +297,7 @@ CommandController prog_skills_loader_side()
       DRIVE_TO_POINT_FAST_PT(start_of_line, fwd)->withTimeout(2.0), // #41
 
       // Drive to End of line
-      TURN_TO_POINT(end_of_line)->withTimeout(2.0),                 // #43
+      TURN_TO_POINT(end_of_line)->withTimeout(2.0),               // #43
       DRIVE_TO_POINT_FAST_PT(end_of_line, fwd)->withTimeout(2.0), // $44
 
   });
@@ -313,7 +314,7 @@ CommandController prog_skills_loader_side()
   // Arrow 4 -------------------------
   Vector2D::point_t endgame_point = {.x = 116.36, .y = 106.23};
 
-  lss.add(TURN_TO_POINT(endgame_point), 1.0);                 // [measure]
+  lss.add(TURN_TO_POINT(endgame_point), 1.0);               // [measure]
   lss.add(DRIVE_TO_POINT_FAST_PT(endgame_point, fwd), 4.0); //[measure]
   lss.add(TURN_TO_HEADING(48), 3.0);
 
@@ -506,7 +507,6 @@ CommandController auto_loader_side()
   return lsa;
 }
 
-
 // start 84, 13
 // turn to goal
 // shooty 2
@@ -525,43 +525,107 @@ CommandController auto_loader_side()
 // turn to roller
 // we do a little rolling.jpeg
 #define SHOOT_3(time_ms) SHOOT_DISK, new DelayCommand(time_ms), STOP_INTAKE
-#define TURN_TO_AND_DRIVE_TO_FAST(pt, timeout) (TURN_TO_POINT(pt)->withTimeout(timeout)),(DRIVE_TO_POINT_FAST_PT(pt, fwd)->withTimeout(timeout))
+#define TURN_TO_AND_DRIVE_TO_FAST(pt, timeout) (TURN_TO_POINT(pt)->withTimeout(timeout)), (DRIVE_TO_POINT_FAST_PT(pt, fwd)->withTimeout(timeout))
 CommandController auto_loader_side_disks_last()
 {
-  #define point_t Vector2D::point_t
-  
+#define point_t Vector2D::point_t
+
   point_t goal_point = {15, 125};
   position_t start_point_odom = {.x = 83, .y = 13, .rot = 90.f};
   point_t start_point = {.x = start_point_odom.x, .y = start_point_odom.y};
   point_t disk_line_end = {83, 47};
   point_t pre_3_stack = {65, 45};
   point_t post_3_stack = {52, 30};
-  point_t pre_roller_pt = {31, 10};
-
+  // point_t pre_roller_pt = {31, 10};
 
   CommandController lsdl;
   lsdl.add({
-    new OdomSetPosition(odometry_sys, start_point_odom),
-    TURN_TO_POINT(goal_point),
-    SHOOT_3(1500),
-    TURN_TO_POINT(disk_line_end),
-    START_INTAKE,
-    DRIVE_TO_POINT_SLOW_PT(disk_line_end, vex::forward),
-    DRIVE_TO_POINT_FAST_PT(start_point, vex::reverse),
-    STOP_INTAKE,
-    TURN_TO_AND_DRIVE_TO_FAST(pre_3_stack, 2.0),
-    TURN_TO_POINT(goal_point),
-    SHOOT_3(1500),
-    START_INTAKE,
-    TURN_TO_AND_DRIVE_TO_FAST(post_3_stack, 2.0),
-    STOP_INTAKE,
-    TURN_TO_POINT(goal_point)->withTimeout(2.0),
-    SHOOT_3(1500),
-    TURN_TO_AND_DRIVE_TO_FAST(pre_roller_pt, 2.0),
-    TURN_TO_HEADING(270)->withTimeout(2.0),
-    // DO LE ROLLERS
+      new OdomSetPosition(odometry_sys, start_point_odom),
+      // TURN_TO_POINT(goal_point),
+      // SHOOT_3(1500),
+      // TURN_TO_POINT(disk_line_end),
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST_PT(disk_line_end, vex::forward),
+      DRIVE_TO_POINT_FAST_PT(start_point, vex::reverse),
+      STOP_INTAKE,
+      // TURN_TO_AND_DRIVE_TO_FAST(pre_3_stack, 2.0),
+      // TURN_TO_POINT(goal_point),
+      // SHOOT_3(1500),
+      // START_INTAKE,
+      // TURN_TO_AND_DRIVE_TO_FAST(post_3_stack, 2.0),
+      // STOP_INTAKE,
+      // TURN_TO_POINT(goal_point)->withTimeout(2.0),
+      // SHOOT_3(1500),
+      // TURN_TO_AND_DRIVE_TO_FAST(pre_roller_pt, 2.0),
+      // TURN_TO_HEADING(270)->withTimeout(2.0),
+      //  DO LE ROLLERS
   });
   return lsdl;
 
-  #undef point_t
+#undef point_t
+}
+
+// Skills rollers last
+
+CommandController skills_rollers_last()
+{
+  CommandController srl;
+  srl.add({
+      // new
+      new OdomSetPosition(odometry_sys, {.x = 30.655172, .y = 13.034482, .rot = -180.0}),
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST(12.551724, 13.5172415, fwd),
+      TURN_TO_HEADING(-270.0),
+      STOP_INTAKE,
+      DRIVE_TO_POINT_FAST(12.310345, 51.413795, fwd),
+      SHOOT_3(1000), // preload+1
+
+      TURN_TO_HEADING(-30.0),
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST(46.58621, 24.137932, fwd),
+      TURN_TO_HEADING(-10.0),
+      STOP_INTAKE,
+      SHOOT_3(1000), // 3 stack on line
+
+      TURN_TO_HEADING(40.0),
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST(69.27586, 48.03448, fwd),
+      TURN_TO_HEADING(-25.0),
+      STOP_INTAKE,
+      SHOOT_3(1000), // 3 stack not on line
+
+      TURN_TO_HEADING(-320.0),
+      DRIVE_TO_POINT_FAST(109.586205, 89.31035, fwd),
+      TURN_TO_HEADING(-425.0),
+      DRIVE_TO_POINT_FAST(124.06897, 56.0, fwd),
+      TURN_TO_HEADING(-450.0),
+      SHOOT_3(1000), // side 3 in a row
+
+      TURN_TO_HEADING(-165.0),
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST(111.51724, 51.65517, fwd),
+      TURN_TO_HEADING(-180.0),
+      DRIVE_TO_POINT_FAST(84.96552, 51.65517, fwd),
+      TURN_TO_HEADING(-40.0),
+      STOP_INTAKE,
+      SHOOT_3(1000), // barrier side 1
+
+      TURN_TO_HEADING(-90.0),
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST(84.96552, 16.896551, fwd),
+      TURN_TO_HEADING(0.0),
+      STOP_INTAKE,
+      SHOOT_3(1000), // barrier side 2
+
+      TURN_TO_HEADING(125.0),
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST(56.48276, 60.344826, fwd),
+      TURN_TO_HEADING(225.0),
+      DRIVE_TO_POINT_FAST(20.034483, 20.758621, fwd),
+      TURN_TO_HEADING(355.0),
+      STOP_INTAKE,
+      SHOOT_3(1000), // center line row of 3
+                     // rollering
+  });
+  return srl;
 }

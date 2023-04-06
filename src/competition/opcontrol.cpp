@@ -10,10 +10,10 @@
 
 int controller_screen()
 {
+  static std::string happy = ":)";
   while (1)
   {
     uint32_t bat = (uint32_t)Brain.Battery.capacity();
-    printf("bat %d\n", bat);
     double f = flywheel_motors.temperature(celsius);
     double i = intake.temperature(celsius);
     double d = (left_motors.temperature(celsius) + right_motors.temperature(celsius)) / 2;
@@ -22,10 +22,21 @@ int controller_screen()
     main_controller.Screen.print("F: %.0f        B: %d%%", f, bat);
 
     main_controller.Screen.setCursor(2, 1);
-    main_controller.Screen.print("I: %.0f        V: %.1fb", intake.temperature(celsius), Brain.Battery.voltage());
+    main_controller.Screen.print("I: %.0f        V: %.1fv", intake.temperature(celsius), Brain.Battery.voltage());
     main_controller.Screen.setCursor(3, 1);
 
-    main_controller.Screen.print("D: %.0f", intake.temperature(celsius));
+    std::string &problem = happy;
+    for (auto const &name_and_motor : motor_names)
+    {
+      if (!name_and_motor.second.installed())
+      {
+        problem = name_and_motor.first;
+        break;
+      }
+    }
+
+    main_controller.Screen.print("D: %.0f      %s", intake.temperature(celsius), problem.c_str());
+
     vexDelay(500);
   }
 }
@@ -34,6 +45,7 @@ int controller_screen()
  */
 void opcontrol()
 {
+
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);
