@@ -1,5 +1,5 @@
 #include "competition/opcontrol.h"
-#include "competition/autonomous_clu.h"
+#include "competition/autonomous_flynn.h"
 #include "automation.h"
 #include "robot-config.h"
 #include "tuning.h"
@@ -45,7 +45,7 @@ int controller_screen()
  */
 void opcontrol()
 {
-
+  test_stuff();
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);

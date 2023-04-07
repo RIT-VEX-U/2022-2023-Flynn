@@ -207,7 +207,6 @@ VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center, in
  */
 bool VisionAimCommand::run()
 {
-
   if (first_run)
   {
     stored_pos = odometry_sys.get_position();
@@ -234,7 +233,7 @@ bool VisionAimCommand::run()
 
   // Take a snapshot with each color selected,
   // and store the largest found object for each in a vector
-  vision::object red_obj, blue_obj;
+  //vision::object red_obj, blue_obj;
 
   int x_val = 0;
   // Get largest red blob
@@ -249,9 +248,11 @@ bool VisionAimCommand::run()
     cam.takeSnapshot(BLUE_GOAL);
   }
 
+
+  printf("Object Count %ld\n", cam.objectCount);
   for(int i = 0; i < cam.objectCount; i++){
     double blob_1_area = cam.objects[i].width * cam.objects[i].height;
-      for(int j = i+1; j < cam.objectCount; i++){
+      for(int j = i+1; j < cam.objectCount; j++){
         double blob_2_area = cam.objects[j].width * cam.objects[j].height;
         if(fabs(cam.objects[i].centerX - cam.objects[j].centerX) < 10 && (blob_1_area + blob_2_area) > MIN_AREA){
           x_val = cam.objects[i].centerX;
