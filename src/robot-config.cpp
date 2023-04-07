@@ -162,7 +162,7 @@ vex::timer oneshot_tmr;
 
 AutoChooser autochooser(Brain);
 
-bool target_red = true;
+bool target_red = false;
 bool vision_enabled = true;
 int num_roller_fallback = 2;
 /**

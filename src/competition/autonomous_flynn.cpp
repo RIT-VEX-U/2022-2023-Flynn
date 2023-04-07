@@ -57,14 +57,18 @@ int print_odom()
 
 void test_stuff()
 {
-  CALIBRATE_IMU();
+  // CALIBRATE_IMU();
 
-  vex::task odom_print(print_odom);
+  // vex::task odom_print(print_odom);
 
-  CommandController mine = auto_loader_side_disks_last();
-  mine.run();
-  return;
+  // CommandController mine = auto_loader_side_disks_last();
+  // mine.run();
+
+  // return;
   //
+  printf("Running pleasant op\n");
+  //fflush(stdout);
+  
   pleasant_opcontrol();
 }
 
@@ -96,7 +100,6 @@ void pleasant_opcontrol()
   main_controller.ButtonL1.pressed([]()
                                    { flapup_solenoid.set(true); });
 
-  int i = 0;
 
   VisionAimCommand visaim(false, 145, 5);
 
@@ -107,12 +110,13 @@ void pleasant_opcontrol()
   // Periodic
   while (true)
   {
-    i++;
 
     // ========== DRIVING CONTROLS ==========
-    if (main_controller.ButtonA.pressing())
+    if (main_controller.ButtonA.pressing()){
+      printf("Vision exists\n");
+      fflush(stdout);
       visaim.run();
-    else
+    }else
       drive_sys.drive_arcade(main_controller.Axis3.position(pct) / 100.0, main_controller.Axis1.position(pct) / 300.0);
 
     // ========== MANIPULATING CONTROLS ==========
