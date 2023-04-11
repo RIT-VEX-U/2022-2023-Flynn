@@ -13,10 +13,8 @@
 
 const double TURN_SPEED = 0.6;
 const double INTAKE_VOLT = 12;
-// const double SHOOTING_RPM = 3200;
 const double SINGLE_SHOT_TIME = 0.2;
 const double SINGLE_SHOT_VOLT = 6;
-// const double SINGLE_SHOT_RECOVER_DELAY_MS = 1000;
 const double THRESHOLD_RPM = 150;
 int glbl_vision_center = 135;
 
@@ -57,12 +55,12 @@ int print_odom()
 
 void test_stuff()
 {
-  // CALIBRATE_IMU();
+  CALIBRATE_IMU();
 
   // vex::task odom_print(print_odom);
 
-  // CommandController mine = auto_loader_side_disks_last();
-  // mine.run();
+  CommandController mine = auto_loader_side_disks_last();
+  mine.run();
 
   // return;
   //
