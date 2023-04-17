@@ -45,7 +45,7 @@ int controller_screen()
  */
 void opcontrol()
 {
-  test_stuff();
+  // test_stuff();
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);
@@ -80,10 +80,11 @@ void opcontrol()
                                   { odometry_sys.set_position(); });
 
   // odometry_sys.end_async();
-
+  odometry_sys.set_position();
   // Periodic
   while (true)
   {
+    // printf("%f : %f\n", left_enc.position(rotationUnits::rev), right_enc.position(rotationUnits::rev));
     // ========== DRIVING CONTROLS ==========
     drive_sys.drive_tank(main_controller.Axis3.position() / 100.0, main_controller.Axis2.position() / 100.0);
     // ========== MANIPULATING CONTROLS ==========

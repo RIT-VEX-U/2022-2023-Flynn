@@ -13,10 +13,8 @@
 
 const double TURN_SPEED = 0.6;
 const double INTAKE_VOLT = 12;
-// const double SHOOTING_RPM = 3200;
 const double SINGLE_SHOT_TIME = 0.2;
 const double SINGLE_SHOT_VOLT = 6;
-// const double SINGLE_SHOT_RECOVER_DELAY_MS = 1000;
 const double THRESHOLD_RPM = 150;
 int glbl_vision_center = 135;
 
@@ -57,12 +55,12 @@ int print_odom()
 
 void test_stuff()
 {
-  // CALIBRATE_IMU();
+  CALIBRATE_IMU();
 
   // vex::task odom_print(print_odom);
 
-  // CommandController mine = auto_loader_side_disks_last();
-  // mine.run();
+  CommandController mine = auto_loader_side_disks_last();
+  mine.run();
 
   // return;
   //
@@ -540,28 +538,28 @@ CommandController auto_loader_side_disks_last()
   point_t disk_line_end = {83, 47};
   point_t pre_3_stack = {65, 45};
   point_t post_3_stack = {52, 30};
-  // point_t pre_roller_pt = {31, 10};
+  point_t pre_roller_pt = {31, 10};
 
   CommandController lsdl;
   lsdl.add({
       new OdomSetPosition(odometry_sys, start_point_odom),
-      // TURN_TO_POINT(goal_point),
-      // SHOOT_3(1500),
-      // TURN_TO_POINT(disk_line_end),
+      TURN_TO_POINT(goal_point),
+      SHOOT_3(1500),
+      TURN_TO_POINT(disk_line_end),
       START_INTAKE,
       DRIVE_TO_POINT_FAST_PT(disk_line_end, vex::forward),
       DRIVE_TO_POINT_FAST_PT(start_point, vex::reverse),
       STOP_INTAKE,
-      // TURN_TO_AND_DRIVE_TO_FAST(pre_3_stack, 2.0),
-      // TURN_TO_POINT(goal_point),
-      // SHOOT_3(1500),
-      // START_INTAKE,
-      // TURN_TO_AND_DRIVE_TO_FAST(post_3_stack, 2.0),
-      // STOP_INTAKE,
-      // TURN_TO_POINT(goal_point)->withTimeout(2.0),
-      // SHOOT_3(1500),
-      // TURN_TO_AND_DRIVE_TO_FAST(pre_roller_pt, 2.0),
-      // TURN_TO_HEADING(270)->withTimeout(2.0),
+      TURN_TO_AND_DRIVE_TO_FAST(pre_3_stack, 2.0),
+      TURN_TO_POINT(goal_point),
+      SHOOT_3(1500),
+      START_INTAKE,
+      TURN_TO_AND_DRIVE_TO_FAST(post_3_stack, 2.0),
+      STOP_INTAKE,
+      TURN_TO_POINT(goal_point)->withTimeout(2.0),
+      SHOOT_3(1500),
+      TURN_TO_AND_DRIVE_TO_FAST(pre_roller_pt, 2.0),
+      TURN_TO_HEADING(270)->withTimeout(2.0),
       //  DO LE ROLLERS
   });
   return lsdl;
@@ -575,8 +573,9 @@ CommandController skills_rollers_last()
 {
   CommandController srl;
   srl.add({
-      // new
+      // preload+1
       new OdomSetPosition(odometry_sys, {.x = 30.655172, .y = 13.034482, .rot = -180.0}),
+      SPIN_FW_AT(3200),
       START_INTAKE,
       DRIVE_TO_POINT_FAST(12.551724, 13.5172415, fwd),
       TURN_TO_HEADING(-270.0),
@@ -584,6 +583,8 @@ CommandController skills_rollers_last()
       DRIVE_TO_POINT_FAST(12.310345, 51.413795, fwd),
       SHOOT_3(1000), // preload+1
 
+      // 3 stack on line
+      SPIN_FW_AT(3200),
       TURN_TO_HEADING(-30.0),
       START_INTAKE,
       DRIVE_TO_POINT_FAST(46.58621, 24.137932, fwd),
@@ -591,6 +592,8 @@ CommandController skills_rollers_last()
       STOP_INTAKE,
       SHOOT_3(1000), // 3 stack on line
 
+      // 3 stack not on line
+      SPIN_FW_AT(3200),
       TURN_TO_HEADING(40.0),
       START_INTAKE,
       DRIVE_TO_POINT_FAST(69.27586, 48.03448, fwd),
@@ -598,6 +601,8 @@ CommandController skills_rollers_last()
       STOP_INTAKE,
       SHOOT_3(1000), // 3 stack not on line
 
+      // side 3 in a row
+      SPIN_FW_AT(3200),
       TURN_TO_HEADING(-320.0),
       DRIVE_TO_POINT_FAST(109.586205, 89.31035, fwd),
       TURN_TO_HEADING(-425.0),
@@ -605,6 +610,8 @@ CommandController skills_rollers_last()
       TURN_TO_HEADING(-450.0),
       SHOOT_3(1000), // side 3 in a row
 
+      // barrier side 1
+      SPIN_FW_AT(3200),
       TURN_TO_HEADING(-165.0),
       START_INTAKE,
       DRIVE_TO_POINT_FAST(111.51724, 51.65517, fwd),
@@ -614,13 +621,17 @@ CommandController skills_rollers_last()
       STOP_INTAKE,
       SHOOT_3(1000), // barrier side 1
 
+      // barrier side 2
+      SPIN_FW_AT(3200),
       TURN_TO_HEADING(-90.0),
       START_INTAKE,
       DRIVE_TO_POINT_FAST(84.96552, 16.896551, fwd),
       TURN_TO_HEADING(0.0),
       STOP_INTAKE,
-      SHOOT_3(1000), // barrier side 2
+      SHOOT_3(1000),
 
+      // center line row of 3
+      SPIN_FW_AT(3200),
       TURN_TO_HEADING(125.0),
       START_INTAKE,
       DRIVE_TO_POINT_FAST(56.48276, 60.344826, fwd),
@@ -630,6 +641,9 @@ CommandController skills_rollers_last()
       STOP_INTAKE,
       SHOOT_3(1000), // center line row of 3
                      // rollering
+
+      // endgaming
+      new EndgameCommand(endgame_solenoid),
   });
   return srl;
 }

@@ -251,7 +251,7 @@ Vector2D::point_t rotate2D(Vector2D::point_t p, double dir_radians)
 void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
 {
 #define point_t Vector2D::point_t
-    const int num_points = 20;
+    const int num_points = 40;
     static int points_index = 0;
     static std::array<point_t, num_points> points = {};
     auto add_point_to_path = [](point_t pt)
@@ -266,7 +266,7 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
 
     // count up and only save points on 0
     static int count = 0;
-    const int save_every = 20; // iterations
+    const int save_every = 5; // iterations
 
     position_t pose = odometry_sys.get_position();
 
@@ -373,6 +373,22 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
 
     screen.printAt(300, 80, "(%.1f, %.1f)", pose.x, pose.y);
     screen.printAt(300, 100, "rot = %.f deg", pose.rot);
+    screen.printAt(300, 120, "%.3f : %.3f", left_enc.position(rotationUnits::rev), right_enc.position(rotationUnits::rev));
+
+
+    screen.setFillColor(vex::green);
+    screen.setPenColor(vex::green);
+    screen.drawRectangle(310, 130, 40, 40);
+    screen.setPenColor(vex::white);
+    int mx = screen.xPosition() - 310;
+    int my = screen.yPosition() - 130;
+    bool inx = mx > 0 && mx < 40;
+    bool iny = my > 0 && my < 40;
+    if (screen.pressing() && inx && iny){
+        odometry_sys.set_position();
+        imu.calibrate();
+        while (imu.isCalibrating()){}
+    }
 
     // Draw Path
     screen.setFillColor(vex::orange);

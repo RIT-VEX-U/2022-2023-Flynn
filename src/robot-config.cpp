@@ -10,15 +10,17 @@ controller main_controller;
 // ======== OUTPUTS ========
 
 // Drive
-motor left_front(PORT20, vex::gearSetting::ratio18_1, true), left_mid(PORT8, vex::gearSetting::ratio18_1, true), left_rear(PORT10, vex::gearSetting::ratio18_1, true);
-motor right_front(PORT11, vex::gearSetting::ratio18_1), right_mid(PORT1, vex::gearSetting::ratio18_1), right_rear(PORT2, vex::gearSetting::ratio18_1);
+motor left_front(PORT13, vex::gearSetting::ratio18_1, true), left_mid(PORT12, vex::gearSetting::ratio18_1, true), left_rear(PORT11, vex::gearSetting::ratio18_1, true);
+motor right_front(PORT18, vex::gearSetting::ratio18_1), right_mid(PORT19, vex::gearSetting::ratio18_1), right_rear(PORT20, vex::gearSetting::ratio18_1);
 
 motor_group left_motors(left_front, left_mid, left_rear);
 motor_group right_motors(right_front, right_mid, right_rear);
 
+inertial imu(PORT3);
+
 // Manipulation
-motor flywheel(PORT12);
-motor intake(PORT19);
+motor flywheel(PORT10);
+motor intake(PORT1);
 
 motor_group flywheel_motors(flywheel);
 
@@ -27,7 +29,7 @@ std::map<std::string, motor &> motor_names{
     {"left mid", left_mid},
     {"left rear", left_rear},
 
-    {"right front", right_front},
+    {"right front", right_front},   
     {"right mid", right_mid},
     {"right rear", right_rear},
 
@@ -46,15 +48,11 @@ vex::digital_out endgame_solenoid(Brain.ThreeWirePort.H); // TODO make this an a
 vex::digital_out flapup_solenoid(Brain.ThreeWirePort.G);
 
 // ======== INPUTS ========
-CustomEncoder left_enc(Brain.ThreeWirePort.A, 2048);
-CustomEncoder right_enc(Brain.ThreeWirePort.C, 2048);
+CustomEncoder left_enc(Brain.ThreeWirePort.G, -2048);
+CustomEncoder right_enc(Brain.ThreeWirePort.E, 2048);
 
-inertial imu(PORT4);
 
 // ======== UTILS ========
-
-
-
 // Drive Tuning
 PID::pid_config_t drive_pid_cfg = {
     .p = .035,
@@ -86,9 +84,6 @@ MotionController::m_profile_cfg_t drive_super_fast_mprofile_cfg = {
     .accel = 150, // MAX = 200
     .pid_cfg = drive_pid_cfg,
     .ff_cfg = drive_ff_cfg};
-
-
-
 
 // Turn Tuning
 PID::pid_config_t turn_pid_cfg = {
@@ -127,7 +122,7 @@ MotionController drive_fast_mprofile(drive_fast_mprofile_cfg), drive_slow_mprofi
 
 robot_specs_t config = {
     .robot_radius = 10,
-    .odom_wheel_diam = 6.374,
+    .odom_wheel_diam = 6.424194,
     .odom_gear_ratio = 1, // .44    16:12
     .dist_between_wheels = 10.163,
 
@@ -151,7 +146,7 @@ PID::pid_config_t flywheel_pid_cfg = {
 
 // ======== SUBSYSTEMS ========
 
-// OdometryTank odometry_sys(left_enc, right_enc, config);.003
+// OdometryTank odometry_sys(left_enc, right_enc, config);
 OdometryTank odometry_sys(left_motors, right_motors, config, &imu); // PUT THIS BACK YUO HOOLIGAN
 
 TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
