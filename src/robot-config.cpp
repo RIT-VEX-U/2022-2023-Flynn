@@ -146,8 +146,8 @@ PID::pid_config_t flywheel_pid_cfg = {
 
 // ======== SUBSYSTEMS ========
 
-OdometryTank odometry_sys(left_enc, right_enc, config);
-// OdometryTank odometry_sys(left_motors, right_motors, config, &imu); // PUT THIS BACK YUO HOOLIGAN
+// OdometryTank odometry_sys(left_enc, right_enc, config);
+OdometryTank odometry_sys(left_motors, right_motors, config, &imu); // PUT THIS BACK YUO HOOLIGAN
 
 TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 

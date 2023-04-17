@@ -375,6 +375,21 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
     screen.printAt(300, 100, "rot = %.f deg", pose.rot);
     screen.printAt(300, 120, "%.3f : %.3f", left_enc.position(rotationUnits::rev), right_enc.position(rotationUnits::rev));
 
+
+    screen.setFillColor(vex::green);
+    screen.setPenColor(vex::green);
+    screen.drawRectangle(310, 130, 40, 40);
+    screen.setPenColor(vex::white);
+    int mx = screen.xPosition() - 310;
+    int my = screen.yPosition() - 130;
+    bool inx = mx > 0 && mx < 40;
+    bool iny = my > 0 && my < 40;
+    if (screen.pressing() && inx && iny){
+        odometry_sys.set_position();
+        imu.calibrate();
+        while (imu.isCalibrating()){}
+    }
+
     // Draw Path
     screen.setFillColor(vex::orange);
     screen.setPenColor(vex::orange);

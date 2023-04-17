@@ -538,28 +538,28 @@ CommandController auto_loader_side_disks_last()
   point_t disk_line_end = {83, 47};
   point_t pre_3_stack = {65, 45};
   point_t post_3_stack = {52, 30};
-  // point_t pre_roller_pt = {31, 10};
+  point_t pre_roller_pt = {31, 10};
 
   CommandController lsdl;
   lsdl.add({
       new OdomSetPosition(odometry_sys, start_point_odom),
-      // TURN_TO_POINT(goal_point),
-      // SHOOT_3(1500),
-      // TURN_TO_POINT(disk_line_end),
+      TURN_TO_POINT(goal_point),
+      SHOOT_3(1500),
+      TURN_TO_POINT(disk_line_end),
       START_INTAKE,
       DRIVE_TO_POINT_FAST_PT(disk_line_end, vex::forward),
       DRIVE_TO_POINT_FAST_PT(start_point, vex::reverse),
       STOP_INTAKE,
-      // TURN_TO_AND_DRIVE_TO_FAST(pre_3_stack, 2.0),
-      // TURN_TO_POINT(goal_point),
-      // SHOOT_3(1500),
-      // START_INTAKE,
-      // TURN_TO_AND_DRIVE_TO_FAST(post_3_stack, 2.0),
-      // STOP_INTAKE,
-      // TURN_TO_POINT(goal_point)->withTimeout(2.0),
-      // SHOOT_3(1500),
-      // TURN_TO_AND_DRIVE_TO_FAST(pre_roller_pt, 2.0),
-      // TURN_TO_HEADING(270)->withTimeout(2.0),
+      TURN_TO_AND_DRIVE_TO_FAST(pre_3_stack, 2.0),
+      TURN_TO_POINT(goal_point),
+      SHOOT_3(1500),
+      START_INTAKE,
+      TURN_TO_AND_DRIVE_TO_FAST(post_3_stack, 2.0),
+      STOP_INTAKE,
+      TURN_TO_POINT(goal_point)->withTimeout(2.0),
+      SHOOT_3(1500),
+      TURN_TO_AND_DRIVE_TO_FAST(pre_roller_pt, 2.0),
+      TURN_TO_HEADING(270)->withTimeout(2.0),
       //  DO LE ROLLERS
   });
   return lsdl;
