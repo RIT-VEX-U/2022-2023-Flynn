@@ -74,7 +74,7 @@ void tune_odometry_wheel_diam()
 
 void tune_odometry_wheelbase()
 {
-    int times_to_turn = 5;
+    int times_to_turn = 15;
     if (main_controller.ButtonA.pressing())
     {
         // left_enc.resetRotation();

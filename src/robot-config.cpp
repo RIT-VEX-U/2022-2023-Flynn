@@ -67,8 +67,8 @@ FeedForward::ff_config_t drive_ff_cfg = {
     .kA = 0.0015};
 
 MotionController::m_profile_cfg_t drive_fast_mprofile_cfg = {
-    .max_v = 40,  // MAX = 48,
-    .accel = 150, // MAX = 200
+    .max_v = 60,  // MAX = 48,
+    .accel = 140, // MAX = 200
     .pid_cfg = drive_pid_cfg,
     .ff_cfg = drive_ff_cfg};
 
@@ -79,11 +79,6 @@ MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
     .ff_cfg = drive_ff_cfg};
 
 
-MotionController::m_profile_cfg_t drive_super_fast_mprofile_cfg = {
-    .max_v = 40,  // MAX = 48,
-    .accel = 150, // MAX = 200
-    .pid_cfg = drive_pid_cfg,
-    .ff_cfg = drive_ff_cfg};
 
 // Turn Tuning
 PID::pid_config_t turn_pid_cfg = {
@@ -124,9 +119,9 @@ robot_specs_t config = {
     .robot_radius = 10,
     .odom_wheel_diam = 6.424194,
     .odom_gear_ratio = 1, // .44    16:12
-    .dist_between_wheels = 10.163,
+    .dist_between_wheels = 10.99,
 
-    .drive_correction_cutoff = 4,
+    .drive_correction_cutoff = 6,
 
     .drive_feedback = &drive_fast_mprofile,
     .turn_feedback = new PIDFF(turn_pid_cfg, turn_ff_cfg),

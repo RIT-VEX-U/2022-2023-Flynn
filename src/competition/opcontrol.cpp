@@ -45,7 +45,8 @@ int controller_screen()
  */
 void opcontrol()
 {
-  // test_stuff();
+  config.turn_feedback->set_limits(0, 0.7);
+  test_stuff();
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);

@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <algorithm>
 #include "competition/autonomous_flynn.h"
 #include "vision.h"
 #include "tuning.h"
@@ -57,16 +59,16 @@ void test_stuff()
 {
   CALIBRATE_IMU();
 
-  // vex::task odom_print(print_odom);
+  vex::task odom_print(print_odom);
 
-  CommandController mine = auto_loader_side_disks_last();
-  mine.run();
+  CommandController mine = skills_rollers_last();
+  // mine.run();
 
   // return;
   //
   printf("Running pleasant op\n");
-  //fflush(stdout);
-  
+  // fflush(stdout);
+
   pleasant_opcontrol();
 }
 
@@ -81,7 +83,7 @@ void pleasant_opcontrol()
   main_controller.ButtonDown.pressed([]()
                                      { flywheel_sys.spinRPM(flywheel_sys.getDesiredRPM() - 250); });
   main_controller.ButtonR1.pressed([]()
-                                   { intake.spin(reverse, 12, volt); }); // Intake
+                                   { intake.spin(vex::reverse, 12, volt); }); // Intake
   main_controller.ButtonR2.pressed([]()
                                    { intake.spin(fwd, 12, volt); }); // Shoot
 
@@ -98,7 +100,6 @@ void pleasant_opcontrol()
   main_controller.ButtonL1.pressed([]()
                                    { flapup_solenoid.set(true); });
 
-
   VisionAimCommand visaim(false, 145, 5);
 
   timer loop_timer;
@@ -110,12 +111,15 @@ void pleasant_opcontrol()
   {
 
     // ========== DRIVING CONTROLS ==========
-    if (main_controller.ButtonA.pressing()){
-      printf("Vision exists\n");
-      fflush(stdout);
-      visaim.run();
-    }else
-      drive_sys.drive_arcade(main_controller.Axis3.position(pct) / 100.0, main_controller.Axis1.position(pct) / 300.0);
+    if (main_controller.ButtonA.pressing())
+    {
+      right_motors.setStopping(brakeType::hold);
+      left_motors.setStopping(brakeType::hold);
+      left_motors.stop();
+      right_motors.stop();
+    }
+    else
+      drive_sys.drive_arcade(main_controller.Axis3.position(pct) / 100.0, main_controller.Axis1.position(pct) / 120.0);
 
     // ========== MANIPULATING CONTROLS ==========
 
@@ -538,7 +542,7 @@ CommandController auto_loader_side_disks_last()
   point_t disk_line_end = {83, 47};
   point_t pre_3_stack = {65, 45};
   point_t post_3_stack = {52, 30};
-  point_t pre_roller_pt = {31, 10};
+  point_t pre_roller_pt = {31, 15};
 
   CommandController lsdl;
   lsdl.add({
@@ -573,77 +577,78 @@ CommandController skills_rollers_last()
 {
   CommandController srl;
   srl.add({
-      // preload+1
-      new OdomSetPosition(odometry_sys, {.x = 30.655172, .y = 13.034482, .rot = -180.0}),
-      SPIN_FW_AT(3200),
-      START_INTAKE,
-      DRIVE_TO_POINT_FAST(12.551724, 13.5172415, fwd),
-      TURN_TO_HEADING(-270.0),
-      STOP_INTAKE,
-      DRIVE_TO_POINT_FAST(12.310345, 51.413795, fwd),
-      SHOOT_3(1000), // preload+1
+              // preload+1
+              new OdomSetPosition(odometry_sys, {.x = 30.655172, .y = 13.034482, .rot = -180.0}),
+              SPIN_FW_AT(3200),
+              START_INTAKE,
+              DRIVE_TO_POINT_FAST(12.551724, 13.5172415, fwd),
+              TURN_TO_HEADING(-270.0),
+              STOP_INTAKE,
+              DRIVE_TO_POINT_FAST(12.310345, 51.413795, fwd),
+              SHOOT_3(1000), // preload+1
 
-      // 3 stack on line
-      SPIN_FW_AT(3200),
-      TURN_TO_HEADING(-30.0),
-      START_INTAKE,
-      DRIVE_TO_POINT_FAST(46.58621, 24.137932, fwd),
-      TURN_TO_HEADING(-10.0),
-      STOP_INTAKE,
-      SHOOT_3(1000), // 3 stack on line
+              // 3 stack on line
+              SPIN_FW_AT(3200),
+              TURN_TO_HEADING(-30.0),
+              START_INTAKE,
+              DRIVE_TO_POINT_FAST(46.58621, 24.137932, fwd),
+              TURN_TO_HEADING(-10.0),
+              STOP_INTAKE,
+              SHOOT_3(1000), // 3 stack on line
 
-      // 3 stack not on line
-      SPIN_FW_AT(3200),
-      TURN_TO_HEADING(40.0),
-      START_INTAKE,
-      DRIVE_TO_POINT_FAST(69.27586, 48.03448, fwd),
-      TURN_TO_HEADING(-25.0),
-      STOP_INTAKE,
-      SHOOT_3(1000), // 3 stack not on line
+              // 3 stack not on line
+              SPIN_FW_AT(3200),
+              TURN_TO_HEADING(40.0),
+              START_INTAKE,
+              DRIVE_TO_POINT_FAST(69.27586, 48.03448, fwd),
+              TURN_TO_HEADING(-25.0),
+              STOP_INTAKE,
+              SHOOT_3(1000), // 3 stack not on line
 
-      // side 3 in a row
-      SPIN_FW_AT(3200),
-      TURN_TO_HEADING(-320.0),
-      DRIVE_TO_POINT_FAST(109.586205, 89.31035, fwd),
-      TURN_TO_HEADING(-425.0),
-      DRIVE_TO_POINT_FAST(124.06897, 56.0, fwd),
-      TURN_TO_HEADING(-450.0),
-      SHOOT_3(1000), // side 3 in a row
+              // side 3 in a row
+              SPIN_FW_AT(3200),
+              TURN_TO_HEADING(-320.0),
+              DRIVE_TO_POINT_FAST(109.586205, 89.31035, fwd),
+              TURN_TO_HEADING(-425.0),
+              DRIVE_TO_POINT_FAST(124.06897, 60.0, fwd),
+              TURN_TO_HEADING(-450.0),
+              SHOOT_3(1000), // side 3 in a row
 
-      // barrier side 1
-      SPIN_FW_AT(3200),
-      TURN_TO_HEADING(-165.0),
-      START_INTAKE,
-      DRIVE_TO_POINT_FAST(111.51724, 51.65517, fwd),
-      TURN_TO_HEADING(-180.0),
-      DRIVE_TO_POINT_FAST(84.96552, 51.65517, fwd),
-      TURN_TO_HEADING(-40.0),
-      STOP_INTAKE,
-      SHOOT_3(1000), // barrier side 1
+              // barrier side 1
+              SPIN_FW_AT(3200),
+              TURN_TO_HEADING(-165.0),
+              START_INTAKE,
+              DRIVE_TO_POINT_FAST(111.51724, 51.65517, fwd),
+              TURN_TO_HEADING(-180.0),
+              DRIVE_TO_POINT_FAST(82.96552, 51.65517, fwd),
+              TURN_TO_HEADING(-40.0),
+              STOP_INTAKE,
+              SHOOT_3(1000), // barrier side 1
 
-      // barrier side 2
-      SPIN_FW_AT(3200),
-      TURN_TO_HEADING(-90.0),
-      START_INTAKE,
-      DRIVE_TO_POINT_FAST(84.96552, 16.896551, fwd),
-      TURN_TO_HEADING(0.0),
-      STOP_INTAKE,
-      SHOOT_3(1000),
+              // barrier side 2
+              SPIN_FW_AT(3200),
+              TURN_TO_HEADING(-90.0),
+              START_INTAKE,
+              DRIVE_TO_POINT_FAST(81.96552, 14.896551, fwd),
+              TURN_TO_HEADING(0.0),
+              STOP_INTAKE,
+              SHOOT_3(1000),
 
-      // center line row of 3
-      SPIN_FW_AT(3200),
-      TURN_TO_HEADING(125.0),
-      START_INTAKE,
-      DRIVE_TO_POINT_FAST(56.48276, 60.344826, fwd),
-      TURN_TO_HEADING(225.0),
-      DRIVE_TO_POINT_FAST(20.034483, 20.758621, fwd),
-      TURN_TO_HEADING(355.0),
-      STOP_INTAKE,
-      SHOOT_3(1000), // center line row of 3
-                     // rollering
+              // center line row of 3
+              SPIN_FW_AT(3200),
+              TURN_TO_HEADING(125.0),
+              START_INTAKE,
+              DRIVE_TO_POINT_FAST(56.48276, 60.344826, fwd),
+              TURN_TO_HEADING(225.0),
+              DRIVE_TO_POINT_FAST(20.034483, 20.758621, fwd),
+              TURN_TO_HEADING(355.0),
+              STOP_INTAKE,
+              SHOOT_3(1000), // center line row of 3
+                             // rollering
 
-      // endgaming
-      new EndgameCommand(endgame_solenoid),
-  });
+              // endgaming
+              new EndgameCommand(endgame_solenoid),
+          },
+          2.0);
   return srl;
 }
