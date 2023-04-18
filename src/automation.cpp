@@ -193,6 +193,8 @@ FeedForward::ff_config_t vis_ff_cfg = {
     .kS = 0.07};
 
 #define MIN_AREA 500
+#define MIN_VISION_AREA 114
+#define MAX_VISION_AREA 3158
 #define MAX_SPEED 0.5
 
 VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center, int fallback_degrees)
@@ -252,9 +254,12 @@ bool VisionAimCommand::run()
   printf("Object Count %ld\n", cam.objectCount);
   for(int i = 0; i < cam.objectCount; i++){
     double blob_1_area = cam.objects[i].width * cam.objects[i].height;
+    if(blob_1_area < MIN_VISION_AREA || blob_1_area > MAX_VISION_AREA){
+      continue;
+    }
       for(int j = i+1; j < cam.objectCount; j++){
         double blob_2_area = cam.objects[j].width * cam.objects[j].height;
-        if(fabs(cam.objects[i].centerX - cam.objects[j].centerX) < 10 && (blob_1_area + blob_2_area) > MIN_AREA){
+        if(fabs(cam.objects[i].centerX - cam.objects[j].centerX) < 5 && blob_2_area >= MIN_VISION_AREA && blob_2_area <= MAX_VISION_AREA){
           x_val = cam.objects[i].centerX;
         }
       }
