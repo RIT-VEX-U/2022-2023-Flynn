@@ -45,13 +45,17 @@ int controller_screen()
  */
 void opcontrol()
 {
-  config.turn_feedback->set_limits(0, 0.7);
-  test_stuff();
+  while(true){
+    tune_flywheel_ff();
+    vexDelay(20);
+  }
+  // config.turn_feedback->set_limits(0, 0.7);
+  // test_stuff();
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);
   flapup_solenoid.set(false);
-
+  intake_solenoid.set(false);
   // Initialization
   double oneshot_time = .05; // Change 1 second to whatever is needed
   bool oneshotting = false;
@@ -73,22 +77,28 @@ void opcontrol()
                                    { intake.spin(fwd, 9.5, volt); }); // Shoot
 
   main_controller.ButtonL1.pressed([]()
-                                   { flapup_solenoid.set(false); }); // Flapup
+                                   { flapup_solenoid.set(true); }); // Flapup
+  main_controller.ButtonL1.released([]()
+                                   { flapup_solenoid.set(false); }); // Flapdown
+
   main_controller.ButtonL2.pressed([]()
-                                   { flapup_solenoid.set(true); }); // Flaodown
+                                   { intake_solenoid.set(true); }); // Raisined
+  main_controller.ButtonL2.released([]()
+                                   { intake_solenoid.set(false); }); // Lowened
 
   main_controller.ButtonB.pressed([]()
                                   { odometry_sys.set_position(); });
 
   // odometry_sys.end_async();
   odometry_sys.set_position();
-  // Periodic
+  // PeriodicA
   while (true)
   {
     // printf("%f : %f\n", left_enc.position(rotationUnits::rev), right_enc.position(rotationUnits::rev));
     // ========== DRIVING CONTROLS ==========
     drive_sys.drive_tank(main_controller.Axis3.position() / 100.0, main_controller.Axis2.position() / 100.0);
     // ========== MANIPULATING CONTROLS ==========
+
 
     if (main_controller.ButtonY.pressing() && main_controller.ButtonRight.pressing())
     {

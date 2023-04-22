@@ -351,9 +351,11 @@ void tune_drive_motion_accel(DriveType dt, double maxv)
 // 1.0 0.000299
 void tune_flywheel_ff()
 {
-    double flywheel_target_pct = .85;
+    double flywheel_target_pct = 0.7;
     static bool new_press = true;
     static int counter = 0;
+    static MovingAverage avg(20, 0.0);
+    static MovingAverage var(20, 0.0);
     if (main_controller.ButtonA.pressing())
     {
         counter++;
@@ -376,10 +378,16 @@ void tune_flywheel_ff()
         double rpm = rawRPM; // flywheel_sys.getRPM();
         double kv = flywheel_target_pct / continuous_avg(rpm);
 
+        avg.add_entry(rpm);
+        double x_bar = avg.get_average();
+        double squared = (rawRPM - x_bar) * (rawRPM - x_bar);
+        var.add_entry(squared);
+        double sd = sqrt(var.get_average());
+
         main_controller.Screen.clearScreen();
         main_controller.Screen.setCursor(1, 1);
         main_controller.Screen.print("kv: %f", kv);
-        printf("%f %f\n", rpm, kv);
+        printf("%f %f %f\n", rpm, kv, sd);
     }
     else
     {
@@ -451,7 +459,7 @@ void tune_flywheel_distcalc()
                                         { intake.spin(fwd, 4, volt); });
         main_controller.ButtonA.released([]()
                                          { intake.spin(fwd, 0, volt); });
-                                                 main_controller.ButtonA.pressed([]()
+        main_controller.ButtonA.pressed([]()
                                         { intake.spin(fwd, 4, volt); });
         main_controller.ButtonA.released([]()
                                          { intake.spin(fwd, 0, volt); });
@@ -496,12 +504,11 @@ void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error
                                            { if (selection == 0){pid.config.p -= sensitivity;} else if (selection == 1){pid.config.i -= sensitivity;} else {pid.config.d -= sensitivity;}printf("{\n\tkP: %f\n\tkI: %f\n\tkD: %f\n\tontime: %f\n\tdeadband: %f\n}", pid.config.p, pid.config.i, pid.config.d, pid.config.on_target_time, pid.config.deadband); });
         main_controller.ButtonR2.pressed([]()
                                          { if (selection == 0){pid.config.p = 0.0 ;} else if (selection == 1){pid.config.i = 0.0;} else {pid.config.d = 0.0;} printf("{\n\tkP: %f\n\tkI: %f\n\tkD: %f\n\tontime: %f\n\tdeadband: %f\n}\n", pid.config.p, pid.config.i, pid.config.d, pid.config.on_target_time, pid.config.deadband); });
-        main_controller.ButtonL2.pressed([](){
+        main_controller.ButtonL2.pressed([]()
+                                         {
             pid.config.p = 0.0;
             pid.config.i = 0.0;
-            pid.config.d = 0.0;
-        });
-
+            pid.config.d = 0.0; });
 
         func_init = true;
     }

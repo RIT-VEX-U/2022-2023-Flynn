@@ -50,7 +50,7 @@ int print_odom()
   {
     position_t pos = odometry_sys.get_position();
     printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
-    vexDelay(1000);
+    vexDelay(500);
   }
   return 0;
 }
@@ -63,11 +63,7 @@ void test_stuff()
 
   CommandController mine = skills_rollers_last();
   // mine.run();
-
-  // return;
-  //
   printf("Running pleasant op\n");
-  // fflush(stdout);
 
   pleasant_opcontrol();
 }
@@ -651,4 +647,45 @@ CommandController skills_rollers_last()
           },
           2.0);
   return srl;
+}
+
+#define INTAKE_UP (new FunctionCommand([]() {intake_up(); return true; }))
+#define INTAKE_DOWN (new FunctionCommand([]() {intake_down(); return true; }))
+
+CommandController disk_rush_auto()
+{
+  CommandController dra;
+  // auto x = new OdomSetPosition()
+  dra.add({
+      new OdomSetPosition(odometry_sys, {.x = 51.896553, .y = 19.068966, .rot = 135.0}),
+      START_INTAKE,
+      SPIN_FW_AT(3500),
+      DRIVE_TO_POINT_FAST(35.482758, 36.448277, fwd),
+
+      DRIVE_TO_POINT_FAST(41.27586, 30.896551, rev),
+      TURN_TO_HEADING(105.0),
+
+      SHOOT_3(1000),
+
+      START_INTAKE,
+      TURN_TO_HEADING(15.0),
+      DRIVE_TO_POINT_FAST(65.413795, 40.068966, fwd),
+      TURN_TO_HEADING(125.0),
+
+      SHOOT_3(1000),
+
+      TURN_TO_HEADING(-60.0),
+      DRIVE_TO_POINT_FAST(82.7931, 12.793103, fwd),
+      TURN_TO_HEADING(90.0),
+
+      START_INTAKE,
+      DRIVE_TO_POINT_FAST(82.55172, 49.482758, fwd),
+      DRIVE_TO_POINT_FAST(82.06897, 14.0, fwd),
+      TURN_TO_HEADING(120.0),
+      DRIVE_TO_POINT_FAST(62.275864, 45.37931, fwd),
+
+      SHOOT_3(1000),
+  });
+
+  return dra;
 }

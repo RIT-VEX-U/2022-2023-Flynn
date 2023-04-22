@@ -5,6 +5,11 @@
 #include "core.h"
 
 
+void intake_up();
+
+void intake_down();
+
+
 void flap_up();
 
 void flap_down();
