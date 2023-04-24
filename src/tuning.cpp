@@ -2,6 +2,7 @@
 #include "robot-config.h"
 #include "math.h"
 #include "core.h"
+#include "automation.h"
 
 #define ENC_IN(enc) (enc.position(rev) * PI * config.odom_wheel_diam)
 #define ENC_DIFF_IN(left, right) (fabs(ENC_IN(left) - ENC_IN(right)) / 2.0)
@@ -590,4 +591,71 @@ void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error
     main_controller.Screen.print("err: %.4f%s", err, pid.is_on_target() ? " :)" : " ");
 
     t += 0.02;
+}
+
+
+void tune_shooting()
+{
+    static std::atomic<int> rpm(0);
+    static std::atomic<double> intake_volt(12);
+    static std::atomic<int> intake_time(0);
+    
+    // Flap control
+    main_controller.ButtonL1.pressed([](){
+        static bool isFlapUp = true;
+        isFlapUp = !isFlapUp;
+        if(isFlapUp)
+            flap_up();
+        else
+            flap_down();
+    });
+
+    // Tuning RPM
+    main_controller.ButtonUp.pressed([](){
+        rpm = 3600;
+        flywheel_sys.spinRPM(rpm);
+    });
+    main_controller.ButtonDown.pressed([](){
+        rpm = 0;
+        flywheel_sys.stop();
+    });
+    main_controller.ButtonRight.pressed([](){
+        rpm += 50;
+        flywheel_sys.spinRPM(rpm);
+    });
+    main_controller.ButtonLeft.pressed([](){
+        rpm -= 50;
+        flywheel_sys.spinRPM(rpm);
+    });
+
+    // Tuning intake
+    main_controller.ButtonX.pressed([](){ intake_volt = intake_volt + 0.5; });
+    main_controller.ButtonB.pressed([](){ intake_volt = intake_volt - 0.5; });
+    main_controller.ButtonA.pressed([](){ intake_time = intake_time + 25; });
+    main_controller.ButtonY.pressed([](){ intake_time = intake_time - 25; });
+
+    // Single shot
+    main_controller.ButtonL2.pressed([](){
+        intake.spin(directionType::fwd, intake_volt, volt);
+        vexDelay(intake_time);
+        intake.stop();
+    });
+
+    // Trishot
+    main_controller.ButtonR2.pressed([](){ intake.spin(directionType::fwd, intake_volt, volt); });
+    main_controller.ButtonR2.released([](){ intake.stop(); });
+
+    // Intake
+    main_controller.ButtonR1.pressed([](){ intake.spin(directionType::rev, 12, volt); });
+    main_controller.ButtonR1.released([](){ intake.stop(); });
+
+    VisionAimCommand visaim(false, 0, 20);
+
+    while(true)
+    {
+        printf("Volt: %1f, Time: %d, rpm: %d, goalX: %d\n", (double)intake_volt, 
+                (int)intake_time, (int)rpm, 0);
+
+        vexDelay(100);
+    }
 }

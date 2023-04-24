@@ -4,6 +4,19 @@
 #include "vision.h"
 
 // Pushes the firing flap to the up position for close in shots
+void intake_up()
+{
+  intake_solenoid.set(true);
+}
+
+// Pushes the firing flap to the down position for far away shots
+void intake_down()
+{
+  intake_solenoid.set(false);
+}
+
+
+// Pushes the firing flap to the up position for close in shots
 void flap_up()
 {
   flapup_solenoid.set(false);

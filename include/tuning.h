@@ -26,5 +26,7 @@ void tune_flywheel_ff();
 void tune_flywheel_pid();
 void tune_flywheel_distcalc();
 
+void tune_shooting();
+
 
 void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error_upper_bound);

@@ -45,12 +45,13 @@ int controller_screen()
  */
 void opcontrol()
 {
-  while(true){
-    tune_flywheel_ff();
-    vexDelay(20);
-  }
+  // while(true){
+  //   tune_flywheel_ff();
+  //   vexDelay(20);
+  // }
   // config.turn_feedback->set_limits(0, 0.7);
-  // test_stuff();
+  // tune_shooting();
+  test_stuff();
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);

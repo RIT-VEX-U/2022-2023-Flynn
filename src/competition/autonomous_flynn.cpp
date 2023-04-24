@@ -61,8 +61,8 @@ void test_stuff()
 
   vex::task odom_print(print_odom);
 
-  CommandController mine = skills_rollers_last();
-  // mine.run();
+  CommandController mine = disk_rush_auto();
+  mine.run();
   printf("Running pleasant op\n");
 
   pleasant_opcontrol();
@@ -526,7 +526,9 @@ CommandController auto_loader_side()
 // turn to preroller
 // turn to roller
 // we do a little rolling.jpeg
-#define SHOOT_3(time_ms) SHOOT_DISK, new DelayCommand(time_ms), STOP_INTAKE
+#define ss_time 0.2
+#define clear_time 2.5
+#define SHOOT_3(time_ms) new ShootCommand(intake, ss_time, 12), new DelayCommand(time_ms), new ShootCommand(intake, ss_time, 12), new DelayCommand(time_ms), new ShootCommand(intake, clear_time, 12), new DelayCommand(time_ms)
 #define TURN_TO_AND_DRIVE_TO_FAST(pt, timeout) (TURN_TO_POINT(pt)->withTimeout(timeout)), (DRIVE_TO_POINT_FAST_PT(pt, fwd)->withTimeout(timeout))
 CommandController auto_loader_side_disks_last()
 {
@@ -654,36 +656,48 @@ CommandController skills_rollers_last()
 
 CommandController disk_rush_auto()
 {
+  
+  flap_down();
   CommandController dra;
   // auto x = new OdomSetPosition()
   dra.add({
-      new OdomSetPosition(odometry_sys, {.x = 51.896553, .y = 19.068966, .rot = 135.0}),
+      new OdomSetPosition(odometry_sys, {.x = 53.896553, .y = 17.068966, .rot = 135.0}),
       START_INTAKE,
+      new FlapDownCommand(),
       SPIN_FW_AT(3500),
-      DRIVE_TO_POINT_FAST(35.482758, 36.448277, fwd),
-
+      INTAKE_UP,
+      DRIVE_TO_POINT_SLOW(37.482758, 34.448277, fwd),
+      INTAKE_DOWN,
+      new DelayCommand(1000),
       DRIVE_TO_POINT_FAST(41.27586, 30.896551, rev),
       TURN_TO_HEADING(105.0),
 
-      SHOOT_3(1000),
+      SHOOT_3(500),
+      SPIN_FW_AT(3100),
 
       START_INTAKE,
-      TURN_TO_HEADING(15.0),
-      DRIVE_TO_POINT_FAST(65.413795, 40.068966, fwd),
-      TURN_TO_HEADING(125.0),
+      TURN_TO_HEADING(20.0),
+      INTAKE_UP,
+      DRIVE_TO_POINT_SLOW(65.413795, 43.068966, fwd),
+      INTAKE_DOWN,
+      new DelayCommand(1000),
+
+      TURN_TO_HEADING(118.0),
+      INTAKE_DOWN,
 
       SHOOT_3(1000),
 
-      TURN_TO_HEADING(-60.0),
-      DRIVE_TO_POINT_FAST(82.7931, 12.793103, fwd),
+      TURN_TO_HEADING(300.0),
+      DRIVE_TO_POINT_FAST(84.7931, 14.0, fwd),
       TURN_TO_HEADING(90.0),
 
       START_INTAKE,
-      DRIVE_TO_POINT_FAST(82.55172, 49.482758, fwd),
-      DRIVE_TO_POINT_FAST(82.06897, 14.0, fwd),
+      DRIVE_TO_POINT_SLOW(83.55172, 49.482758, fwd),
+      DRIVE_TO_POINT_FAST(83.06897, 14.0, rev),
       TURN_TO_HEADING(120.0),
       DRIVE_TO_POINT_FAST(62.275864, 45.37931, fwd),
 
+      TURN_TO_HEADING(118.0),
       SHOOT_3(1000),
   });
 

@@ -44,8 +44,8 @@ std::map<std::string, device &> device_names{
 };
 
 // Other Outputs
-vex::digital_out endgame_solenoid(Brain.ThreeWirePort.C); // TODO make this an actual port
-vex::digital_out flapup_solenoid(Brain.ThreeWirePort.A);
+vex::digital_out endgame_solenoid(Brain.ThreeWirePort.A); // TODO make this an actual port
+vex::digital_out flapup_solenoid(Brain.ThreeWirePort.C);
 vex::digital_out intake_solenoid(Brain.ThreeWirePort.B);
 
 // ======== INPUTS ========
