@@ -51,7 +51,7 @@ void opcontrol()
   // }
   // config.turn_feedback->set_limits(0, 0.7);
   // tune_shooting();
-  test_stuff();
+  // test_stuff();
   vex::thread controller_screen_thread(controller_screen);
 
   endgame_solenoid.set(false);
@@ -60,14 +60,18 @@ void opcontrol()
   // Initialization
   double oneshot_time = .05; // Change 1 second to whatever is needed
   bool oneshotting = false;
-  flywheel_sys.spinRPM(3200);
+  const static double RPM1 = 2300;
+  const static double RPM2 = 2700;
+  const static double RPM3= 3400;
+
+  flywheel_sys.spinRPM(RPM2);
 
   main_controller.ButtonUp.pressed([]()
-                                   { flywheel_sys.spinRPM(3400); });
+                                   { flywheel_sys.spinRPM(RPM3); });
   main_controller.ButtonLeft.pressed([]()
-                                     { flywheel_sys.spinRPM(3100); });
+                                     { flywheel_sys.spinRPM(RPM2); });
   main_controller.ButtonRight.pressed([]()
-                                      { flywheel_sys.spinRPM(3200); });
+                                      { flywheel_sys.spinRPM(RPM1); });
 
   main_controller.ButtonDown.pressed([]()
                                      { flywheel_sys.stop(); });
