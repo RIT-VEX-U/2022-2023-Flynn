@@ -48,6 +48,8 @@ vex::digital_out endgame_solenoid(Brain.ThreeWirePort.A); // TODO make this an a
 vex::digital_out flapup_solenoid(Brain.ThreeWirePort.C);
 vex::digital_out intake_solenoid(Brain.ThreeWirePort.B);
 
+optical roller_sensor(PORT9);
+
 // ======== INPUTS ========
 CustomEncoder left_enc(Brain.ThreeWirePort.G, -2048);
 CustomEncoder right_enc(Brain.ThreeWirePort.E, 2048);

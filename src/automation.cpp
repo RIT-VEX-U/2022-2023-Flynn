@@ -48,10 +48,30 @@ bool FlapDownCommand::run()
   return true;
 }
 
+
+#define BLUE_HUE 82
+#define RED_HUE 70
+#define NEUTRAL_BAND 3
+
+Pepsi get_roller_scored()
+{
+  static const double HUE_THRESH = (BLUE_HUE + RED_HUE) / 2.0;
+  static const bool IS_RED_GREATER = RED_HUE > BLUE_HUE;
+
+  double hue = roller_sensor.hue();
+
+  if(hue > HUE_THRESH - NEUTRAL_BAND && hue < HUE_THRESH + NEUTRAL_BAND)
+    return NEUTRAL;
+
+  if((hue > HUE_THRESH && IS_RED_GREATER) || (hue < HUE_THRESH && !IS_RED_GREATER))
+    return BLUE;
+  
+  return RED;
+}
+
 /**
  * Construct a SpinRollerCommand
- * @param drive_sys the drive train that will allow us to apply pressure on the rollers
- * @param roller_motor The motor that will spin the roller
+ * @param align_pos The motor that will spin the roller
  */
 SpinRollerCommand::SpinRollerCommand(position_t align_pos): align_pos(align_pos), roller_count(0) {}
 
@@ -63,29 +83,26 @@ SpinRollerCommand::SpinRollerCommand(position_t align_pos): align_pos(align_pos)
 
 bool SpinRollerCommand::run()
 {
-
-  vexDelay(100);
-  Pepsi cur_roller = scan_roller();
-  printf("%s\n", cur_roller==RED?"red":cur_roller==BLUE?"blue":"neutral");
-  if(vision_enabled && (cur_roller == RED && target_red) || cur_roller == BLUE && !target_red)
-  {
-    drive_sys.stop();
-    return true; 
-  }
-
   CommandController cmd;
-  cmd.add({
-     (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd))->withTimeout(0.5),
-     (new DelayCommand(100)),
-     (new OdomSetPosition(odometry_sys, align_pos)),
-     (new DriveForwardCommand(drive_sys, drive_fast_mprofile, 6, directionType::rev))
-  });
-
+  cmd.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd), 0.5);
+  cmd.add(new DriveStopCommand(drive_sys));
+  cmd.add_delay(800);
   cmd.run();
 
-  if(!vision_enabled && ++roller_count >= num_roller_fallback)
+  Pepsi cur_roller = get_roller_scored();
+
+  CommandController cmd1;
+  cmd1.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 6, directionType::rev), 1);
+  cmd1.add(new DriveStopCommand(drive_sys)),
+  cmd1.run();
+
+  printf("RED? = %d, CUR = %s\n", target_red, cur_roller==RED?"red":cur_roller==BLUE?"blue":"neutral");
+  if((cur_roller == RED && target_red) || (cur_roller == BLUE && !target_red))
+  {
+    drive_sys.stop();
     return true;
-  
+  }
+
   return false;
 }
 
@@ -196,23 +213,57 @@ bool PrintOdomContinousCommand::run()
   printf("(%.2f, %.2f), %.2f\n", pos.x, pos.y, pos.rot);
   return false;
 }
+
+
+
+
 PID::pid_config_t vis_pid_cfg = {
-    .p = .003,
-    // .d = .0001,
-    .deadband = 5,
+    .p = .004,
+    .d = .0004,
+    .deadband = 10,
     .on_target_time = .2};
 
 FeedForward::ff_config_t vis_ff_cfg = {
-    .kS = 0.07};
+    .kS = 0.03};
 
 #define MIN_AREA 500
-#define MIN_VISION_AREA 114
-#define MAX_VISION_AREA 3158
+#define MIN_VISION_AREA 150
+#define MAX_VISION_AREA 4000
 #define MAX_SPEED 0.5
 
 VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center, int fallback_degrees)
     : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false), vision_center(vision_center), fallback_degrees(fallback_degrees)
-{
+{}
+
+int VisionAimCommand::get_x(){
+
+  int x_val = 0;
+
+  if(!cam.installed())
+  {
+    return 0;
+  }
+
+  if(target_red){
+    cam.takeSnapshot(RED_GOAL);
+  } else {
+    cam.takeSnapshot(BLUE_GOAL);
+  }
+
+  for(int i = 0; i < cam.objectCount; i++){
+    double blob_1_area = cam.objects[i].width * cam.objects[i].height;
+    if(blob_1_area < MIN_VISION_AREA || blob_1_area > MAX_VISION_AREA){
+      continue;
+    }
+      for(int j = i+1; j < cam.objectCount; j++){
+        double blob_2_area = cam.objects[j].width * cam.objects[j].height;
+        if(fabs(cam.objects[i].centerX - cam.objects[j].centerX) < 5 && blob_2_area >= MIN_VISION_AREA && blob_2_area <= MAX_VISION_AREA){
+          x_val = cam.objects[i].centerX;
+        }
+      }
+    }
+
+    return x_val;
 }
 
 /**
@@ -222,6 +273,13 @@ VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center, in
  */
 bool VisionAimCommand::run()
 {
+  // If the camera isn't installed, move on to the next command
+  if (!cam.installed() || !vision_enabled)
+  {
+    drive_sys.stop();
+    return true;
+  }
+  
   if (first_run)
   {
     stored_pos = odometry_sys.get_position();
@@ -239,59 +297,22 @@ bool VisionAimCommand::run()
       return false;
   }
 
-  // If the camera isn't installed, move on to the next command
-  if (!cam.installed())
-    return true;
-  // If we have disabled vision on the screen, move on to the next command
-  if (!vision_enabled)
-    return true;
+  // // If the camera isn't installed, move on to the next command
+  // if (!cam.installed())
+  //   return true;
+  // // If we have disabled vision on the screen, move on to the next command
+  // if (!vision_enabled)
+  //   return true;
 
-  // Take a snapshot with each color selected,
-  // and store the largest found object for each in a vector
-  //vision::object red_obj, blue_obj;
-
-  int x_val = 0;
-  // Get largest red blob
-  
-  // int red_count = cam.objectCount;
-  // if (red_count > 0){
-    
+  // if(target_red){
+  //   cam.takeSnapshot(RED_GOAL);
+  // } else {
+  //   cam.takeSnapshot(BLUE_GOAL);
   // }
-  if(target_red){
-    cam.takeSnapshot(RED_GOAL);
-  } else {
-    cam.takeSnapshot(BLUE_GOAL);
-  }
 
+  int x_val = get_x();
 
   printf("Object Count %ld\n", cam.objectCount);
-  for(int i = 0; i < cam.objectCount; i++){
-    double blob_1_area = cam.objects[i].width * cam.objects[i].height;
-    if(blob_1_area < MIN_VISION_AREA || blob_1_area > MAX_VISION_AREA){
-      continue;
-    }
-      for(int j = i+1; j < cam.objectCount; j++){
-        double blob_2_area = cam.objects[j].width * cam.objects[j].height;
-        if(fabs(cam.objects[i].centerX - cam.objects[j].centerX) < 5 && blob_2_area >= MIN_VISION_AREA && blob_2_area <= MAX_VISION_AREA){
-          x_val = cam.objects[i].centerX;
-        }
-      }
-    }
-
-
-  // // Compare the areas of the largest
-  // double red_area = red_obj.width * red_obj.height;
-  // double blue_area = blue_obj.width * blue_obj.height;
-  
-
-  // if (red_area > blue_area && red_area > MIN_AREA && target_red)
-  // {
-  //   x_val = red_obj.centerX;
-  // }
-  // else if (blue_area > red_area && blue_area > MIN_AREA && !target_red)
-  // {
-  //   x_val = blue_obj.centerX;
-  // }
 
   printf("CenterX: %d\n", x_val);
 

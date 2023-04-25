@@ -14,6 +14,7 @@ void flap_up();
 
 void flap_down();
 
+
 /**
  * SpinRollerCommand is an ACS command that tells the robot spin the roller to the team color
  */
@@ -25,7 +26,7 @@ public:
    * @param drive_sys the drivetrain tha will let us apply pressure to spin the roller
    * @param roller_motor The motor that will spin the roller
    */
-  SpinRollerCommand(position_t align_pos);
+  SpinRollerCommand(position_t align_pos={0,0,0});
 
   /**
    * Run roller controller to spin the roller to our color
@@ -40,7 +41,6 @@ private:
   bool check_pos = true;
   int roller_count;
 };
-
 /**
  * ShootCommand is an ACS command that tells the robot to shoot the disks for a certain amount of time
  */
@@ -162,27 +162,6 @@ public:
 private:
   OdometryTank &odom;
 };
-
-/**
- * ACS Command to spin roller to a certain color using a color sensor
- */
-class SpinToColorCommand : public AutoCommand
-{
-public:
-  /**
-   * Construct a new SpinToColorCommand
-   */
-  SpinToColorCommand(vex::optical &colorSensor, double color, vex::motor &rollerMotor, double error = 15);
-
-  bool run() override;
-
-private:
-  vex::optical &colorSensor;
-  double color;
-  vex::motor &rollerMotor;
-  double error;
-};
-
 /**
  * ACS Command for targetting the high goal with vision using PID
  */
@@ -194,6 +173,7 @@ public:
    */
   VisionAimCommand(bool odometry_fallback, int vision_center, int fallback_degrees);
 
+  int get_x();
   bool run() override;
   void on_timeout() override;
 
