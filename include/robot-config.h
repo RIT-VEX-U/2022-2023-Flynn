@@ -55,6 +55,8 @@ extern OdometryTank odometry_sys;
 extern TankDrive drive_sys;
 extern Flywheel flywheel_sys;
 extern vex::timer oneshot_tmr;
+extern vex::timer auto_tmr;
+
 
 
 extern AutoChooser autochooser;

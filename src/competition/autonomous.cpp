@@ -6,8 +6,8 @@
 
 
 //functions that define autos. construct a CommandController when called.
-CommandController auto_loader_side();
-CommandController prog_skills_loader_side();
+// CommandController auto_loader_side();
+// CommandController prog_skills_loader_side();
 
 
 /**
@@ -19,7 +19,7 @@ void autonomous()
     while(imu.isCalibrating()){
     }
 
-    CommandController current_auto = prog_skills_loader_side();
+    CommandController current_auto = only_roller_auto();
     current_auto.run();
     keep_collecting = false;
     while(true){

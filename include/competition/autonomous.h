@@ -1,5 +1,6 @@
 #pragma once
 #include "vex.h"
+#include "autonomous_flynn.h"
 
 // drive commands
 #define DRIVE_TO_POINT_FAST(x,y,dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, x, y, directionType::dir))

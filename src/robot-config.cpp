@@ -127,6 +127,7 @@ TankDrive drive_sys(left_motors, right_motors, config, &odometry_sys);
 Flywheel flywheel_sys(flywheel_motors, flywheel_ff_cfg, 18);
 // Flywheel flywheel_sys(flywheel_motors, flywheel_pid_cfg, flywheel_ff_cfg, 18);
 vex::timer oneshot_tmr;
+vex::timer auto_tmr;
 
 AutoChooser autochooser(Brain);
 
