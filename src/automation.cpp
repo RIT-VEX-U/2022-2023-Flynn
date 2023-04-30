@@ -49,9 +49,9 @@ bool FlapDownCommand::run()
 }
 
 
-#define BLUE_HUE 82
-#define RED_HUE 70
-#define NEUTRAL_BAND 3
+#define BLUE_HUE 27
+#define RED_HUE 44
+#define NEUTRAL_BAND 4
 
 Pepsi get_roller_scored()
 {
@@ -85,7 +85,7 @@ bool SpinRollerCommand::run()
 {
   CommandController cmd;
   cmd.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd), 0.5);
-  cmd.add(new DriveStopCommand(drive_sys));
+  cmd.add(new FunctionCommand([](){drive_sys.drive_tank(0.2,0.2); return true;}));
   cmd.add_delay(800);
   cmd.run();
 

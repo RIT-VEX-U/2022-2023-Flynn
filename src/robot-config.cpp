@@ -48,7 +48,7 @@ vex::digital_out endgame_solenoid(Brain.ThreeWirePort.A); // TODO make this an a
 vex::digital_out flapup_solenoid(Brain.ThreeWirePort.C);
 vex::digital_out intake_solenoid(Brain.ThreeWirePort.B);
 
-optical roller_sensor(PORT9);
+optical roller_sensor(PORT17);
 
 // ======== INPUTS ========
 CustomEncoder left_enc(Brain.ThreeWirePort.G, -2048);
@@ -131,9 +131,9 @@ vex::timer auto_tmr;
 
 AutoChooser autochooser(Brain);
 
-bool target_red = false;
+bool target_red = true;
 bool vision_enabled = true;
-int num_roller_fallback = 2;
+int num_roller_fallback = 3;
 /**
  * Used to initialize code/tasks/devices added using tools in VEXcode Pro.
  *

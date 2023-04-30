@@ -17,5 +17,6 @@ CommandController auto_loader_side_disks_last();
 CommandController skills_rollers_last();
 CommandController disk_rush_auto();
 CommandController only_roller_auto();
-
+CommandController only_roller_auto_fancy();
+CommandController safe_auto();
 void draw_image();
