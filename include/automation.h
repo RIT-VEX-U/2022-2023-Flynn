@@ -26,7 +26,7 @@ public:
    * @param drive_sys the drivetrain tha will let us apply pressure to spin the roller
    * @param roller_motor The motor that will spin the roller
    */
-  SpinRollerCommand(position_t align_pos={0,0,0});
+  SpinRollerCommand(pose_t align_pos={0,0,0});
 
   /**
    * Run roller controller to spin the roller to our color
@@ -37,7 +37,7 @@ public:
   void on_timeout() override;
 
 private:
-  position_t align_pos;
+  pose_t align_pos;
   bool check_pos = true;
   int roller_count;
 };
@@ -182,7 +182,7 @@ private:
   timer tmr;
   bool odometry_fallback;
   bool first_run;
-  position_t stored_pos;
+  pose_t stored_pos;
   bool fallback_triggered;
   int vision_center;
   int fallback_degrees;
@@ -213,7 +213,7 @@ public:
   /**
    * COnstruct the command
    */
-  TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &feedback, Vector2D::point_t point);
+  TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &feedback, point_t point);
 
   bool run() override;
 
@@ -221,7 +221,7 @@ private:
   TankDrive &drive_sys;
   OdometryTank &odom;
   Feedback &feedback;
-  Vector2D::point_t point;
+  point_t point;
 };
 
 class FunctionCommand : public AutoCommand

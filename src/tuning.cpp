@@ -520,8 +520,8 @@ void tune_generic_pid(Feedback &pid2tune, double error_lower_bound, double error
     double err = pid.get_error();
     double out = pid.get();
 
-    Vector2D::point_t p_out = {.x = t, .y = out};
-    Vector2D::point_t p_err = {.x = t, .y = err};
+    point_t p_out = {.x = t, .y = out};
+    point_t p_err = {.x = t, .y = err};
 
     output_graph.add_sample(p_out);
     error_graph.add_sample(p_err);
