@@ -53,7 +53,7 @@ void testing()
 
     while(true)
     {
-        position_t pos = odometry_sys.get_position();
+        pose_t pos = odometry_sys.get_position();
         printf("x: %2f, y: %2f, z: %2f\n", pos.x, pos.y, pos.rot);
         vexDelay(50);
     }
@@ -89,7 +89,7 @@ CommandController auto_non_loader_side(){
     CommandController nlsa;
 
     // Initialization
-    position_t start_pos = {.x=105.75, .y=86.5, .rot=90}; 
+    pose_t start_pos = {.x=105.75, .y=86.5, .rot=90}; 
     nlsa.add(new OdomSetPosition(odometry_sys, start_pos));
 
     // Drive to roller
@@ -187,7 +187,7 @@ CommandController prog_skills_non_loader_side(){
 
     CommandController nlss;
 
-    position_t start_pos = {.x = 0, .y = 0, .rot = 90};
+    pose_t start_pos = {.x = 0, .y = 0, .rot = 90};
     nlss.add(new OdomSetPosition(odometry_sys, start_pos));
 
     // Shoot 1 (2 disks)

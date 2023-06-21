@@ -73,7 +73,7 @@ Pepsi get_roller_scored()
  * Construct a SpinRollerCommand
  * @param align_pos The motor that will spin the roller
  */
-SpinRollerCommand::SpinRollerCommand(position_t align_pos): align_pos(align_pos), roller_count(0) {}
+SpinRollerCommand::SpinRollerCommand(pose_t align_pos): align_pos(align_pos), roller_count(0) {}
 
 /**
  * Run roller controller to spin the roller to our color
@@ -201,7 +201,7 @@ PrintOdomCommand::PrintOdomCommand(OdometryTank &odom) : odom(odom) {}
 
 bool PrintOdomCommand::run()
 {
-  position_t pos = odom.get_position();
+  pose_t pos = odom.get_position();
   printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
   return true;
 }
@@ -209,7 +209,7 @@ bool PrintOdomCommand::run()
 PrintOdomContinousCommand::PrintOdomContinousCommand(OdometryTank &odom) : odom(odom) {}
 bool PrintOdomContinousCommand::run()
 {
-  position_t pos = odom.get_position();
+  pose_t pos = odom.get_position();
   printf("CONTINUAL(%.2f, %.2f), %.2f\n", pos.x, pos.y, pos.rot);
   if (main_controller.ButtonA.pressing()){
     return true;
@@ -356,7 +356,7 @@ void VisionAimCommand::on_timeout()
  * @param drive_sys Reference to the TankDrive system
  * @param point The point we want to turn towards
  */
-TurnToPointCommand::TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &turn_feedback, Vector2D::point_t point) : drive_sys(drive_sys), odom(odom), feedback(turn_feedback), point(point) {}
+TurnToPointCommand::TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &turn_feedback, point_t point) : drive_sys(drive_sys), odom(odom), feedback(turn_feedback), point(point) {}
 
 /**
  * Run the TurnToPointCommand
@@ -423,13 +423,13 @@ bool WallAlignCommand::run()
   // otherwise stop and reset the position
   drive_sys.stop();
 
-  position_t old_pos = odom.get_position();
-  position_t newpos = {.x = x, .y = y, .rot = heading};
+  pose_t old_pos = odom.get_position();
+  pose_t newpos = {.x = x, .y = y, .rot = heading};
   if (x == NO_CHANGE)
   {
     newpos.x = old_pos.x;
   }
-  if (x == NO_CHANGE)
+  if (y == NO_CHANGE)
   {
     newpos.y = old_pos.y;
   }

@@ -25,6 +25,7 @@
 #include "../core/include/utils/pidff.h"
 #include "../core/include/utils/pure_pursuit.h"
 #include "../core/include/utils/trapezoid_profile.h"
+#include "../core/include/utils/geometry.h"
 #include "../core/include/utils/vector2d.h"
 
 // Misc

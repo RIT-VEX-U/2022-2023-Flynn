@@ -48,7 +48,7 @@ int print_odom()
 {
   while (true)
   {
-    position_t pos = odometry_sys.get_position();
+    pose_t pos = odometry_sys.get_position();
     printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
     vexDelay(500);
   }
@@ -172,9 +172,9 @@ CommandController prog_skills_loader_side()
   glbl_vision_center = 125;
   target_red = true;
   flapup_solenoid.set(true);
-  position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
+  pose_t start_pos = pose_t{.x = 36.0, .y = 12.2, .rot = -90};
 
-  position_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
+  pose_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
 
   CommandController lss;
   lss.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
@@ -183,7 +183,7 @@ CommandController prog_skills_loader_side()
   lss.add(new SpinRollerCommand(roller_in_pos), 5.0);
   lss.add(DRIVE_FORWARD_FAST(6, rev));
 
-  Vector2D::point_t corner_disk_point = {.x = 10, .y = 12};
+  point_t corner_disk_point = {.x = 10, .y = 12};
 
   // intake corner disk
   lss.add({
@@ -193,13 +193,13 @@ CommandController prog_skills_loader_side()
       DRIVE_FORWARD_FAST(4, rev)->withTimeout(1.5),                     // #8
   });
 
-  Vector2D::point_t shoot_point = {.x = 10.5, .y = 93};
+  point_t shoot_point = {.x = 10.5, .y = 93};
 
   // align to 180 degree roller
   lss.add(new SpinRPMCommand(flywheel_sys, 2900)); // #21
 
-  Vector2D::point_t roller_out_pos2 = {.x = 14, .y = 33};
-  position_t roller_in_pos2 = {.x = 4.20, .y = 33, .rot = 180};
+  point_t roller_out_pos2 = {.x = 14, .y = 33};
+  pose_t roller_in_pos2 = {.x = 4.20, .y = 33, .rot = 180};
 
   lss.add({
       TURN_TO_POINT(roller_out_pos2)->withTimeout(1.5),
@@ -236,13 +236,13 @@ CommandController prog_skills_loader_side()
   // lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
 
   // DISKS AGAINST L PIECE
-  Vector2D::point_t disk_pos1 = {.x = 24.0, .y = 81.5};
-  Vector2D::point_t disk_pos2 = {.x = 32.0, .y = 81.5};
-  Vector2D::point_t disk_pos3 = {.x = 42.0, .y = 81.5};
+  point_t disk_pos1 = {.x = 24.0, .y = 81.5};
+  point_t disk_pos2 = {.x = 32.0, .y = 81.5};
+  point_t disk_pos3 = {.x = 42.0, .y = 81.5};
 
-  Vector2D::point_t disk_prep_pos1 = {.x = 25, .y = 70};
-  Vector2D::point_t disk_prep_pos2 = {.x = 28, .y = 70};
-  Vector2D::point_t disk_prep_pos3 = {.x = 33, .y = 70};
+  point_t disk_prep_pos1 = {.x = 25, .y = 70};
+  point_t disk_prep_pos2 = {.x = 28, .y = 70};
+  point_t disk_prep_pos3 = {.x = 33, .y = 70};
 
   // disks against L piece
   lss.add({
@@ -265,8 +265,8 @@ CommandController prog_skills_loader_side()
   });
   lss.add(new SpinRPMCommand(flywheel_sys, 3100)); // #40
 
-  // Vector2D::point_t pre_shoot_point_other = {.x = 10.5, .y = 70};
-  // Vector2D::point_t shoot_point_other = {.x = 10.5, .y = 90};
+  // point_t pre_shoot_point_other = {.x = 10.5, .y = 70};
+  // point_t shoot_point_other = {.x = 10.5, .y = 90};
 
   // lss.add(TURN_TO_POINT(pre_shoot_point_other), 1.5);        // #37
   // lss.add(DriveToPointFastPt(pre_shoot_point_other), 4.0); // #38
@@ -275,7 +275,7 @@ CommandController prog_skills_loader_side()
   lss.add(new FlapDownCommand());
 
   // lss.add(TURN_TO_HEADING(75), 0.5); // #39
-  Vector2D::point_t hoop_point_early = {.x = 17, .y = 123};
+  point_t hoop_point_early = {.x = 17, .y = 123};
   lss.add(TURN_TO_POINT(hoop_point_early));
 
   add_single_shot_cmd(lss);
@@ -284,9 +284,9 @@ CommandController prog_skills_loader_side()
 
   // Arrow 3 -------------------------
 
-  Vector2D::point_t start_of_line = {.x = 34.5, .y = 49};
-  Vector2D::point_t end_of_line = {.x = 65, .y = 82};
-  Vector2D::point_t out_of_way_point = {.x = 73, .y = 118};
+  point_t start_of_line = {.x = 34.5, .y = 49};
+  point_t end_of_line = {.x = 65, .y = 82};
+  point_t out_of_way_point = {.x = 73, .y = 118};
 
   lss.add(new SpinRPMCommand(flywheel_sys, 3200)); // #40
 
@@ -304,7 +304,7 @@ CommandController prog_skills_loader_side()
 
   });
 
-  Vector2D::point_t hoop_point = {.x = 17, .y = 113};
+  point_t hoop_point = {.x = 17, .y = 113};
   lss.add(TURN_TO_POINT(hoop_point), 1.0);
   lss.add(DRIVE_FORWARD_FAST(6, rev));
 
@@ -314,7 +314,7 @@ CommandController prog_skills_loader_side()
   add_single_shot_cmd(lss);
 
   // Arrow 4 -------------------------
-  Vector2D::point_t endgame_point = {.x = 116.36, .y = 106.23};
+  point_t endgame_point = {.x = 116.36, .y = 106.23};
 
   lss.add(TURN_TO_POINT(endgame_point), 1.0);               // [measure]
   lss.add(DRIVE_TO_POINT_FAST_PT(endgame_point, fwd), 4.0); //[measure]
@@ -359,8 +359,8 @@ CommandController auto_loader_side()
 
   flap_down();
 
-  position_t start_pos = position_t{.x = 36.0, .y = 12.2, .rot = -90};
-  position_t roller_in_pos = {.x = 36.0, .y = 5.16, .rot = -90};
+  pose_t start_pos = pose_t{.x = 36.0, .y = 12.2, .rot = -90};
+  pose_t roller_in_pos = {.x = 36.0, .y = 5.16, .rot = -90};
 
   // Rollers =======================================================
   lsa.add(new OdomSetPosition(odometry_sys, start_pos));
@@ -368,11 +368,11 @@ CommandController auto_loader_side()
   lsa.add(new SpinRollerCommand(roller_in_pos), 5.0);
   // lsa.add(new OdomSetPosition(odometry_sys, start_pos));
   lsa.add(DRIVE_FORWARD_FAST(2, rev));
-  Vector2D::point_t roller_out_pos = {.x = 36, .y = 16.0};
+  point_t roller_out_pos = {.x = 36, .y = 16.0};
   lsa.add(DRIVE_TO_POINT_FAST_PT(roller_out_pos, vex::reverse));
 
-  Vector2D::point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
-  Vector2D::point_t shoot_point1 = {.x = 65, .y = 50};
+  point_t out_of_way_pos1 = {.x = 79.0, .y = 14.0};
+  point_t shoot_point1 = {.x = 65, .y = 50};
 
   // First Shot =======================================================
   lsa.add({
@@ -395,17 +395,17 @@ CommandController auto_loader_side()
   lsa.add(WAIT_FOR_FLYWHEEL, 1.0);
   lsa.add(CLEAR_DISKS);
 
-  auto lerp_point = [](Vector2D::point_t a, Vector2D::point_t b, float t)
+  auto lerp_point = [](point_t a, point_t b, float t)
   {
-    return Vector2D::point_t{.x = a.x * (1 - t) + b.x * t, .y = a.y * (1 - t) + b.y * t};
+    return point_t{.x = a.x * (1 - t) + b.x * t, .y = a.y * (1 - t) + b.y * t};
   };
 
-  Vector2D::point_t pre_stack3_pos = {.x = 70.0, .y = 48.0};
-  Vector2D::point_t after_stack3_pos = {.x = 44.0, .y = 20.0};
+  point_t pre_stack3_pos = {.x = 70.0, .y = 48.0};
+  point_t after_stack3_pos = {.x = 44.0, .y = 20.0};
 
-  Vector2D::point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .6);
+  point_t mid_stack3_pos = lerp_point(pre_stack3_pos, after_stack3_pos, .6);
 
-  // Vector2D::point_t shoot_point1 = {.x = 64, .y = 51};
+  // point_t shoot_point1 = {.x = 64, .y = 51};
   // double goal_pos1_deg = 120.0;
 
   // Third Shot =======================================================
@@ -446,12 +446,12 @@ CommandController auto_loader_side()
   lsa.add(CLEAR_DISKS);
   lsa.add_delay(600);
 
-  Vector2D::point_t disk1_pos = {.x = 84.0, .y = 46.0};
-  Vector2D::point_t disk2_pos = {.x = 83.0, .y = 36.0};
-  Vector2D::point_t disk3_pos = {.x = 83.0, .y = 27.0};
+  point_t disk1_pos = {.x = 84.0, .y = 46.0};
+  point_t disk2_pos = {.x = 83.0, .y = 36.0};
+  point_t disk3_pos = {.x = 83.0, .y = 27.0};
 
-  Vector2D::point_t lineup_disk2_pos = {.x = 70.0, .y = 41.0};
-  Vector2D::point_t lineup_disk3_pos = {.x = 70.0, .y = 32.0};
+  point_t lineup_disk2_pos = {.x = 70.0, .y = 41.0};
+  point_t lineup_disk3_pos = {.x = 70.0, .y = 32.0};
 
   // Second Shot =======================================================
   lsa.add(SPIN_FW_AT(3500));
@@ -474,9 +474,9 @@ CommandController auto_loader_side()
   });
 
   // go shoot
-  //  Vector2D::point_t disk3_pos = {.x = 86.0, .y = 27.0};
-  Vector2D::point_t halfway = {.x = 75, .y = 39}; // turn here
-  Vector2D::point_t shoot_point2 = {.x = 64, .y = 51};
+  //  point_t disk3_pos = {.x = 86.0, .y = 27.0};
+  point_t halfway = {.x = 75, .y = 39}; // turn here
+  point_t shoot_point2 = {.x = 64, .y = 51};
 
   lsa.add({
       DRIVE_TO_POINT_FAST_PT(halfway, vex::reverse)->withTimeout(2.0),
@@ -500,7 +500,7 @@ CommandController auto_loader_side()
   lsa.add_delay(600);
 
   // Line up to 3 stack
-  Vector2D::point_t pre_op_lineup = {.x = 43.6, .y = 24.05};
+  point_t pre_op_lineup = {.x = 43.6, .y = 24.05};
   lsa.add({
       TURN_TO_POINT(pre_op_lineup)->withTimeout(2.0),
       DRIVE_TO_POINT_FAST_PT(pre_op_lineup, fwd)->withTimeout(2.0),
@@ -537,10 +537,10 @@ CommandController auto_loader_side()
 #define TURN_TO_AND_DRIVE_TO_FAST(pt, timeout) (TURN_TO_POINT(pt)->withTimeout(timeout)), (DRIVE_TO_POINT_FAST_PT(pt, fwd)->withTimeout(timeout))
 CommandController auto_loader_side_disks_last()
 {
-#define point_t Vector2D::point_t
+#define point_t point_t
 
   point_t goal_point = {15, 125};
-  position_t start_point_odom = {.x = 83, .y = 13, .rot = 90.f};
+  pose_t start_point_odom = {.x = 83, .y = 13, .rot = 90.f};
   point_t start_point = {.x = start_point_odom.x, .y = start_point_odom.y};
   point_t disk_line_end = {83, 47};
   point_t pre_3_stack = {65, 45};

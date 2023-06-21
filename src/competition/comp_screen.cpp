@@ -46,7 +46,7 @@ void page_two(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     screen.setFillColor(vex::black);
 
     screen.drawRectangle(x, y, width, height);
-    position_t pos = odometry_sys.get_position();
+    pose_t pos = odometry_sys.get_position();
     screen.setFont(vex::mono20);
     screen.setPenColor(vex::white);
     screen.setFillColor(vex::transparent);
@@ -211,7 +211,7 @@ void page_four(vex::brain::lcd &screen, int x, int y, int width, int height, boo
 bool keep_collecting = true;
 const float paddingx = 50;
 const float paddingy = 10;
-Vector2D::point_t offset_from_corner_px = {20, 20};
+point_t offset_from_corner_px = {20, 20};
 const float field_width_on_screen = 200;
 const float tile_width_in = 23.5;
 const float field_width_inches = 6 * tile_width_in;
@@ -219,27 +219,27 @@ const float inch_to_pixel = field_width_on_screen / field_width_inches;
 const float rob_width = 16;
 const float rob_height = 16;
 
-Vector2D::point_t field_to_screen(Vector2D::point_t p)
+point_t field_to_screen(point_t p)
 {
-    Vector2D::point_t ret = {.x = p.y * inch_to_pixel, .y = p.x * inch_to_pixel};
+    point_t ret = {.x = p.y * inch_to_pixel, .y = p.x * inch_to_pixel};
     ret = ret + offset_from_corner_px;
     return ret;
 }
 
-int pixel_x(Vector2D::point_t p)
+int pixel_x(point_t p)
 {
     return (int)field_to_screen(p).x;
 }
-int pixel_y(Vector2D::point_t p)
+int pixel_y(point_t p)
 {
     return (int)field_to_screen(p).y;
 }
-void drawInchLine(vex::brain::lcd &screen, Vector2D::point_t a, Vector2D::point_t b)
+void drawInchLine(vex::brain::lcd &screen, point_t a, point_t b)
 {
     screen.drawLine(pixel_x(a), pixel_y(a), pixel_x(b), pixel_y(b));
 }
 
-Vector2D::point_t rotate2D(Vector2D::point_t p, double dir_radians)
+point_t rotate2D(point_t p, double dir_radians)
 {
     double c = cos(dir_radians);
     double s = sin(dir_radians);
@@ -250,7 +250,7 @@ Vector2D::point_t rotate2D(Vector2D::point_t p, double dir_radians)
 }
 void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
 {
-#define point_t Vector2D::point_t
+#define point_t point_t
     const int num_points = 40;
     static int points_index = 0;
     static std::array<point_t, num_points> points = {};
@@ -268,7 +268,7 @@ void page_five(vex::brain::lcd &screen, int x, int y, int width, int height, boo
     static int count = 0;
     const int save_every = 5; // iterations
 
-    position_t pose = odometry_sys.get_position();
+    pose_t pose = odometry_sys.get_position();
 
     bool isZeroPos = pose.x==odometry_sys.zero_pos.x && pose.y==odometry_sys.zero_pos.y && pose.rot==odometry_sys.zero_pos.rot;
 
