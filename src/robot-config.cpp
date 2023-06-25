@@ -139,9 +139,11 @@ int num_roller_fallback = 3;
  *
  * This should be called at the start of your int main function.
  */
+std::vector<screen::Page *> pages = {};
 void vexcodeInit(void)
 {
-    StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four, page_five, page_six}, 4);
+    // StartScreen(Brain.Screen, {page_one, page_two, page_three, page_four, page_five, page_six}, 4);
+    screen::start_screen(Brain.Screen, pages);
 
     endgame_solenoid.set(false); // TODO figure out if false or true shoots
     imu.calibrate();

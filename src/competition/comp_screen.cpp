@@ -1,5 +1,7 @@
 #include "competition/comp_screen.h"
 
+
+/*
 void page_one(vex::brain::lcd &screen, int x, int y, int width, int height, bool first_run)
 {
     screen.setFillColor(vex::black);
@@ -453,3 +455,5 @@ void page_six(vex::brain::lcd &screen, int x, int y, int width, int height, bool
     }
     was_pressing = pressing;
 }
+
+*/

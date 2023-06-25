@@ -22,7 +22,7 @@ void autonomous()
 
     CommandController current_auto = only_roller_auto();
     current_auto.run();
-    keep_collecting = false;
+    // keep_collecting = false;
     while (true)
     {
         drive_sys.stop();

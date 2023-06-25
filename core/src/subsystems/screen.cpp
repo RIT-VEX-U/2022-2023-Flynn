@@ -1,5 +1,63 @@
 #include "../core/include/subsystems/screen.h"
 
+namespace screen
+{
+    static std::vector<Page *> my_pages;
+    static int page = 0;
+    static vex::brain::lcd *my_screen = nullptr;
+
+    static vex::thread *screen_thread = nullptr;
+
+    static bool running = false;
+
+    int screen_thread_func()
+    {
+        vex::brain::lcd &screen = *my_screen;
+        running = true;
+        unsigned int frame = 0;
+
+        bool was_pressed = false;
+        int x_press = 0;
+        int y_press = 0;
+
+        while (running)
+        {
+            my_pages[page]->update(was_pressed, x_press, y_press);
+
+            if (frame % 5 == 0)
+            {
+                my_pages[page]->draw(screen, false, frame);
+            }
+
+            vexDelay(0.02);
+        }
+
+        return 0;
+    }
+
+    FunctionPage::FunctionPage(update_func_t update_f, draw_func_t draw_f) : update_f(update_f), draw_f(draw_f) {}
+
+    void FunctionPage::update(bool was_pressed, int x, int y)
+    {
+        update_f(was_pressed, x, y);
+    }
+    void FunctionPage::draw(vex::brain::lcd &screen, bool first_draw, unsigned int frame_number)
+    {
+        draw_f(screen, first_draw, frame_number);
+    }
+
+    void start_screen(vex::brain::lcd &screen, std::vector<Page *> pages, int first_page)
+    {
+        my_screen = &screen;
+        my_pages = pages;
+        page = first_page;
+
+        screen_thread = new vex::thread(screen_thread_func);
+    }
+}
+
+
+/*
 void draw_battery_stats(vex::brain::lcd &screen, int x, int y, double voltage, double percentage)
 {
     double low_pct = 70.0;
@@ -8,8 +66,6 @@ void draw_battery_stats(vex::brain::lcd &screen, int x, int y, double voltage, d
     vex::color low_col = vex::color(120, 0, 0);
     vex::color med_col = vex::color(140, 100, 0);
     vex::color high_col = vex::black;
-
-
 
     vex::color bg_col = vex::black;
     vex::color border_col = vex::white;
@@ -32,8 +88,7 @@ void draw_battery_stats(vex::brain::lcd &screen, int x, int y, double voltage, d
     screen.setPenColor(border_col);
     screen.setFont(vex::mono15);
 
-
-    screen.drawRectangle(x+3, y, 200-3, 20);
+    screen.drawRectangle(x + 3, y, 200 - 3, 20);
     screen.printAt(x + 5, y + 15, "battery: %.1fv  %d%%", voltage, (int)percentage);
 }
 
@@ -46,7 +101,7 @@ void draw_mot_header(vex::brain::lcd &screen, int x, int y, int width)
     screen.setPenColor(border_col);
     screen.setFont(vex::mono15);
 
-    screen.drawRectangle(x+3, y, width-3, 20);
+    screen.drawRectangle(x + 3, y, width - 3, 20);
     screen.printAt(x + 5, y + 15, "motor name");
     int name_width = 110;
 
@@ -101,7 +156,7 @@ void draw_mot_stats(vex::brain::lcd &screen, int x, int y, int width, const char
     screen.setPenColor(border_col);
     screen.setFont(vex::mono15);
 
-    screen.drawRectangle(x+3, y, width-3, 20);
+    screen.drawRectangle(x + 3, y, width - 3, 20);
 
     // name
     screen.printAt(x + 7, y + 15, name);
@@ -145,7 +200,7 @@ void draw_dev_stats(vex::brain::lcd &screen, int x, int y, int width, const char
     screen.setPenColor(border_col);
     screen.setFont(vex::mono15);
 
-    screen.drawRectangle(x+3, y, width-3, 20);
+    screen.drawRectangle(x + 3, y, width - 3, 20);
 
     // name
     screen.printAt(x + 5, y + 15, name);
@@ -244,3 +299,4 @@ void StartScreen(vex::brain::lcd &screen, std::vector<screenFunc> pages, int fir
     vex::task screenTask([]()
                          { return handle_screen_thread(my_screen, my_pages, my_first_page); });
 }
+*/
