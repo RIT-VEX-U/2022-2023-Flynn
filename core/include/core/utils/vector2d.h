@@ -1,17 +1,15 @@
 #pragma once
 
-
+#include "core/utils/geometry.h"
 #include <cmath>
-#include "../core/include/utils/geometry.h"
+#include <string>
 
 #ifndef PI
 #define PI 3.141592654
 #endif
 /**
- * Vector2D is an x,y pair
- * Used to represent 2D locations on the field. 
- * It can also be treated as a direction and magnitude
-*/
+ * Vector2D is a structure holding a direction and a magnitude
+ */
 class Vector2D
 {
 public:
@@ -28,7 +26,7 @@ public:
      * 
      * @param p point_t.x , point_t.y
      */
-    Vector2D(point_t p);
+    Vector2D(const point_t &p);
 
     /**
      * Get the direction of the vector, in radians.
@@ -107,3 +105,5 @@ double deg2rad(double deg);
 
  */
 double rad2deg(double r);
+
+const std::string to_string(const Vector2D &v);

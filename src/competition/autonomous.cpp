@@ -1,6 +1,5 @@
-#include "../include/competition/autonomous.h"
-#include "../include/robot-config.h"
-#include "../core/include/utils/math_util.h"
+#include "competition/autonomous.h"
+#include "robot-config.h"
 
 #define TURN_SPEED 0.6
 

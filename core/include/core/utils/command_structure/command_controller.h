@@ -8,9 +8,9 @@
  */
 
 #pragma once
-#include <vector>
+#include "core/utils/command_structure/auto_command.h"
 #include <queue>
-#include "../core/include/utils/command_structure/auto_command.h"
+#include <vector>
 
 class CommandController
 {

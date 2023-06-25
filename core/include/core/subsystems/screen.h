@@ -50,7 +50,8 @@ namespace screen
      * @param pages drawing pages
      * @param first_page optional, which page to start the program at. by default 0
      */
-    void start_screen(vex::brain::lcd &screen, std::vector<Page *> pages, int first_page = 0);
+    void start_screen(vex::brain::lcd &screen, const std::vector<Page *> &pages,
+                      int first_page = 0);
 
     void goto_page(int page_num);
 

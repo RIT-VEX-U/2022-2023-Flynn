@@ -1,5 +1,4 @@
-#include "../core/include/utils/feedforward.h"
-
+#include "core/utils/feedforward.h"
 
 /**
 * tune_feedforward takes a group of motors and finds the feedforward conifg parameters automagically.

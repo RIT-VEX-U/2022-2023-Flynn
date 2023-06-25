@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <algorithm>
 #include "competition/autonomous_flynn.h"
-#include "vision.h"
+#include "core/splash.h"
 #include "tuning.h"
-#include "../core/include/splash.h"
+#include "vision.h"
+#include <algorithm>
+#include <stdio.h>
 
 #define DRIVE_TO_POINT_SLOW_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_slow_mprofile, pt, dir))
 #define DRIVE_TO_POINT_FAST_PT(pt, dir) (new DriveToPointCommand(drive_sys, drive_fast_mprofile, pt, dir))

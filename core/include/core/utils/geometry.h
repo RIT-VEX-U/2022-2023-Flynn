@@ -1,6 +1,9 @@
 #pragma once
 #include <cmath>
 
+#include <cstdio>
+#include <string>
+
 /**
  * Data structure representing an X,Y coordinate
  */
@@ -16,7 +19,8 @@ struct point_t
      */
     double dist(const point_t other)
     {
-        return std::sqrt(std::pow(this->x - other.x, 2) + pow(this->y - other.y, 2));
+      return std::sqrt(std::pow(this->x - other.x, 2.0) +
+                       std::pow(this->y - other.y, 2.0));
     }
 
     /**
@@ -56,3 +60,8 @@ typedef struct
     double y;   ///< y position in the world
     double rot; ///< rotation in the world
 } pose_t;
+
+using std::to_string;
+
+const std::string to_string(pose_t pose);
+const std::string to_string(point_t pt);

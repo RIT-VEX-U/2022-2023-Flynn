@@ -6,8 +6,8 @@
 
 #pragma once
 
-#include "../core/include/subsystems/flywheel.h"
-#include "../core/include/utils/command_structure/auto_command.h"
+#include "core/subsystems/flywheel.h"
+#include "core/utils/command_structure/auto_command.h"
 
 /**
  * AutoCommand wrapper class for the spinRPM function

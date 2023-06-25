@@ -1,12 +1,10 @@
 #pragma once
 
-#include <string>
-#include <stdio.h>
-#include <vector>
-#include <cmath>
+#include "core/utils/geometry.h"
 #include "vex.h"
-#include "../core/include/utils/geometry.h"
-#include "../core/include/utils/vector2d.h"
+#include <cmath>
+#include <string>
+#include <vector>
 
 class GraphDrawer
 {

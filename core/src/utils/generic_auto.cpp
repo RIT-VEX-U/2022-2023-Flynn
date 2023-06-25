@@ -1,4 +1,4 @@
-#include "../core/include/utils/generic_auto.h"
+#include "core/utils/generic_auto.h"
 
 /**
 * The method that runs the autonomous. If 'blocking' is true, then
@@ -33,20 +33,22 @@ bool GenericAuto::run(bool blocking)
   return blocking;
 }
 
-void GenericAuto::add(state_ptr new_state)
+void GenericAuto::add(run_function_t new_state)
 {
   state_list.push(new_state);
 }
 
-void GenericAuto::add_async(state_ptr async_state)
+void GenericAuto::add_async(run_function_t async_state)
 {
-  state_ptr fn = [&async_state](){
-    vex::task t([](void* fn_ptr){
-      while(! (*(state_ptr*)fn_ptr)() )
-       vexDelay(20);
+  run_function_t fn = [&async_state]() {
+    vex::task t(
+        [](void *fn_ptr) {
+          while (!(*(run_function_t *)fn_ptr)())
+            vexDelay(20);
 
-      return 0;
-    }, &async_state);
+          return 0;
+        },
+        &async_state);
     return true;
   };
 

@@ -1,10 +1,10 @@
-#include "../core/include/subsystems/odometry/odometry_base.h"
-#include "../core/include/utils/vector2d.h"
-
+#include "core/subsystems/odometry/odometry_base.h"
+#include "core/utils/geometry.h"
 /**
  * Construct a new Odometry Base object
- * 
- * @param is_async True to run constantly in the background, false to call update() manually
+ *
+ * @param is_async True to run constantly in the background, false to call
+ * update() manually
  */
 OdometryBase::OdometryBase(bool is_async) : current_pos(zero_pos)
 {

@@ -1,9 +1,8 @@
 #pragma once
-#include <functional>
-#include <cfloat>
-#include "vex.h"
 #include "core.h"
-
+#include "vex.h"
+#include <cfloat>
+#include <functional>
 
 void intake_up();
 

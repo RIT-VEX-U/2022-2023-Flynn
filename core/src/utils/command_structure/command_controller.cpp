@@ -6,9 +6,9 @@
  *    a queue and get executed and removed from the queue
  *    in FIFO order.
  */
+#include "core/utils/command_structure/command_controller.h"
+#include "core/utils/command_structure/delay_command.h"
 #include <stdio.h>
-#include "../core/include/utils/command_structure/command_controller.h"
-#include "../core/include/utils/command_structure/delay_command.h"
 
 /**
  * Adds a command to the queue

@@ -3,6 +3,7 @@
 #include "math.h"
 #include "core.h"
 #include "automation.h"
+#include "core/utils/graph_drawer.h"
 
 #define ENC_IN(enc) (enc.position(rev) * PI * config.odom_wheel_diam)
 #define ENC_DIFF_IN(left, right) (fabs(ENC_IN(left) - ENC_IN(right)) / 2.0)

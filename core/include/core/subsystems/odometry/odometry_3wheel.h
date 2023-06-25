@@ -1,7 +1,7 @@
 #pragma once
-#include "../core/include/subsystems/odometry/odometry_base.h"
-#include "../core/include/subsystems/tank_drive.h"
-#include "../core/include/subsystems/custom_encoder.h"
+#include "core/subsystems/custom_encoder.h"
+#include "core/subsystems/odometry/odometry_base.h"
+#include "core/subsystems/tank_drive.h"
 
 /**
  * Odometry3Wheel

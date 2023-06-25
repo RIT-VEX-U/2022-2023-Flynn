@@ -1,8 +1,7 @@
 #pragma once
-#include "vex.h"
 #include "core.h"
-#include "../core/include/subsystems/screen.h"
-#include "competition/comp_screen.h"
+#include "vex.h"
+#include <map>
 
 using namespace vex;
 

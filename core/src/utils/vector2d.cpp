@@ -1,4 +1,4 @@
-#include "../core/include/utils/vector2d.h"
+#include "core/utils/vector2d.h"
 
 /**
  * Construct a vector object.
@@ -17,7 +17,7 @@ Vector2D::Vector2D(double dir, double mag)
  * 
  * @param p point_t.x , point_t.y
  */
-Vector2D::Vector2D(point_t p)
+Vector2D::Vector2D(const point_t &p)
 {
     this->dir = atan2(p.y, p.x);
     this->mag = sqrt( (p.x*p.x) + (p.y*p.y) );
@@ -132,4 +132,9 @@ double deg2rad(double deg)
 double rad2deg(double rad)
 {
     return rad * (180.0 / PI);
+}
+const std::string to_string(const Vector2D &v)
+{
+    return "(dir: " + std::to_string(v.get_dir()) +
+           ", mag: " + std::to_string(v.get_mag()) + ")";
 }

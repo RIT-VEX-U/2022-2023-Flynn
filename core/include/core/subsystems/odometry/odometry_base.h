@@ -1,24 +1,23 @@
 #pragma once
 
+#include "core/utils/geometry.h"
 #include "vex.h"
-#include "../core/include/utils/geometry.h"
-#include "../core/include/robot_specs.h"
 
 #ifndef PI
 #define PI 3.141592654
 #endif
 
-
-
 /**
  * OdometryBase
- * 
- * This base class contains all the shared code between different implementations of odometry.
- * It handles the asynchronous management, position input/output and basic math functions, and 
- * holds positional types specific to field orientation. 
- * 
- * All future odometry implementations should extend this file and redefine update() function. 
- * 
+ *
+ * This base class contains all the shared code between different
+ * implementations of odometry. It handles the asynchronous management, position
+ * input/output and basic math functions, and holds positional types specific to
+ * field orientation.
+ *
+ * All future odometry implementations should extend this file and redefine
+ * update() function.
+ *
  * @author Ryan McGee
  * @date Aug 11 2021
  */

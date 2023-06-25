@@ -1,7 +1,7 @@
 # VEXcode makefile 2019_03_26_01
 
 # show compiler output
-VERBOSE = 0
+VERBOSE = 1
 
 # include toolchain options
 include vex/mkenv.mk
@@ -23,10 +23,19 @@ OBJ = $(addprefix $(BUILD)/, $(addsuffix .o, $(basename $(SRC_C))) )
 
 # location of include files that c and cpp files depend on
 SRC_H  = $(wildcard include/*.h)
+SRC_H += $(wildcard include/*/*.h)
+SRC_H += $(wildcard include/*/*/*.h)
 
-SRC_H += $(wildcard core/include/*.h)
-SRC_H += $(wildcard core/include/*/*.h)
-SRC_H += $(wildcard core/include/*/*/*.h)
+SRC_H += $(wildcard include/*.h)
+SRC_H += $(wildcard include/*/*.h)
+SRC_H += $(wildcard include/*/*/*.h)
+
+
+
+HEADER_DIRS = core/include/
+
+CXX_FLAGS +=  $(addprefix -I, $(HEADER_DIRS))
+C_FLAGS += $(addprefix -I, $(HEADER_DIRS))
 
 # additional dependancies
 SRC_A  = makefile

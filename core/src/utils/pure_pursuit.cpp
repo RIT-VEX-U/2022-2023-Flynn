@@ -1,4 +1,4 @@
-#include "../core/include/utils/pure_pursuit.h"
+#include "core/utils/pure_pursuit.h"
 
 /**
   * Returns points of the intersections of a line segment and a circle. The line 

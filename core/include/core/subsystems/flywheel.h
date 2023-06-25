@@ -11,10 +11,9 @@
 * 09/23/2022  <CRN> Reorganized, added documentation.
 * 09/23/2022  <CRN> Added functions elaborated on in .cpp.
 *********************************************************/
-#include "../core/include/utils/feedforward.h"
+#include "core/utils/feedforward.h"
+#include "core/utils/pid.h"
 #include "vex.h"
-#include "../core/include/robot_specs.h"
-#include "../core/include/utils/pid.h"
 #include <atomic>
 
 using namespace vex;

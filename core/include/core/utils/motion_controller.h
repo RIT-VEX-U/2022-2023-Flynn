@@ -1,9 +1,10 @@
 #pragma once
-#include "../core/include/utils/pid.h"
-#include "../core/include/utils/feedforward.h"
-#include "../core/include/utils/trapezoid_profile.h"
-#include "../core/include/utils/feedback_base.h"
-#include "../core/include/subsystems/tank_drive.h"
+#include "core/subsystems/odometry/odometry_tank.h"
+#include "core/subsystems/tank_drive.h"
+#include "core/utils/feedback_base.h"
+#include "core/utils/feedforward.h"
+#include "core/utils/pid.h"
+#include "core/utils/trapezoid_profile.h"
 #include "vex.h"
 
 /**

@@ -13,11 +13,10 @@
 * 09/23/2022  <CRN> Neatened up program, added getters and setters, fixed documentation and bang bang.
 * 09/29/2022  <CRN> Bug fixes, RPM handling. Multiplied the motor by 18.
 *********************************************************/
-
-#include "../core/include/subsystems/flywheel.h"
-#include "../core/include/utils/feedforward.h"
-#include "../core/include/utils/pid.h"
-#include "../core/include/utils/math_util.h"
+#include "core/subsystems/flywheel.h"
+#include "core/utils/feedforward.h"
+#include "core/utils/math_util.h"
+#include "core/utils/pid.h"
 #include "vex.h"
 
 using namespace vex;
