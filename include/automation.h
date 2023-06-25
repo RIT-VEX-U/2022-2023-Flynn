@@ -1,8 +1,15 @@
 #pragma once
-#include "core.h"
-#include "vex.h"
+
 #include <cfloat>
 #include <functional>
+
+#include "vex.h"
+
+#include "core/subsystems/odometry/odometry_tank.h"
+#include "core/subsystems/tank_drive.h"
+#include "core/utils/command_structure/auto_command.h"
+#include "core/utils/geometry.h"
+#include "core/utils/pidff.h"
 
 void intake_up();
 
@@ -178,7 +185,7 @@ public:
 
 private:
   PIDFF pidff;
-  timer tmr;
+  vex::timer tmr;
   bool odometry_fallback;
   bool first_run;
   pose_t stored_pos;
