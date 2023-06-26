@@ -2,63 +2,92 @@
 
 namespace screen
 {
-    static std::vector<Page *> my_pages;
-    static int page = 0;
-    static vex::brain::lcd *my_screen = nullptr;
-
-    static vex::thread *screen_thread = nullptr;
-
-    static bool running = false;
-
-    int screen_thread_func()
+  struct ScreenData {
+    ScreenData(const std::vector<Page *> &m_pages, int m_page,
+               vex::brain::lcd *m_screen)
+        : pages(m_pages), page(m_page), screen(m_screen)
     {
-        vex::brain::lcd &screen = *my_screen;
-        running = true;
-        unsigned int frame = 0;
+    }
+    std::vector<Page *> pages;
+    int page = 0;
+    vex::brain::lcd *screen = nullptr;
+  };
 
-        bool was_pressed = false;
-        int x_press = 0;
-        int y_press = 0;
+  static vex::thread *screen_thread = nullptr;
 
-        while (running)
-        {
-            my_pages[page]->update(was_pressed, x_press, y_press);
+  static bool running = false;
 
-            if (frame % 5 == 0)
-            {
-                my_pages[page]->draw(screen, false, frame);
-            }
+  int screen_thread_func(void *screen_data_v)
+  {
+    ScreenData screen_data = *static_cast<ScreenData *>(screen_data_v);
+    running = true;
+    unsigned int frame = 0;
 
-            vexDelay(0.02);
+    bool was_pressed = false;
+    int x_press = 0;
+    int y_press = 0;
+
+    while (running) {
+      for (int i = 0; i < screen_data.pages.size(); i++) {
+        if (i == screen_data.page) {
+          screen_data.pages[i]->update(was_pressed, x_press, y_press);
+        } else {
+          screen_data.pages[i]->update(false, 0, 0);
         }
+      }
+      screen_data.pages[screen_data.page]->update(was_pressed, x_press,
+                                                  y_press);
 
-        return 0;
+      if (frame % 5 == 0) {
+        screen_data.pages[screen_data.page]->draw(*screen_data.screen, false,
+                                                  frame);
+      }
+
+      vexDelay(20);
     }
 
-    FunctionPage::FunctionPage(update_func_t update_f, draw_func_t draw_f) : update_f(update_f), draw_f(draw_f) {}
+    return 0;
+  }
 
-    void FunctionPage::update(bool was_pressed, int x, int y)
-    {
-        update_f(was_pressed, x, y);
-    }
-    void FunctionPage::draw(vex::brain::lcd &screen, bool first_draw, unsigned int frame_number)
-    {
-        draw_f(screen, first_draw, frame_number);
-    }
+  FunctionPage::FunctionPage(update_func_t update_f, draw_func_t draw_f)
+      : update_f(update_f), draw_f(draw_f)
+  {
+  }
 
-    void start_screen(vex::brain::lcd &screen, std::vector<Page *> pages, int first_page)
-    {
-        my_screen = &screen;
-        my_pages = pages;
-        page = first_page;
+  /// @brief update uses the supplied update function to update this page
+  void FunctionPage::update(bool was_pressed, int x, int y)
+  {
+    update_f(was_pressed, x, y);
+  }
+  /// @brief draw uses the supplied draw function to draw to the screen
+  void FunctionPage::draw(vex::brain::lcd &screen, bool first_draw,
+                          unsigned int frame_number)
+  {
+    draw_f(screen, first_draw, frame_number);
+  }
 
-        screen_thread = new vex::thread(screen_thread_func);
-    }
-}
+  /// @brief start_screen begins a screen. only call this once per program (a
+  /// good place is vexcodeInit)
+  /// This is a set and forget type function. You don't have to wait on it or
+  /// start it in a new thread
+  /// @param screen the brain screen
+  /// @param pages the list of pages in your UI slideshow
+  /// @param first_page the page to start on (by default 0)
+  void start_screen(vex::brain::lcd &screen, std::vector<Page *> pages,
+                    int first_page)
+  {
+    ScreenData *data = new ScreenData{pages, first_page, &screen};
 
+    screen_thread
+        = new vex::thread(screen_thread_func, static_cast<void *>(data));
+  }
+
+  void stop_screen() { running = false; }
+} // namespace screen
 
 /*
-void draw_battery_stats(vex::brain::lcd &screen, int x, int y, double voltage, double percentage)
+void draw_battery_stats(vex::brain::lcd &screen, int x, int y, double
+voltage, double percentage)
 {
     double low_pct = 70.0;
     double med_pct = 85.0;
@@ -89,7 +118,8 @@ void draw_battery_stats(vex::brain::lcd &screen, int x, int y, double voltage, d
     screen.setFont(vex::mono15);
 
     screen.drawRectangle(x + 3, y, 200 - 3, 20);
-    screen.printAt(x + 5, y + 15, "battery: %.1fv  %d%%", voltage, (int)percentage);
+    screen.printAt(x + 5, y + 15, "battery: %.1fv  %d%%", voltage,
+(int)percentage);
 }
 
 void draw_mot_header(vex::brain::lcd &screen, int x, int y, int width)
@@ -114,7 +144,8 @@ void draw_mot_header(vex::brain::lcd &screen, int x, int y, int width)
     screen.printAt(x + name_width + 55, y + 15, "port");
 }
 
-void draw_mot_stats(vex::brain::lcd &screen, int x, int y, int width, const char *name, vex::motor &motor, int animation_tick)
+void draw_mot_stats(vex::brain::lcd &screen, int x, int y, int width, const
+char *name, vex::motor &motor, int animation_tick)
 {
     double tempC = motor.temperature(vex::celsius);
     bool pluggedin = motor.installed();
@@ -177,7 +208,8 @@ void draw_mot_stats(vex::brain::lcd &screen, int x, int y, int width, const char
 }
 
 //
-void draw_dev_stats(vex::brain::lcd &screen, int x, int y, int width, const char *name, vex::device &dev, int animation_tick)
+void draw_dev_stats(vex::brain::lcd &screen, int x, int y, int width, const
+char *name, vex::device &dev, int animation_tick)
 {
     bool pluggedin = dev.installed();
     int port = dev.index() + 1;
@@ -220,7 +252,8 @@ void draw_dev_stats(vex::brain::lcd &screen, int x, int y, int width, const char
     screen.printAt(x + name_width + 60, y + 15, "%d%s", port, warning);
 }
 
-void draw_lr_arrows(vex::brain::lcd &screen, int bar_width, int width, int height)
+void draw_lr_arrows(vex::brain::lcd &screen, int bar_width, int width, int
+height)
 {
     auto bar_col = vex::color(40, 40, 40);
     auto arrow_col = vex::color(255, 255, 255);
@@ -233,14 +266,17 @@ void draw_lr_arrows(vex::brain::lcd &screen, int bar_width, int width, int heigh
 
     // draw arrows
     screen.setPenColor(arrow_col);
-    screen.drawLine(bar_width / 3, height / 2, 2 * bar_width / 3, height / 2 - 20);
-    screen.drawLine(bar_width / 3, height / 2, 2 * bar_width / 3, height / 2 + 20);
+    screen.drawLine(bar_width / 3, height / 2, 2 * bar_width / 3, height / 2
+- 20); screen.drawLine(bar_width / 3, height / 2, 2 * bar_width / 3, height
+/ 2 + 20);
 
-    screen.drawLine(width - bar_width / 3, height / 2, width - 2 * bar_width / 3, height / 2 - 20);
-    screen.drawLine(width - bar_width / 3, height / 2, width - 2 * bar_width / 3, height / 2 + 20);
+    screen.drawLine(width - bar_width / 3, height / 2, width - 2 * bar_width
+/ 3, height / 2 - 20); screen.drawLine(width - bar_width / 3, height / 2,
+width - 2 * bar_width / 3, height / 2 + 20);
 }
 
-int handle_screen_thread(vex::brain::lcd &screen, std::vector<screenFunc> pages, int first_page)
+int handle_screen_thread(vex::brain::lcd &screen, std::vector<screenFunc>
+pages, int first_page)
 {
     unsigned int num_pages = pages.size();
     unsigned int current_page = first_page;
@@ -254,7 +290,8 @@ int handle_screen_thread(vex::brain::lcd &screen, std::vector<screenFunc> pages,
     bool first_draw = true;
     while (true)
     {
-        pages[current_page](screen, bar_width, 0, width - bar_width * 2, height, first_draw);
+        pages[current_page](screen, bar_width, 0, width - bar_width * 2,
+height, first_draw);
 
         first_draw = false;
         // handle presses
@@ -290,13 +327,13 @@ int handle_screen_thread(vex::brain::lcd &screen, std::vector<screenFunc> pages,
     return 0;
 }
 
-void StartScreen(vex::brain::lcd &screen, std::vector<screenFunc> pages, int first_page)
+void StartScreen(vex::brain::lcd &screen, std::vector<screenFunc> pages, int
+first_page)
 {
-    // hold onto arguments here so we don't lose them and can use then in the lambda down there. capture semantics are not fun
-    static std::vector<screenFunc> my_pages = pages;
-    static vex::brain::lcd my_screen = screen;
-    static int my_first_page = first_page;
-    vex::task screenTask([]()
-                         { return handle_screen_thread(my_screen, my_pages, my_first_page); });
+    // hold onto arguments here so we don't lose them and can use then in
+the lambda down there. capture semantics are not fun static
+std::vector<screenFunc> my_pages = pages; static vex::brain::lcd my_screen =
+screen; static int my_first_page = first_page; vex::task screenTask([]() {
+return handle_screen_thread(my_screen, my_pages, my_first_page); });
 }
 */

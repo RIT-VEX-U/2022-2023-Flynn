@@ -9,19 +9,24 @@ namespace screen
     class Page
     {
     public:
-        /**
-         * @brief collect data, respond to screen input, do fast things (runs at 50hz)
-         * @param was_pressed true if the screen has been pressed
-         * @param x x position of screen press (if the screen was pressed)
-         * @param y y position of screen press (if the screen was pressed)
-         */
-        virtual void update(bool was_pressed, int x, int y);
-        /**
-         * @brief draw stored data to the screen (runs at 10 hz)
-         * @param first_draw true if we just switched to this page
-         * @param frame_number frame of drawing we are on (basically an animation tick)
-         */
-        virtual void draw(vex::brain::lcd &screen, bool first_draw, unsigned int frame_number);
+      /**
+       * @brief collect data, respond to screen input, do fast things (runs at
+       * 50hz even if you're not focused on this Page (only drawn page gets
+       * touch updates))
+       * @param was_pressed true if the screen has been pressed
+       * @param x x position of screen press (if the screen was pressed)
+       * @param y y position of screen press (if the screen was pressed)
+       */
+      virtual void update(bool was_pressed, int x, int y);
+      /**
+       * @brief draw stored data to the screen (runs at 10 hz and only runs if
+       * this page is in front)
+       * @param first_draw true if we just switched to this page
+       * @param frame_number frame of drawing we are on (basically an animation
+       * tick)
+       */
+      virtual void draw(vex::brain::lcd &screen, bool first_draw,
+                        unsigned int frame_number);
     };
 
     /// @brief  type of function needed for update
@@ -51,8 +56,6 @@ namespace screen
      * @param first_page optional, which page to start the program at. by default 0
      */
     void start_screen(vex::brain::lcd &screen, std::vector<Page *> pages, int first_page = 0);
-
-    void goto_page(int page_num);
 
     void stop_screen();
 

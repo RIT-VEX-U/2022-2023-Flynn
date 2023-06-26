@@ -2,3 +2,11 @@ build/
 .vscode/c_cpp_properties.json
 .vscode/settings.json
 movie.mov
+.qtc_clangd/
+2022-2023-Flynn.cflags
+2022-2023-Flynn.config
+2022-2023-Flynn.creator
+2022-2023-Flynn.creator.user
+2022-2023-Flynn.cxxflags
+2022-2023-Flynn.files
+2022-2023-Flynn.includes
