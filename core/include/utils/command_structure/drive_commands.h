@@ -84,9 +84,6 @@ class TurnDegreesCommand: public AutoCommand {
   private:
     // drive system to run the function on
     TankDrive &drive_sys;
-    
-    // feedback controller to use
-    Feedback &feedback;
 
     // parameters for turn_degrees
     double degrees;

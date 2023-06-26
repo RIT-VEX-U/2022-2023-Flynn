@@ -1,12 +1,13 @@
 #include "competition/opcontrol.h"
-#include "competition/autonomous_flynn.h"
 #include "automation.h"
+#include "competition/autonomous_flynn.h"
 #include "robot-config.h"
 #include "tuning.h"
-#include "vision.h"
-#include <stdio.h>
-#include "vex_global.h"
 #include "v5_api.h"
+#include "vex_global.h"
+#include "vision.h"
+#include <algorithm>
+#include <stdio.h>
 
 int controller_screen()
 {
@@ -15,8 +16,9 @@ int controller_screen()
   {
     uint32_t bat = (uint32_t)Brain.Battery.capacity();
     double f = flywheel_motors.temperature(celsius);
-    double i = intake.temperature(celsius);
-    double d = (left_motors.temperature(celsius) + right_motors.temperature(celsius)) / 2;
+    //    double i = intake.temperature(celsius);
+    //    double d = (left_motors.temperature(celsius) +
+    //    right_motors.temperature(celsius)) / 2;
 
     main_controller.Screen.setCursor(1, 1);
     main_controller.Screen.print("F: %.0f        B: %d%%", f, bat);
@@ -25,17 +27,15 @@ int controller_screen()
     main_controller.Screen.print("I: %.0f        V: %.1fv", intake.temperature(celsius), Brain.Battery.voltage());
     main_controller.Screen.setCursor(3, 1);
 
-    std::string &problem = happy;
-    for (auto const &name_and_motor : motor_names)
-    {
-      if (!name_and_motor.second.installed())
-      {
-        problem = name_and_motor.first;
-        break;
-      }
-    }
+    const std::string &problem =
+        std::find_if(motor_names.begin(), motor_names.end(),
+                     [](auto name_and_motor) {
+                       return !name_and_motor.second.installed();
+                     })
+            ->first;
 
-    main_controller.Screen.print("D: %.0f      %s", intake.temperature(celsius), problem.c_str());
+    main_controller.Screen.print("D: %.0f      %s", intake.temperature(celsius),
+                                 problem.c_str());
 
     vexDelay(500);
   }

@@ -29,10 +29,9 @@ class SpinRollerCommand : public AutoCommand
 public:
   /**
    * Construct a SpinRollerCommand
-   * @param drive_sys the drivetrain tha will let us apply pressure to spin the roller
-   * @param roller_motor The motor that will spin the roller
+   * @param align_pos where to reset after hitting the wall
    */
-  SpinRollerCommand(pose_t align_pos={0,0,0});
+  explicit SpinRollerCommand(pose_t align_pos = {0, 0, 0});
 
   /**
    * Run roller controller to spin the roller to our color
@@ -43,7 +42,6 @@ public:
   void on_timeout() override;
 
 private:
-  pose_t align_pos;
   bool check_pos = true;
   int roller_count;
 };
