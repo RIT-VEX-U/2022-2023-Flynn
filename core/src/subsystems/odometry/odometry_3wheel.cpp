@@ -31,8 +31,6 @@ pose_t Odometry3Wheel::update()
     pose_t updated_pos = calculate_new_pos(lside_delta, rside_delta, offax_delta, current_pos, cfg);
 
     static pose_t last_pos = updated_pos;
-    static double last_speed = 0;
-    static double last_ang_speed = 0;
     static timer tmr;
 
     double speed_local = 0;
@@ -43,24 +41,28 @@ pose_t Odometry3Wheel::update()
 
     // This loop runs too fast. Only check at LEAST every 1/10th sec
     if(update_vel_accel)
-    {
-      // Calculate robot velocity
-      speed_local = pos_diff(updated_pos, last_pos) / tmr.time(sec);
+      {
+        static double last_speed = 0;
+        static double last_ang_speed = 0;
 
-      // Calculate robot acceleration
-      accel_local = (speed_local - last_speed) / tmr.time(sec);
+        // Calculate robot velocity
+        speed_local = pos_diff(updated_pos, last_pos) / tmr.time(sec);
 
-      // Calculate robot angular velocity (deg/sec)
-      ang_speed_local = smallest_angle(updated_pos.rot, last_pos.rot) / tmr.time(sec);
+        // Calculate robot acceleration
+        accel_local = (speed_local - last_speed) / tmr.time(sec);
 
-      // Calculate robot angular acceleration (deg/sec^2)
-      ang_accel_local = (ang_speed_local - last_ang_speed) / tmr.time(sec);
+        // Calculate robot angular velocity (deg/sec)
+        ang_speed_local =
+            smallest_angle(updated_pos.rot, last_pos.rot) / tmr.time(sec);
 
-      tmr.reset();
-      last_pos = updated_pos;
-      last_speed = speed_local;
-      last_ang_speed = ang_speed_local;
-    }
+        // Calculate robot angular acceleration (deg/sec^2)
+        ang_accel_local = (ang_speed_local - last_ang_speed) / tmr.time(sec);
+
+        tmr.reset();
+        last_pos = updated_pos;
+        last_speed = speed_local;
+        last_ang_speed = ang_speed_local;
+      }
 
     this->current_pos = updated_pos;
     if(update_vel_accel)

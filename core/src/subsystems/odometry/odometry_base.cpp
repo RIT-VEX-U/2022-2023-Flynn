@@ -21,8 +21,8 @@ OdometryBase::OdometryBase(bool is_async) : current_pos(zero_pos)
  */
 int OdometryBase::background_task(void* ptr)
 {
-    OdometryBase &obj = *((OdometryBase*) ptr);
-    while(!obj.end_task)
+  OdometryBase &obj = *static_cast<OdometryBase *>(ptr);
+  while (!obj.end_task)
     {
       obj.mut.lock();
       obj.update();

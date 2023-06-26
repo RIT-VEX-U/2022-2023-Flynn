@@ -94,31 +94,33 @@ pose_t OdometryTank::update()
 
 
     static pose_t last_pos = current_pos;
-    static double last_speed = 0;
-    static double last_ang_speed = 0;
     static timer tmr;
     bool update_vel_accel = tmr.time(sec) > 0.1;
 
     // This loop runs too fast. Only check at LEAST every 1/10th sec
     if(update_vel_accel)
-    {
-      // Calculate robot velocity
-      speed = pos_diff(current_pos, last_pos) / tmr.time(sec);
+        {
+        static double last_speed = 0;
+        static double last_ang_speed = 0;
 
-      // Calculate robot acceleration
-      accel = (speed - last_speed) / tmr.time(sec);
+        // Calculate robot velocity
+        speed = pos_diff(current_pos, last_pos) / tmr.time(sec);
 
-      // Calculate robot angular velocity (deg/sec)
-      ang_speed_deg = smallest_angle(current_pos.rot, last_pos.rot) / tmr.time(sec);
+        // Calculate robot acceleration
+        accel = (speed - last_speed) / tmr.time(sec);
 
-      // Calculate robot angular acceleration (deg/sec^2)
-      ang_accel_deg = (ang_speed_deg - last_ang_speed) / tmr.time(sec);
+        // Calculate robot angular velocity (deg/sec)
+        ang_speed_deg =
+            smallest_angle(current_pos.rot, last_pos.rot) / tmr.time(sec);
 
-      tmr.reset();
-      last_pos = current_pos;
-      last_speed = speed;
-      last_ang_speed = ang_speed_deg;
-    }
+        // Calculate robot angular acceleration (deg/sec^2)
+        ang_accel_deg = (ang_speed_deg - last_ang_speed) / tmr.time(sec);
+
+        tmr.reset();
+        last_pos = current_pos;
+        last_speed = speed;
+        last_ang_speed = ang_speed_deg;
+        }
 
     return current_pos;
 }

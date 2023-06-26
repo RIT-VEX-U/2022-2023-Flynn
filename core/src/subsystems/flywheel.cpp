@@ -138,25 +138,31 @@ void Flywheel::updatePID(double value) { pid.update(value); }
 * Runs a Feedforward variant to control rpm
 */
 int spinRPMTask_BangBang(void* wheelPointer) {
-  Flywheel* wheel = (Flywheel*) wheelPointer; 
-  while(true) {
-    // if it below the RPM, go, otherwise don't
-    wheel->measureRPM();
+  Flywheel *wheel = static_cast<Flywheel *>(wheelPointer);
+  while (true)
+    {
+      // if it below the RPM, go, otherwise don't
+      wheel->measureRPM();
 
-    if(wheel->getRPM() < wheel->getDesiredRPM()) { 
-      wheel->spin_raw(1, fwd);
-    }   
-    else { wheel->stopMotors(); }
-    vexDelay(10);
-  }
+      if (wheel->getRPM() < wheel->getDesiredRPM())
+        {
+          wheel->spin_raw(1, fwd);
+        }
+      else
+        {
+          wheel->stopMotors();
+        }
+      vexDelay(10);
+    }
   return 0;
 }
 
 /**
 * Runs a Feedforward variant to control rpm
 */
-int spinRPMTask_Feedforward(void* wheelPointer) { 
-  Flywheel* wheel = (Flywheel*) wheelPointer;
+int spinRPMTask_Feedforward(void *wheelPointer)
+{
+  Flywheel *wheel = static_cast<Flywheel *>(wheelPointer);
   // get the pid from the wheel and set its target to the RPM stored in the wheel.
   while(true) {
     wheel->measureRPM();
@@ -165,13 +171,13 @@ int spinRPMTask_Feedforward(void* wheelPointer) {
     wheel->spin_raw(output, fwd);   // set the motors to whatever feedforward tells them to do
     vexDelay(1);
   }
-  return 0; 
+  return 0;
 }
 /**
 * Runs a PID + Feedforward variant to control rpm
 */
 int spinRPMTask_PID_Feedforward(void* wheelPointer) {
-  Flywheel* wheel = (Flywheel*) wheelPointer;
+  Flywheel *wheel = static_cast<Flywheel *>(wheelPointer);
   // get the pid from the wheel and set its target to the RPM stored in the wheel.
   while(true) {
     wheel->measureRPM();
@@ -188,7 +194,7 @@ int spinRPMTask_PID_Feedforward(void* wheelPointer) {
 * https://www.vexwiki.org/programming/controls_algorithms/tbh
 */
 int spinRPMTask_TBH(void* wheelPointer) {
-  Flywheel* wheel = (Flywheel*) wheelPointer;
+  Flywheel *wheel = static_cast<Flywheel *>(wheelPointer);
 
   double tbh = 0.0;
   double output = 0.0;
@@ -218,9 +224,6 @@ int spinRPMTask_TBH(void* wheelPointer) {
   
    return 0; 
 }
-
-// Runs a 'Moving average filter with above closed loop systems' variant, whatever that means; FUNCTION STUB
-int spinRPMTask_ClosedLoop(void* wheelPointer) { return 0; }
 
 /*********************************************************
 *         SPINNERS AND STOPPERS

@@ -1,5 +1,4 @@
 #pragma once
-#include "math.h"
 #include "vex.h"
 #include <vector>
 

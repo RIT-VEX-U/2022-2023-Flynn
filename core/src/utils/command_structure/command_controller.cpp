@@ -70,7 +70,7 @@ void CommandController::add_delay(int ms)
 void CommandController::run()
 {
   AutoCommand *next_cmd;
-  printf("Running Auto. Commands 1 to %d\n", command_queue.size());
+  printf("Running Auto. Commands 1 to %lu\n", command_queue.size());
   fflush(stdout);
   int command_count = 1;
   vex::timer tmr;
