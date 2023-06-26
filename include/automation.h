@@ -40,10 +40,6 @@ public:
    */
   bool run() override;
   void on_timeout() override;
-
-private:
-  bool check_pos = true;
-  int roller_count;
 };
 /**
  * ShootCommand is an ACS command that tells the robot to shoot the disks for a certain amount of time

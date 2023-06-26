@@ -1,8 +1,6 @@
 #include "competition/opcontrol.h"
 #include "competition/autonomous_flynn.h"
 #include "robot-config.h"
-#include "tuning.h"
-#include "v5_api.h"
 #include "vex_global.h"
 #include "vision.h"
 #include <algorithm>

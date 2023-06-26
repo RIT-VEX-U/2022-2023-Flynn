@@ -108,12 +108,11 @@ class MotionController : public Feedback
      * @param duration Amount of time the robot should be moving for the test
      * @return A tuned feedforward object
      */
-    static FeedForward::ff_config_t tune_feedforward(TankDrive &drive, OdometryTank &odometry, double pct=0.6, double duration=2);
-
-    private: 
-
-    m_profile_cfg_t config;
-
+    static FeedForward::ff_config_t tune_feedforward(TankDrive &drive,
+                                                     OdometryTank &odometry,
+                                                     double pct = 0.6,
+                                                     double duration = 2);
+    m_profile_cfg_t &config;
     PID pid;
     FeedForward ff;
     TrapezoidProfile profile;
