@@ -1,4 +1,4 @@
-#include "core/subsystems/screen.h"
+#include "../core/include/subsystems/screen.h"
 
 namespace screen
 {

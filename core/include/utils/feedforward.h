@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/utils/math_util.h"
-#include "core/utils/moving_average.h"
+#include "../core/include/utils/math_util.h"
+#include "../core/include/utils/moving_average.h"
 #include "vex.h"
 #include <math.h>
 #include <vector>

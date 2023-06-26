@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/utils/geometry.h"
+#include "../core/include/utils/geometry.h"
 #include "vex.h"
 #include <cmath>
 #include <string>

@@ -4,11 +4,11 @@
 #define PI 3.141592654
 #endif
 
-#include "core/robot_specs.h"
-#include "core/subsystems/odometry/odometry_base.h"
-#include "core/utils/feedback_base.h"
-#include "core/utils/pid.h"
-#include "core/utils/pure_pursuit.h"
+#include "../core/include/robot_specs.h"
+#include "../core/include/subsystems/odometry/odometry_base.h"
+#include "../core/include/utils/feedback_base.h"
+#include "../core/include/utils/pid.h"
+#include "../core/include/utils/pure_pursuit.h"
 #include "vex.h"
 #include <vector>
 

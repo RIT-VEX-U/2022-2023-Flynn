@@ -1,7 +1,7 @@
-#include "core/subsystems/mecanum_drive.h"
-#include "core/utils/math_util.h"
-#include "core/utils/pid.h"
-#include "core/utils/vector2d.h"
+#include "../core/include/subsystems/mecanum_drive.h"
+#include "../core/include/utils/math_util.h"
+#include "../core/include/utils/pid.h"
+#include "../core/include/utils/vector2d.h"
 /**
 * Create the Mecanum drivetrain object
 */

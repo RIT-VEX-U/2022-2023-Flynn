@@ -18,9 +18,9 @@
 
 #pragma once
 
-#include "core/subsystems/tank_drive.h"
-#include "core/utils/command_structure/auto_command.h"
-#include "core/utils/geometry.h"
+#include "../core/include/subsystems/tank_drive.h"
+#include "../core/include/utils/command_structure/auto_command.h"
+#include "../core/include/utils/geometry.h"
 #include "vex.h"
 
 using namespace vex;

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "core/utils/geometry.h"
-#include "core/utils/vector2d.h"
+#include "../core/include/utils/geometry.h"
+#include "../core/include/utils/vector2d.h"
 #include "vex.h"
 #include <vector>
 
@@ -80,7 +80,7 @@ namespace PurePursuit {
    * For more information: https://www.youtube.com/watch?v=hG0p4XgePSA.
    *
    * @param path The path of hermite points to interpolate.
-   * @param steps The number of points interpolated between points.
+   * @param step The number of points interpolated between points.
    * @return The smoothed path.
    */
   std::vector<point_t> smooth_path_hermite(std::vector<hermite_point> path,

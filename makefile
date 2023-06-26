@@ -32,10 +32,10 @@ SRC_H += $(wildcard include/*/*/*.h)
 
 
 
-HEADER_DIRS = core/include/
+#HEADER_DIRS = core/include/
 
-CXX_FLAGS +=  $(addprefix -I, $(HEADER_DIRS))
-C_FLAGS += $(addprefix -I, $(HEADER_DIRS))
+#CXX_FLAGS +=  $(addprefix -I, $(HEADER_DIRS))
+#C_FLAGS += $(addprefix -I, $(HEADER_DIRS))
 
 # additional dependancies
 SRC_A  = makefile

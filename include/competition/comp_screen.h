@@ -1,8 +1,8 @@
 #pragma once
 
-#include "core/subsystems/screen.h"
-#include "core/utils/graph_drawer.h"
-#include "core/utils/vector2d.h"
+#include "../core/include/subsystems/screen.h"
+#include "../core/include/utils/graph_drawer.h"
+#include "../core/include/utils/vector2d.h"
 #include "robot-config.h"
 #include "splash_image_small.h"
 #include <array>

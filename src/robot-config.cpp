@@ -1,5 +1,5 @@
 #include "robot-config.h"
-#include "core/subsystems/screen.h"
+#include "../core/include/subsystems/screen.h"
 #include <map>
 
 using namespace vex;

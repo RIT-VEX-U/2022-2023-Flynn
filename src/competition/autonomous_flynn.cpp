@@ -1,5 +1,5 @@
 #include "competition/autonomous_flynn.h"
-#include "core/splash.h"
+#include "../core/include/splash.h"
 #include "tuning.h"
 #include "vision.h"
 #include <algorithm>

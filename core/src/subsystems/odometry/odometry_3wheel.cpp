@@ -1,6 +1,6 @@
-#include "core/subsystems/odometry/odometry_3wheel.h"
-#include "core/utils/math_util.h"
-#include "core/utils/vector2d.h"
+#include "../core/include/subsystems/odometry/odometry_3wheel.h"
+#include "../core/include/utils/math_util.h"
+#include "../core/include/utils/vector2d.h"
 
 Odometry3Wheel::Odometry3Wheel(CustomEncoder &lside_fwd, CustomEncoder &rside_fwd, CustomEncoder &off_axis, odometry3wheel_cfg_t &cfg, bool is_async) 
 : OdometryBase(is_async), lside_fwd(lside_fwd), rside_fwd(rside_fwd), off_axis(off_axis), cfg(cfg)

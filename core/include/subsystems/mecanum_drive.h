@@ -1,6 +1,6 @@
 #pragma once
 
-#include "core/utils/pid.h"
+#include "../core/include/utils/pid.h"
 #include "vex.h"
 
 #ifndef PI

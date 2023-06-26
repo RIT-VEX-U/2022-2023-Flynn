@@ -1,4 +1,4 @@
-#include "core/utils/graph_drawer.h"
+#include "../core/include/utils/graph_drawer.h"
 
 /**
  * Construct a GraphDrawer

@@ -5,11 +5,11 @@
 
 #include "vex.h"
 
-#include "core/subsystems/odometry/odometry_tank.h"
-#include "core/subsystems/tank_drive.h"
-#include "core/utils/command_structure/auto_command.h"
-#include "core/utils/geometry.h"
-#include "core/utils/pidff.h"
+#include "../core/include/subsystems/odometry/odometry_tank.h"
+#include "../core/include/subsystems/tank_drive.h"
+#include "../core/include/utils/command_structure/auto_command.h"
+#include "../core/include/utils/geometry.h"
+#include "../core/include/utils/pidff.h"
 
 void intake_up();
 

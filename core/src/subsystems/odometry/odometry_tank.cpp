@@ -1,5 +1,5 @@
-#include "core/subsystems/odometry/odometry_tank.h"
-#include "core/utils/vector2d.h"
+#include "../core/include/subsystems/odometry/odometry_tank.h"
+#include "../core/include/utils/vector2d.h"
 
 /**
 * Initialize the Odometry module, calculating position from the drive motors.

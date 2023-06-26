@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 10.0.1, 2023-06-25T19:05:55. -->
+<!-- Written by QtCreator 10.0.1, 2023-06-25T21:10:35. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -100,6 +100,7 @@
       <valuelist type="QVariantList" key="GenericProjectManager.GenericMakeStep.BuildTargets">
        <value type="QString">all</value>
       </valuelist>
+      <value type="QString" key="GenericProjectManager.GenericMakeStep.MakeArguments">P=2022-2023-Flynn T=/home/richie/.config/Code/User/globalStorage/vexrobotics.vexcode/sdk/cpp/V5/V5_20220726_10_00_00</value>
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
       <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">GenericProjectManager.GenericMakeStep</value>
      </valuemap>
