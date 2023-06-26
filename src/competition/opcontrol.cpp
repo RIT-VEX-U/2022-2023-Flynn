@@ -21,7 +21,9 @@ int controller_screen()
     main_controller.Screen.print("F: %.0f        B: %d%%", f, bat);
 
     main_controller.Screen.setCursor(2, 1);
-    main_controller.Screen.print("I: %.0f        V: %.1fv", intake.temperature(celsius), Brain.Battery.voltage());
+    main_controller.Screen.print("I: %.0f        V: %.1fv",
+                                 intake.temperature(celsius),
+                                 Brain.Battery.voltage());
     main_controller.Screen.setCursor(3, 1);
 
     // recommended by a static analyzer :)
@@ -86,7 +88,6 @@ void opcontrol()
   main_controller.ButtonB.pressed([]()
                                   { odometry_sys.set_position(); });
 
-  // odometry_sys.end_async();
   odometry_sys.set_position();
   // PeriodicA
   while (true)
