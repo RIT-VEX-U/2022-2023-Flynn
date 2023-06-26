@@ -56,8 +56,11 @@ void DriveForwardCommand::on_timeout(){
  * @param degrees how many degrees to rotate
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
  */
-TurnDegreesCommand::TurnDegreesCommand(TankDrive &drive_sys, Feedback &feedback, double degrees, double max_speed):
-  drive_sys(drive_sys), feedback(feedback), degrees(degrees), max_speed(max_speed){}
+TurnDegreesCommand::TurnDegreesCommand(TankDrive &drive_sys, Feedback &feedback,
+                                       double degrees, double max_speed)
+    : drive_sys(drive_sys), degrees(degrees), max_speed(max_speed)
+{
+}
 
 /**
  * Run turn_degrees

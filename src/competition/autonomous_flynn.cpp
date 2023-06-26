@@ -286,7 +286,6 @@ CommandController prog_skills_loader_side()
 
   point_t start_of_line = {.x = 34.5, .y = 49};
   point_t end_of_line = {.x = 65, .y = 82};
-  point_t out_of_way_point = {.x = 73, .y = 118};
 
   lss.add(new SpinRPMCommand(flywheel_sys, 3200)); // #40
 

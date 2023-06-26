@@ -1,5 +1,4 @@
 #include "competition/opcontrol.h"
-#include "automation.h"
 #include "competition/autonomous_flynn.h"
 #include "robot-config.h"
 #include "tuning.h"
@@ -27,6 +26,8 @@ int controller_screen()
     main_controller.Screen.print("I: %.0f        V: %.1fv", intake.temperature(celsius), Brain.Battery.voltage());
     main_controller.Screen.setCursor(3, 1);
 
+    // recommended by a static analyzer :)
+    // https://godbolt.org/z/3EjzG5WEj for it compared to a raw loop
     const std::string &problem =
         std::find_if(motor_names.begin(), motor_names.end(),
                      [](auto name_and_motor) {
@@ -53,7 +54,6 @@ void opcontrol()
   intake_solenoid.set(false);
   // Initialization
   double oneshot_time = .05; // Change 1 second to whatever is needed
-  bool oneshotting = false;
   const static double RPM1 = 2300;
   const static double RPM2 = 2700;
   const static double RPM3= 3400;
@@ -70,8 +70,8 @@ void opcontrol()
   main_controller.ButtonDown.pressed([]()
                                      { flywheel_sys.stop(); });
 
-  main_controller.ButtonR1.pressed([]()
-                                   { intake.spin(reverse, 12, volt); }); // Intake
+  main_controller.ButtonR1.pressed(
+      []() { intake.spin(vex::directionType::rev, 12, volt); }); // Intake
   main_controller.ButtonR2.pressed([]()
                                    { intake.spin(fwd, 9.5, volt); }); // Shoot
 
@@ -104,7 +104,7 @@ void opcontrol()
       endgame_solenoid.set(true);
     }
 
-    oneshotting = oneshot_tmr.time(vex::sec) < oneshot_time;
+    bool oneshotting = oneshot_tmr.time(vex::sec) < oneshot_time;
     if (!main_controller.ButtonR1.pressing() && !main_controller.ButtonR2.pressing() && !oneshotting)
     {
       intake.stop();

@@ -73,7 +73,7 @@ Pepsi get_roller_scored()
  * Construct a SpinRollerCommand
  * @param align_pos The motor that will spin the roller
  */
-SpinRollerCommand::SpinRollerCommand(pose_t align_pos): align_pos(align_pos), roller_count(0) {}
+SpinRollerCommand::SpinRollerCommand(pose_t align_pos) : roller_count(0) {}
 
 /**
  * Run roller controller to spin the roller to our color
