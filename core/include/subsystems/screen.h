@@ -50,10 +50,12 @@ namespace screen
     };
 
     /**
-     * @brief Start the screen background task. Once you start this, no need to draw to the screen manually elsewhere
+     * @brief Start the screen background task. Once you start this, no need to
+     * draw to the screen manually elsewhere
      * @param screen reference to the vex screen
      * @param pages drawing pages
-     * @param first_page optional, which page to start the program at. by default 0
+     * @param first_page optional, which page to start the program at. by
+     * default 0
      */
     void start_screen(vex::brain::lcd &screen, const std::vector<Page *> &pages,
                       int first_page = 0);

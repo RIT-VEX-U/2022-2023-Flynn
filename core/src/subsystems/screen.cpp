@@ -87,7 +87,7 @@ namespace screen
   /// @param screen the brain screen
   /// @param pages the list of pages in your UI slideshow
   /// @param first_page the page to start on (by default 0)
-  void start_screen(vex::brain::lcd &screen, std::vector<Page *> pages,
+  void start_screen(vex::brain::lcd &screen, const std::vector<Page *> &pages,
                     int first_page)
   {
     if (running) {
