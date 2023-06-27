@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../core/include/utils/geometry.h"
+#include "../core/include/utils/units.h"
 #include "vex.h"
 
 #ifndef PI
@@ -99,13 +100,13 @@ public:
      * Get the current speed
      * @return the speed at which the robot is moving and grooving (inch/s)
      */
-    double get_speed();
+    units::Speed get_speed();
 
     /**
      * Get the current acceleration
      * @return the acceleration rate of the robot (inch/s^2)
      */
-    double get_accel();
+    units::Acceleration get_accel();
 
     /**
      * Get the current angular speed in degrees

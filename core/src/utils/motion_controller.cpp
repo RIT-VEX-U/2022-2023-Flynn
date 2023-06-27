@@ -1,5 +1,6 @@
 #include "../core/include/utils/motion_controller.h"
 #include "../core/include/utils/math_util.h"
+#include "../core/include/utils/units.h"
 #include <vector>
 
 /**
@@ -11,8 +12,11 @@
 *    pid_cfg Definitions of kP, kI, and kD
 *    ff_cfg Definitions of kS, kV, and kA
 */
-MotionController::MotionController(m_profile_cfg_t &config)
-: config(config), pid(config.pid_cfg), ff(config.ff_cfg), profile(config.max_v, config.accel)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+MotionController<input_dims, output_dims>::MotionController(
+    m_profile_cfg_t &config)
+    : config(config), pid(config.pid_cfg), ff(config.ff_cfg),
+      profile(config.max_v, config.accel)
 {}
 
 /**
@@ -21,7 +25,9 @@ MotionController::MotionController(m_profile_cfg_t &config)
  * @param start_pt Movement starting position
  * @param end_pt Movement ending posiiton 
  */
-void MotionController::init(double start_pt, double end_pt)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+void MotionController<input_dims, output_dims>::init(InputType start_pt,
+                                                     InputType end_pt)
 {
     profile.set_endpts(start_pt, end_pt);
     pid.reset();
@@ -34,9 +40,11 @@ void MotionController::init(double start_pt, double end_pt)
 * @param sensor_val Value from the sensor
 * @return the motor input generated from the motion profile 
 */
-double MotionController::update(double sensor_val)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+units::Quantity<output_dims>
+MotionController<input_dims, output_dims>::update(InputType sensor_val)
 {
-    cur_motion = profile.calculate(tmr.time(timeUnits::sec));
+    cur_motion = profile.calculate(1_s * tmr.time(timeUnits::sec));
     pid.set_target(cur_motion.pos);
     pid.update(sensor_val);
 
@@ -51,7 +59,8 @@ double MotionController::update(double sensor_val)
 /**
  * @return the last saved result from the feedback controller
  */
-double MotionController::get()
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+units::Quantity<output_dims> MotionController<input_dims, output_dims>::get()
 {
     return out;
 }
@@ -62,7 +71,9 @@ double MotionController::get()
  * @param lower Upper limit
  * @param upper Lower limit
  */
-void MotionController::set_limits(double lower, double upper)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+void MotionController<input_dims, output_dims>::set_limits(OutputType lower,
+                                                           OutputType upper)
 {
     lower_limit = lower;
     upper_limit = upper;
@@ -72,15 +83,19 @@ void MotionController::set_limits(double lower, double upper)
  * @return Whether or not the movement has finished, and the PID
  * confirms it is on target
  */
-bool MotionController::is_on_target()
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+bool MotionController<input_dims, output_dims>::is_on_target()
 {
-    return (tmr.time(timeUnits::sec) > profile.get_movement_time()) && pid.is_on_target();
+    return (1_s * tmr.time(timeUnits::sec) > profile.get_movement_time())
+           && pid.is_on_target();
 }
 
 /**
  * @return The current postion, velocity and acceleration setpoints
 */
-motion_t MotionController::get_motion()
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+motion_t<MotionController<input_dims, output_dims>::InputType::Dims>
+MotionController<input_dims, output_dims>::get_motion()
 {
     return cur_motion;
 }
@@ -103,19 +118,23 @@ motion_t MotionController::get_motion()
  * @param duration Amount of time the robot should be moving for the test
  * @return A tuned feedforward object
  */
-FeedForward::ff_config_t MotionController::tune_feedforward(TankDrive &drive, OdometryTank &odometry, double pct, double duration)
+
+FeedForward<units::Length::Dims, units::Voltage::Dims>::ff_config_t
+tune_feedforward(TankDrive &drive, OdometryTank &odometry, units::Voltage volts,
+                 units::Time duration)
 {
-    FeedForward::ff_config_t out = {};
-    
+    using FF = FeedForward<units::Length::Dims, units::Voltage::Dims>;
+    typename FF::ff_config_t out = {};
+
     pose_t start_pos = odometry.get_position();
 
     // ========== kS Tuning =========
     // Start at 0 and slowly increase the power until the robot starts moving
-    double power = 0;
+    units::Voltage power = 0_v;
     while(odometry.pos_diff(start_pos, odometry.get_position()) < 0.05)
     {
-        drive.drive_tank(power, power, 1);
-        power += 0.001;
+        drive.drive_tank(power, power);
+        power += 0.001_v;
         vexDelay(100);
     }
     out.kS = power;
@@ -124,26 +143,26 @@ FeedForward::ff_config_t MotionController::tune_feedforward(TankDrive &drive, Od
 
     // ========== kV / kA Tuning =========
 
-    std::vector<std::pair<double, double>> vel_data_points; // time, velocity
-    std::vector<std::pair<double, double>> accel_data_points; // time, accel
+    std::vector<std::pair<units::Time, units::Speed>> vel_data_points;
+    std::vector<std::pair<units::Time, units::Acceleration>> accel_data_points;
 
-    double max_speed = 0;
+    units::Speed max_speed = 0_inps;
     timer tmr;
-    double time;
+    units::Time time;
 
-    MovingAverage vel_ma(3);
-    MovingAverage accel_ma(3);
+    MovingAverage<FF::VelocityType::Dims> vel_ma(3);
+    MovingAverage<FF::AccelType::Dims> accel_ma(3);
 
     // Move the robot forward at a fixed percentage for X seconds while taking velocity and accel measurements
     do
     {
-        time = tmr.time(sec);
+        time = 1_s * tmr.time(sec);
 
         vel_ma.add_entry(odometry.get_speed());
         accel_ma.add_entry(odometry.get_accel());
 
-        double speed = vel_ma.get_average();
-        double accel = accel_ma.get_average();
+        units::Speed speed = vel_ma.get_average();
+        units::Acceleration accel = accel_ma.get_average();
 
         // For kV:
         if(speed > max_speed)
@@ -151,10 +170,9 @@ FeedForward::ff_config_t MotionController::tune_feedforward(TankDrive &drive, Od
 
         // For kA:
         // Filter out the acceleration dampening due to motor inductance
-        if(time > 0.25)
-        {
-            vel_data_points.push_back(std::pair<double, double>(time, speed));
-            accel_data_points.push_back(std::pair<double, double>(time, accel));
+        if (time > 0.25_s) {
+            vel_data_points.push_back({time, speed});
+            accel_data_points.push_back({time, accel});
         }
 
         // Theoretical polling rate = 100hz (it won't be that much, cause, y'know, vex.)
@@ -164,21 +182,30 @@ FeedForward::ff_config_t MotionController::tune_feedforward(TankDrive &drive, Od
     drive.stop();
 
     // Calculate kV (volts/12 per unit per second)
-    out.kV = (pct - out.kS) / max_speed;
+    out.kV = (volts - out.kS) / max_speed;
 
     // Calculate kA (volts/12 per unit per second^2)
+    // nasty un unitted thing
     std::vector<std::pair<double, double>> accel_per_pct;
     for (int i = 0; i < vel_data_points.size(); i++)
     {
-        accel_per_pct.push_back(std::pair<double, double>(
-            pct - out.kS - (vel_data_points[i].second * out.kV),   // Acceleration-causing percent (X variable)
-            accel_data_points[i].second                            // Measured acceleration (Y variable)
-        ));
+        accel_per_pct.push_back({
+            (volts - out.kS - (vel_data_points[i].second * out.kV))
+                .getValue(), // Acceleration-causing percent (X variable)
+            accel_data_points[i]
+                .second.getValue() // Measured acceleration (Y variable)
+        });
     }
     
     // kA is the reciprocal of the slope of the linear regression
     double regres_slope = calculate_linear_regression(accel_per_pct).first;
-    out.kA = 1.0 / regres_slope; 
+    // get back to unit land
+    out.kA = 1.0_v / (regres_slope * 1_inps / 1_s);
 
     return out;
 }
+
+template class MotionController<units::Length::Dims, units::Voltage::Dims>;
+template class MotionController<units::Angle::Dims, units::Voltage::Dims>;
+template class MotionController<units::AngularSpeed::Dims,
+                                units::Voltage::Dims>;

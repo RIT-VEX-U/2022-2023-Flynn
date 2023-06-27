@@ -2,6 +2,7 @@
 
 #include "../core/include/utils/math_util.h"
 #include "../core/include/utils/moving_average.h"
+#include "../core/include/utils/units.h"
 #include "vex.h"
 #include <math.h>
 #include <vector>
@@ -26,66 +27,85 @@
  * @author Ryan McGee
  * @date 6/13/2022
  */
+template <units::Dimensions input_dims, units::Dimensions output_dims>
 class FeedForward
 {
-    public:
+public:
+  using InputType = units::Quantity<input_dims>;
+  using OutputType = units::Quantity<output_dims>;
 
-    /**
-     * ff_config_t holds the parameters to make the theoretical model of a real world system
-     * equation is of the form
-     * kS if the system is not stopped, 0 otherwise
-     * + kV * desired velocity
-     * + kA * desired acceleration
-     * + kG
-     */
-    typedef struct
-    {
-        double kS; /**< Coefficient to overcome static friction: the point at which the motor *starts* to move.*/
-        double kV; /**< Veclocity coefficient: the power required to keep the mechanism in motion. Multiplied by the requested velocity.*/
-        double kA; /**< kA - Acceleration coefficient: the power required to change the mechanism's speed. Multiplied by the requested acceleration.*/
-        double kG; /**< kG - Gravity coefficient: only needed for lifts. The power required to overcome gravity and stay at steady state.*/
-    } ff_config_t;
+  // input per second
+  using VelocityType = units::Quantity<input_dims - units::time_dimensions>;
+  // output per velocity, (volts per meters per second
+  using KV_Type = units::Quantity<output_dims - VelocityType::Dims>;
 
-    
-    /**
-     * Creates a FeedForward object.
-     * @param cfg Configuration Struct for tuning
-    */
-    FeedForward(ff_config_t &cfg) : cfg(cfg) {}
+  // input per second squared
+  using AccelType
+      = units::Quantity<VelocityType::Dims - units::time_dimensions>;
+  // output per velocity, (volts per meters per second
+  using KA_Type = units::Quantity<output_dims - AccelType::Dims>;
 
-    /**
-     * @brief Perform the feedforward calculation
-     * 
-     * This calculation is the equation:
-     * F = kG + kS*sgn(v) + kV*v + kA*a
-     * 
-     * @param v Requested velocity of system
-     * @param a Requested acceleration of system
-     * @return A feedforward that should closely represent the system if tuned correctly
-     */
-    double calculate(double v, double a, double pid_ref=0.0)
-    {
-        double ks_sign = 0;
-        if(v != 0)
-            ks_sign = sign(v);
-        else if(pid_ref != 0)
-            ks_sign = sign(pid_ref);
-        
-        return (cfg.kS * ks_sign) + (cfg.kV * v) + (cfg.kA * a) + cfg.kG;
-    }
+  /**
+   * ff_config_t holds the parameters to make the theoretical model of a
+   * real world system equation is of the form kS if the system is not
+   * stopped, 0 otherwise
+   * + kV * desired velocity
+   * + kA * desired acceleration
+   * + kG
+   */
+  typedef struct {
+    OutputType kS; /**< Coefficient to overcome static friction: the point at
+                  which the motor *starts* to move.*/
+    KV_Type kV;    /**< Veclocity coefficient: the power required to keep the
+                     mechanism in motion. Multiplied by the requested velocity.*/
+    KA_Type
+        kA; /**< kA - Acceleration coefficient: the power required to change the
+               mechanism's speed. Multiplied by the requested acceleration.*/
+    OutputType kG; /**< kG - Gravity coefficient: only needed for lifts. The
+                  power required to overcome gravity and stay at steady state.*/
+  } ff_config_t;
 
-    private:
+  /**
+   * Creates a FeedForward object.
+   * @param cfg Configuration Struct for tuning
+   */
+  FeedForward(ff_config_t &cfg) : cfg(cfg) {}
 
-    ff_config_t &cfg;
+  /**
+   * @brief Perform the feedforward calculation
+   *
+   * This calculation is the equation:
+   * F = kG + kS*sgn(v) + kV*v + kA*a
+   *
+   * @param v Requested velocity of system
+   * @param a Requested acceleration of system
+   * @return A feedforward that should closely represent the system if tuned
+   * correctly
+   */
+  OutputType calculate(VelocityType v, AccelType a,
+                       units::Voltage pid_ref = 0.0_v)
+  {
 
+    double ks_sign = 0;
+    if (v != VelocityType(0))
+      ks_sign = sign(v);
+    else if (pid_ref != 0_v)
+      ks_sign = sign(pid_ref);
+
+    return (cfg.kS * ks_sign) + (cfg.kV * v) + (cfg.kA * a) + cfg.kG;
+  }
+
+private:
+  ff_config_t &cfg;
 };
 
-
 /**
-* tune_feedforward takes a group of motors and finds the feedforward conifg parameters automagically.
-*  @param motor the motor group to use 
-*  @param pct Maximum velocity in percent (0->1.0)
+ * tune_feedforward takes a group of motors and finds the feedforward conifg
+ * parameters automagically.
+ *  @param motor the motor group to use
+ *  @param pct Maximum velocity in percent (0->1.0)
  * @param duration Amount of time the motors spin for the test
  * @return A tuned feedforward object
  */
-FeedForward::ff_config_t tune_feedforward(vex::motor_group &motor, double pct, double duration);
+FeedForward<units::length_dimensions, units::voltage_dimensions>::ff_config_t
+tune_feedforward(vex::motor_group &motor, double pct, double duration);

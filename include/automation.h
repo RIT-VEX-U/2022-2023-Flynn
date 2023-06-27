@@ -10,6 +10,7 @@
 #include "../core/include/utils/command_structure/auto_command.h"
 #include "../core/include/utils/geometry.h"
 #include "../core/include/utils/pidff.h"
+#include "../core/include/utils/units.h"
 
 void intake_up();
 
@@ -178,7 +179,7 @@ public:
   void on_timeout() override;
 
 private:
-  PIDFF pidff;
+  PIDFF<units::Angle::Dims, units::Voltage::Dims> pidff;
   vex::timer tmr;
   bool odometry_fallback;
   bool first_run;
@@ -213,14 +214,17 @@ public:
   /**
    * COnstruct the command
    */
-  TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &feedback, point_t point);
+  TurnToPointCommand(
+      TankDrive &drive_sys, OdometryTank &odom,
+      Feedback<units::Angle::Dims, units::Voltage::Dims> &feedback,
+      point_t point);
 
   bool run() override;
 
 private:
   TankDrive &drive_sys;
   OdometryTank &odom;
-  Feedback &feedback;
+  Feedback<units::Angle::Dims, units::Voltage::Dims> &feedback;
   point_t point;
 };
 

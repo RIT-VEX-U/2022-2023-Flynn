@@ -1,5 +1,5 @@
 #include "../core/include/subsystems/odometry/odometry_base.h"
-#include "../core/include/utils/geometry.h"
+
 /**
  * Construct a new Odometry Base object
  *
@@ -111,22 +111,22 @@ double OdometryBase::smallest_angle(double start_deg, double end_deg)
   return retval;
 }
 
-double OdometryBase::get_speed()
+units::Speed OdometryBase::get_speed()
 {
   mut.lock();
   double retval = speed;
   mut.unlock();
-  
-  return retval;
+
+  return 1_inps * retval;
 }
 
-double OdometryBase::get_accel()
+units::Acceleration OdometryBase::get_accel()
 {
   mut.lock();
   double retval = accel;
   mut.unlock();
 
-  return retval;
+  return 1_inps / 1_s * retval;
 }
 
 double OdometryBase::get_angular_speed_deg()

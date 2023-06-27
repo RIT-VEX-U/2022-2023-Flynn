@@ -52,8 +52,7 @@ int controller_screen()
     if (problem_motor) {
       problem_str = problem_motor->first;
     }
-    main_controller.Screen.print("D: %.0f      %s", d,
-                                 problem_motor->first.c_str());
+    main_controller.Screen.print("D: %.0f      %s", d, problem_str.c_str());
 
     vexDelay(500);
   }
@@ -71,9 +70,9 @@ void opcontrol()
   intake_solenoid.set(false);
   // Initialization
   double oneshot_time = .05; // Change 1 second to whatever is needed
-  const static double RPM1 = 2300;
-  const static double RPM2 = 2700;
-  const static double RPM3= 3400;
+  const static units::AngularSpeed RPM1 = 2300_rpm;
+  const static units::AngularSpeed RPM2 = 2700_rpm;
+  const static units::AngularSpeed RPM3 = 3400_rpm;
 
   flywheel_sys.spinRPM(RPM2);
 
@@ -111,7 +110,8 @@ void opcontrol()
   {
     // printf("%f : %f\n", left_enc.position(rotationUnits::rev), right_enc.position(rotationUnits::rev));
     // ========== DRIVING CONTROLS ==========
-    drive_sys.drive_tank(main_controller.Axis3.position() / 100.0, main_controller.Axis2.position() / 100.0);
+    drive_sys.drive_tank(12_v * (main_controller.Axis3.position() / 100.0),
+                         12_v * (main_controller.Axis2.position() / 100.0));
     // ========== MANIPULATING CONTROLS ==========
 
 

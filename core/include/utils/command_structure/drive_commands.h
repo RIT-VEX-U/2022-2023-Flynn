@@ -21,6 +21,8 @@
 #include "../core/include/subsystems/tank_drive.h"
 #include "../core/include/utils/command_structure/auto_command.h"
 #include "../core/include/utils/geometry.h"
+#include "../core/include/utils/units.h"
+
 #include "vex.h"
 
 using namespace vex;
@@ -33,61 +35,68 @@ using namespace vex;
  * TankDrive class
  *
  */
-class DriveForwardCommand: public AutoCommand {
-  public:
-    DriveForwardCommand(TankDrive &drive_sys, Feedback &feedback, double inches, directionType dir, double max_speed=1);
+class DriveForwardCommand : public AutoCommand
+{
+public:
+  DriveForwardCommand(
+      TankDrive &drive_sys,
+      Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+      double inches, directionType dir, double max_speed = 1);
 
-    /**
-     * Run drive_forward
-     * Overrides run from AutoCommand
-     * @returns true when execution is complete, false otherwise
-     */
-    bool run() override;
-    /**
-     * Cleans up drive system if we time out before finishing
-    */
-    void on_timeout() override;
+  /**
+   * Run drive_forward
+   * Overrides run from AutoCommand
+   * @returns true when execution is complete, false otherwise
+   */
+  bool run() override;
+  /**
+   * Cleans up drive system if we time out before finishing
+   */
+  void on_timeout() override;
 
-  private:
-    // drive system to run the function on
-    TankDrive &drive_sys;
+private:
+  // drive system to run the function on
+  TankDrive &drive_sys;
 
-    // feedback controller to use
-    Feedback &feedback;
+  // feedback controller to use
+  Feedback<units::Length::Dims, units::Voltage::Dims> &feedback;
 
-    // parameters for drive_forward
-    double inches;
-    directionType dir;
-    double max_speed;
+  // parameters for drive_forward
+  double inches;
+  directionType dir;
+  double max_speed;
 };
 
 /**
  * AutoCommand wrapper class for the turn_degrees function in the 
  * TankDrive class
  */
-class TurnDegreesCommand: public AutoCommand {
-  public:
-    TurnDegreesCommand(TankDrive &drive_sys, Feedback &feedback, double degrees, double max_speed = 1);
+class TurnDegreesCommand : public AutoCommand
+{
+public:
+  TurnDegreesCommand(
+      TankDrive &drive_sys,
+      Feedback<units::Angle::Dims, units::Voltage::Dims> &feedback,
+      double degrees, double max_speed = 1);
 
-    /**
-     * Run turn_degrees
-     * Overrides run from AutoCommand
-     * @returns true when execution is complete, false otherwise
-     */
-    bool run() override;
-    /**
-     * Cleans up drive system if we time out before finishing
-    */
-    void on_timeout() override;
+  /**
+   * Run turn_degrees
+   * Overrides run from AutoCommand
+   * @returns true when execution is complete, false otherwise
+   */
+  bool run() override;
+  /**
+   * Cleans up drive system if we time out before finishing
+   */
+  void on_timeout() override;
 
+private:
+  // drive system to run the function on
+  TankDrive &drive_sys;
 
-  private:
-    // drive system to run the function on
-    TankDrive &drive_sys;
-
-    // parameters for turn_degrees
-    double degrees;
-    double max_speed;
+  // parameters for turn_degrees
+  double degrees;
+  double max_speed;
 };
 
 /**
@@ -96,8 +105,14 @@ class TurnDegreesCommand: public AutoCommand {
  */
 class DriveToPointCommand: public AutoCommand {
   public:
-    DriveToPointCommand(TankDrive &drive_sys, Feedback &feedback, double x, double y, directionType dir, double max_speed = 1);
-    DriveToPointCommand(TankDrive &drive_sys, Feedback &feedback, point_t point, directionType dir, double max_speed=1);
+    DriveToPointCommand(
+        TankDrive &drive_sys,
+        Feedback<units::Length::Dims, units::Voltage::Dims> &feedback, double x,
+        double y, directionType dir, double max_speed = 1);
+    DriveToPointCommand(
+        TankDrive &drive_sys,
+        Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+        point_t point, directionType dir, double max_speed = 1);
 
     /**
      * Run drive_to_point
@@ -117,7 +132,7 @@ class DriveToPointCommand: public AutoCommand {
 
 
     // feedback controller to use
-    Feedback &feedback;
+    Feedback<units::Length::Dims, units::Voltage::Dims> &feedback;
 
     // parameters for drive_to_point
     double x;
@@ -134,7 +149,10 @@ class DriveToPointCommand: public AutoCommand {
  */
 class TurnToHeadingCommand: public AutoCommand {
   public:
-    TurnToHeadingCommand(TankDrive &drive_sys, Feedback &feedback, double heading_deg, double speed = 1);
+    TurnToHeadingCommand(
+        TankDrive &drive_sys,
+        Feedback<units::Angle::Dims, units::Voltage::Dims> &feedback,
+        double heading_deg, double speed = 1);
 
     /**
      * Run turn_to_heading
@@ -153,7 +171,7 @@ class TurnToHeadingCommand: public AutoCommand {
     TankDrive &drive_sys;
 
     // feedback controller to use
-    Feedback &feedback;
+    Feedback<units::Angle::Dims, units::Voltage::Dims> &feedback;
 
     // parameters for turn_to_heading
     double heading_deg;

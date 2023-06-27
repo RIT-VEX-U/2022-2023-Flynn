@@ -17,7 +17,7 @@
  */
 
 #include "../core/include/utils/command_structure/drive_commands.h"
-
+#include "../core/include/utils/units.h"
 // ==== DRIVING ====
 
 /**
@@ -28,8 +28,14 @@
  * @param dir the direction to drive
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
 */
-DriveForwardCommand::DriveForwardCommand(TankDrive &drive_sys, Feedback &feedback, double inches, directionType dir, double max_speed):
-  drive_sys(drive_sys), feedback(feedback), inches(inches), dir(dir), max_speed(max_speed) {}
+DriveForwardCommand::DriveForwardCommand(
+    TankDrive &drive_sys,
+    Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+    double inches, directionType dir, double max_speed)
+    : drive_sys(drive_sys), feedback(feedback), inches(inches), dir(dir),
+      max_speed(max_speed)
+{
+}
 
 /**
  * Run drive_forward
@@ -56,8 +62,10 @@ void DriveForwardCommand::on_timeout(){
  * @param degrees how many degrees to rotate
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
  */
-TurnDegreesCommand::TurnDegreesCommand(TankDrive &drive_sys, Feedback &feedback,
-                                       double degrees, double max_speed)
+TurnDegreesCommand::TurnDegreesCommand(
+    TankDrive &drive_sys,
+    Feedback<units::Angle::Dims, units::Voltage::Dims> &feedback,
+    double degrees, double max_speed)
     : drive_sys(drive_sys), degrees(degrees), max_speed(max_speed)
 {
 }
@@ -68,7 +76,7 @@ TurnDegreesCommand::TurnDegreesCommand(TankDrive &drive_sys, Feedback &feedback,
  * @returns true when execution is complete, false otherwise
  */
 bool TurnDegreesCommand::run() {
-  return drive_sys.turn_degrees(degrees, max_speed);
+  return drive_sys.turn_relative(1_deg * degrees, 12_v * max_speed);
 }
 /**
  * reset the drive system if we timeout
@@ -77,7 +85,6 @@ void TurnDegreesCommand::on_timeout(){
   drive_sys.reset_auto();
   drive_sys.stop();
 }
-
 
 /**
  * Construct a DriveForward Command
@@ -88,8 +95,14 @@ void TurnDegreesCommand::on_timeout(){
  * @param dir the direction to drive
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
  */
-DriveToPointCommand::DriveToPointCommand(TankDrive &drive_sys, Feedback &feedback, double x, double y, directionType dir, double max_speed):
-  drive_sys(drive_sys), feedback(feedback), x(x), y(y), dir(dir), max_speed(max_speed) {}
+DriveToPointCommand::DriveToPointCommand(
+    TankDrive &drive_sys,
+    Feedback<units::Length::Dims, units::Voltage::Dims> &feedback, double x,
+    double y, directionType dir, double max_speed)
+    : drive_sys(drive_sys), feedback(feedback), x(x), y(y), dir(dir),
+      max_speed(max_speed)
+{
+}
 
 /**
  * Construct a DriveForward Command
@@ -99,8 +112,14 @@ DriveToPointCommand::DriveToPointCommand(TankDrive &drive_sys, Feedback &feedbac
  * @param dir the direction to drive
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
  */
-DriveToPointCommand::DriveToPointCommand(TankDrive &drive_sys, Feedback &feedback, point_t point, directionType dir, double max_speed):
-  drive_sys(drive_sys), feedback(feedback), x(point.x), y(point.y), dir(dir), max_speed(max_speed) {}
+DriveToPointCommand::DriveToPointCommand(
+    TankDrive &drive_sys,
+    Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+    point_t point, directionType dir, double max_speed)
+    : drive_sys(drive_sys), feedback(feedback), x(point.x), y(point.y),
+      dir(dir), max_speed(max_speed)
+{
+}
 
 /**
  * Run drive_to_point
@@ -126,8 +145,14 @@ void DriveToPointCommand::on_timeout(){
  * @param heading_deg the heading to turn to in degrees
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
  */
-TurnToHeadingCommand::TurnToHeadingCommand(TankDrive &drive_sys, Feedback &feedback, double heading_deg, double max_speed):
-  drive_sys(drive_sys), feedback(feedback), heading_deg(heading_deg), max_speed(max_speed) {}
+TurnToHeadingCommand::TurnToHeadingCommand(
+    TankDrive &drive_sys,
+    Feedback<units::Angle::Dims, units::Voltage::Dims> &feedback,
+    double heading_deg, double max_speed)
+    : drive_sys(drive_sys), feedback(feedback), heading_deg(heading_deg),
+      max_speed(max_speed)
+{
+}
 
 /**
  * Run turn_to_heading
@@ -135,7 +160,8 @@ TurnToHeadingCommand::TurnToHeadingCommand(TankDrive &drive_sys, Feedback &feedb
  * @returns true when execution is complete, false otherwise
  */
 bool TurnToHeadingCommand::run() {
-  return drive_sys.turn_to_heading(heading_deg, feedback, max_speed);
+  return drive_sys.turn_to_heading(1_deg * heading_deg, feedback,
+                                   12_v * max_speed);
 }
 /**
  * reset the drive system if we don't hit our target

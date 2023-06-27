@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../core/include/utils/pid.h"
+#include "../core/include/utils/units.h"
 #include "vex.h"
 #include <atomic>
 #include <iostream>
@@ -20,8 +21,8 @@ using namespace std;
 template <typename T>
 class Lift
 {
-  public:
-
+public:
+  using PID_Type = PID<units::Angle::Dims, units::Voltage::Dims>;
   /**
    * lift_cfg_t holds the physical parameter specifications of a lify system.
    * includes:
@@ -33,7 +34,7 @@ class Lift
     double up_speed, down_speed;
     double softstop_up, softstop_down;
 
-    PID::pid_config_t lift_pid_cfg;
+    PID_Type::pid_config_t lift_pid_cfg;
   };
 
   /**
@@ -62,10 +63,10 @@ class Lift
   {
 
     is_async = true;
-    setpoint = 0;
-    
-    // Create a background task that is constantly updating the lift PID, if requested.
-    // Set once, and forget.
+    setpoint = 0_rev;
+
+    // Create a background task that is constantly updating the lift PID, if
+    // requested. Set once, and forget.
     task t([](void* ptr){
       Lift &lift = *((Lift*) ptr);
 
@@ -93,19 +94,19 @@ class Lift
   void control_continuous(bool up_ctrl, bool down_ctrl)
   {
     static timer tmr;
-    
-    double cur_pos = 0;
+
+    units::Angle cur_pos = 0_rev;
 
     // Check if there's a hook for a custom sensor. If not, use the motors.
     if(get_sensor == NULL)
-      cur_pos = lift_motors.position(rev);
+      cur_pos = lift_motors.position(rev) * units::revolution;
     else
       cur_pos = get_sensor();
 
     if(up_ctrl && cur_pos < cfg.softstop_up)
     {
       lift_motors.spin(directionType::fwd, cfg.up_speed, volt);
-      setpoint = cur_pos + .3;
+      setpoint = cur_pos + .3_rev;
 
       // std::cout << "DEBUG OUT: UP " << setpoint << ", " << tmr.time(sec) << ", " << cfg.down_speed << "\n";
 
@@ -234,10 +235,7 @@ class Lift
   /**
     * @return The current setpoint for the lift
     */
-  double get_setpoint()
-  {
-    return this->setpoint;
-  }
+  units::Length get_setpoint() { return this->setpoint; }
 
   /**
     * Target the class's setpoint.
@@ -251,11 +249,11 @@ class Lift
     if(get_sensor != NULL)
       lift_pid.update(get_sensor());
     else
-      lift_pid.update(lift_motors.position(rev));
+      lift_pid.update(lift_motors.position(rev) * units::revolution);
 
     // std::cout << "DEBUG OUT: ROTATION " << lift_motors.rotation(rev) << "\n\n";
 
-    lift_motors.spin(fwd, lift_pid.get(), volt);
+    lift_motors.spin(fwd, lift_pid.get().Convert(units::volt), volt);
   }
 
   /**
@@ -332,15 +330,13 @@ class Lift
 
   motor_group &lift_motors;
   lift_cfg_t &cfg;
-  PID lift_pid;
+  PID_Type lift_pid;
   map<T, double> &setpoint_map;
   limit *homing_switch;
-  
-  atomic<double> setpoint;
+
+  atomic<units::Angle> setpoint;
   atomic<bool> is_async;
 
-  double (*get_sensor)(void) = NULL;
+  units::Angle (*get_sensor)(void) = NULL;
   void (*reset_sensor)(void) = NULL;
-  
-
 };

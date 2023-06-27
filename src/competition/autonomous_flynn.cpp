@@ -74,10 +74,10 @@ void pleasant_opcontrol()
   double oneshot_time = .02; // Change 1 second to whatever is needed
   bool oneshotting = false;
 
-  main_controller.ButtonUp.pressed([]()
-                                   { flywheel_sys.spinRPM(flywheel_sys.getDesiredRPM() + 250); });
-  main_controller.ButtonDown.pressed([]()
-                                     { flywheel_sys.spinRPM(flywheel_sys.getDesiredRPM() - 250); });
+  main_controller.ButtonUp.pressed(
+      []() { flywheel_sys.spinRPM(flywheel_sys.getDesiredRPM() + 250_rpm); });
+  main_controller.ButtonDown.pressed(
+      []() { flywheel_sys.spinRPM(flywheel_sys.getDesiredRPM() - 250_rpm); });
   main_controller.ButtonR1.pressed([]()
                                    { intake.spin(vex::reverse, 12, volt); }); // Intake
   main_controller.ButtonR2.pressed([]()

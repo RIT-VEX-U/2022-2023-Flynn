@@ -3,6 +3,7 @@
 #include <map>
 
 using namespace vex;
+using namespace unit_literals;
 
 // A global instance of brain used for printing to the V5 brain screen
 brain Brain;
@@ -57,65 +58,60 @@ CustomEncoder right_enc(Brain.ThreeWirePort.E, 2048);
 
 // ======== UTILS ========
 // Drive Tuning
-PID::pid_config_t drive_pid_cfg = {
-    .p = .035,
-    .i = 0,
-    .d = 0,
-    .deadband = 2,
-    .on_target_time = 0.2};
+DrivePid::pid_config_t drive_pid_cfg = {.p = .035_v / 1_in,
+                                        .i = 0_v / (1_in * 1_s),
+                                        .d = 0_v / (1_in / 1_s),
+                                        .deadband = 2_in,
+                                        .on_target_time = 0.2_s};
 
-FeedForward::ff_config_t drive_ff_cfg = {
-    .kS = 0.07,
-    .kV = .011, // 0.014205,
-    .kA = 0.0015};
+DriveFF::ff_config_t drive_ff_cfg
+    = {.kS = 0.07_v, .kV = .011_v / (1_inps), .kA = 0.0015_v / (1_inps / 1_s)};
 
-MotionController::m_profile_cfg_t drive_fast_mprofile_cfg = {
-    .max_v = 60,  // MAX = 48,
-    .accel = 140, // MAX = 200
-    .pid_cfg = drive_pid_cfg,
-    .ff_cfg = drive_ff_cfg};
+DriveMC::m_profile_cfg_t drive_fast_mprofile_cfg
+    = {.max_v = 60_inps,        // MAX = 48,
+       .accel = 140_inps / 1_s, // MAX = 200
+       .pid_cfg = drive_pid_cfg,
+       .ff_cfg = drive_ff_cfg};
 
-MotionController::m_profile_cfg_t drive_slow_mprofile_cfg = {
-    .max_v = 15,
-    .accel = 100,
-    .pid_cfg = drive_pid_cfg,
-    .ff_cfg = drive_ff_cfg};
+DriveMC::m_profile_cfg_t drive_slow_mprofile_cfg = {.max_v = 15_inps,
+                                                    .accel = 100_inps / 1_s,
+                                                    .pid_cfg = drive_pid_cfg,
+                                                    .ff_cfg = drive_ff_cfg};
 
 // Turn Tuning
-PID::pid_config_t turn_pid_cfg = {
-    .p = .013,
-    .i = 0.00001,
-    .d = .00085,
-    .deadband = 2.0,
-    .on_target_time = .2};
+TurnPid::pid_config_t turn_pid_cfg
+    = {.p = .013_v / units::degree,
+       .i = 0.00001_v / (units::degree * units::second),
+       .d = .00085_v / (1_deg / 1_s),
+       .deadband = 2.0_deg,
+       .on_target_time = .2_s};
 
-FeedForward::ff_config_t turn_ff_cfg =
-    {
-        .kS = 0.08};
+TurnFF::ff_config_t turn_ff_cfg = {.kS = 0.08_v};
 
-MotionController drive_fast_mprofile(drive_fast_mprofile_cfg), drive_slow_mprofile(drive_slow_mprofile_cfg), drive_super_fast_mprofile(drive_fast_mprofile_cfg);
+DriveMC drive_fast_mprofile(drive_fast_mprofile_cfg),
+    drive_slow_mprofile(drive_slow_mprofile_cfg),
+    drive_super_fast_mprofile(drive_fast_mprofile_cfg);
 
-robot_specs_t config = {
-    .robot_radius = 10,
-    .odom_wheel_diam = 6.424194,
-    .odom_gear_ratio = 1, // .44    16:12
-    .dist_between_wheels = 10.99,
+robot_specs_t config
+    = {.robot_radius = 10,
+       .odom_wheel_diam = 6.424194,
+       .odom_gear_ratio = 1, // .44    16:12
+       .dist_between_wheels = 10.99,
 
-    .drive_correction_cutoff = 6,
+       .drive_correction_cutoff = 6_in,
 
-    .drive_feedback = &drive_fast_mprofile,
-    .turn_feedback = new PIDFF(turn_pid_cfg, turn_ff_cfg),
-    .correction_pid = {
-        .p = .012,
-        .i = 0,
-        .d = 0.0012}};
+       .drive_feedback = &drive_fast_mprofile,
+       .turn_feedback = new PIDFF<units::Angle::Dims, units::Voltage::Dims>(
+           turn_pid_cfg, turn_ff_cfg),
+       .correction_pid = {.p = .012_v / units::degree,
+                          .i = 0_v / (units::degree * units::second),
+                          .d = 0.0012_v / (units::degree_per_sec)}};
 
 // Flywheel Tuning
-FeedForward::ff_config_t flywheel_ff_cfg = {
-    .kV = 0.0003};
+FeedForwardFW::ff_config_t flywheel_ff_cfg = {.kV = 0.0003_v / 1_rpm};
 
-PID::pid_config_t flywheel_pid_cfg = {
-    .p = .0000, // 5,
+PidFW::pid_config_t flywheel_pid_cfg = {
+    .p = .0000_v / 1_rpm, // 5,
 };
 
 // ======== SUBSYSTEMS ========

@@ -5,6 +5,7 @@
 #include "../core/include/utils/feedforward.h"
 #include "../core/include/utils/pid.h"
 #include "../core/include/utils/trapezoid_profile.h"
+#include "../core/include/utils/units.h"
 #include "vex.h"
 
 /**
@@ -23,22 +24,34 @@
  * @author Ryan McGee
  * @date 7/13/2022
  */
-class MotionController : public Feedback
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+class MotionController : public Feedback<input_dims, output_dims>
 {
-    public:
+  using InputType = units::Quantity<input_dims>;
+  using OutputType = units::Quantity<output_dims>;
+  using VelocityType = units::Quantity<input_dims - units::time_dimensions>;
+  using AccelType
+      = units::Quantity<VelocityType::Dims - units::time_dimensions>;
 
-    /**
-     * m_profile_config holds all data the motion controller uses to plan paths
-     * When motion pofile is given a target to drive to, max_v and accel are used to make the trapezoid profile instructing the controller how to drive
-     * pid_cfg, ff_cfg are used to find the motor outputs necessary to execute this path
-     */
-    typedef struct
-    {
-        double max_v; ///< the maximum velocity the robot can drive
-        double accel; ///< the most acceleration the robot can do
-        PID::pid_config_t pid_cfg; ///< configuration parameters for the internal PID controller 
-        FeedForward::ff_config_t ff_cfg; ///< configuration parameters for the internal 
-    } m_profile_cfg_t;
+  using MC_PID = PID<input_dims, output_dims>;
+  using MC_FF = FeedForward<input_dims, output_dims>;
+
+public:
+  /**
+   * m_profile_config holds all data the motion controller uses to plan paths
+   * When motion pofile is given a target to drive to, max_v and accel are used
+   * to make the trapezoid profile instructing the controller how to drive
+   * pid_cfg, ff_cfg are used to find the motor outputs necessary to execute
+   * this path
+   */
+  typedef struct {
+    VelocityType max_v; ///< the maximum velocity the robot can drive
+    AccelType accel;    ///< the most acceleration the robot can do
+    /// configuration parameters for the internal PID controller
+    typename MC_PID::pid_config_t pid_cfg;
+    /// configuration parameters for the internal
+    typename MC_FF::ff_config_t ff_cfg;
+  } m_profile_cfg_t;
 
     /**
      * @brief Construct a new Motion Controller object
@@ -55,20 +68,20 @@ class MotionController : public Feedback
      * @brief Initialize the motion profile for a new movement
      * This will also reset the PID and profile timers.
      */
-    void init(double start_pt, double end_pt) override;
-    
+    void init(InputType start_pt, InputType end_pt) override;
+
     /**
      * @brief Update the motion profile with a new sensor value
-     * 
+     *
      * @param sensor_val Value from the sensor
-     * @return the motor input generated from the motion profile 
+     * @return the motor input generated from the motion profile
      */
-    double update(double sensor_val) override;
+    OutputType update(InputType sensor_val) override;
 
     /**
      * @return the last saved result from the feedback controller
      */
-    double get() override;
+    OutputType get() override;
 
     /**
      * Clamp the upper and lower limits of the output. If both are 0, no limits should be applied.
@@ -77,7 +90,7 @@ class MotionController : public Feedback
      * @param lower upper limit
      * @param upper lower limiet
      */
-    void set_limits(double lower, double upper) override;
+    void set_limits(OutputType lower, OutputType upper) override;
 
     /** 
      * @return Whether or not the movement has finished, and the PID
@@ -88,39 +101,20 @@ class MotionController : public Feedback
     /**
      * @return The current postion, velocity and acceleration setpoints
     */
-    motion_t get_motion();
+    motion_t<InputType::Dims> get_motion();
 
-    /**
-     * This method attempts to characterize the robot's drivetrain and automatically tune the feedforward.
-     * It does this by first calculating the kS (voltage to overcome static friction) by slowly increasing
-     * the voltage until it moves.
-     * 
-     * Next is kV (voltage to sustain a certain velocity), where the robot will record it's steady-state velocity
-     * at 'pct' speed.
-     * 
-     * Finally, kA (voltage needed to accelerate by a certain rate), where the robot will record the entire movement's
-     * velocity and acceleration, record a plot of [X=(pct-kV*V-kS), Y=(Acceleration)] along the movement,
-     * and since kA*Accel = pct-kV*V-kS, the reciprocal of the linear regression is the kA value.
-     * 
-     * @param drive The tankdrive to operate on
-     * @param odometry The robot's odometry subsystem
-     * @param pct Maximum velocity in percent (0->1.0)
-     * @param duration Amount of time the robot should be moving for the test
-     * @return A tuned feedforward object
-     */
-        static FeedForward::ff_config_t tune_feedforward(TankDrive &drive,
-                                                     OdometryTank &odometry,
-                                                     double pct = 0.6,
-                                                     double duration = 2);
     m_profile_cfg_t &config;
-    PID pid;
-    FeedForward ff;
-    TrapezoidProfile profile;
+    MC_PID pid;
+    MC_FF ff;
+    TrapezoidProfile<InputType::Dims> profile;
 
-    double lower_limit = 0, upper_limit = 0;
-    double out = 0;
-    motion_t cur_motion;
-     
+    units::Voltage lower_limit = 0_v, upper_limit = 0_v;
+    units::Voltage out = 0_v;
+    motion_t<InputType::Dims> cur_motion;
+
     vex::timer tmr;
-
 };
+
+FeedForward<units::length_dimensions, units::voltage_dimensions>::ff_config_t
+tune_feedforward(TankDrive &drive, OdometryTank &odometry,
+                 units::Voltage pct = 8_v, units::Time duration = 2_s);

@@ -1,7 +1,7 @@
 #pragma once
+#include "../core/include/utils/pid.h"
+#include "../core/include/utils/units.h"
 #include "utils/feedback_base.h"
-#include "utils/pid.h"
-
 /**
  * Main robot characterization struct.
  * This will be passed to all the major subsystems 
@@ -14,12 +14,21 @@ typedef struct
 
   double odom_wheel_diam; ///< the diameter of the wheels used for 
   double odom_gear_ratio; ///< the ratio of the odometry wheel to the encoder reading odometry data
-  double dist_between_wheels; ///< the distance between centers of the central drive wheels 
+  double dist_between_wheels; ///< the distance between centers of the central
+                              ///< drive wheels
 
-  double drive_correction_cutoff; ///< the distance at which to stop trying to turn towards the target. If we are less than this value, we can continue driving forward to minimize our distance but will not try to spin around to point directly at the target
+  /// the distance at which to stop trying to turn  towards the target. If we
+  /// are less than this value, we can continue driving forward to minimize our
+  /// distance but will not try to spin around to point directly at the target
 
-  Feedback *drive_feedback; ///< the default feedback for autonomous driving
-  Feedback *turn_feedback; ///< the defualt feedback for autonomous turning
-  PID::pid_config_t correction_pid; ///< the pid controller to keep the robot driving in as straight a line as possible
+  units::Length drive_correction_cutoff;
+  /// the default feedback for autonomous driving
+  Feedback<units::length_dimensions, units::voltage_dimensions> *drive_feedback;
+  /// the defualt feedback for autonomous turning
+  Feedback<units::angle_dimensions, units::voltage_dimensions> *turn_feedback;
 
+  /// the pid controller to keep the robot driving in as
+  /// straight a line as possible
+  PID<units::angle_dimensions, units::voltage_dimensions>::pid_config_t
+      correction_pid;
 } robot_specs_t;

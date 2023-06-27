@@ -85,7 +85,10 @@ bool SpinRollerCommand::run()
 {
   CommandController cmd;
   cmd.add(new DriveForwardCommand(drive_sys, drive_fast_mprofile, 12, directionType::fwd), 0.5);
-  cmd.add(new FunctionCommand([](){drive_sys.drive_tank(0.2,0.2); return true;}));
+  cmd.add(new FunctionCommand([]() {
+    drive_sys.drive_tank(3_v, 3_v);
+    return true;
+  }));
   cmd.add_delay(800);
   cmd.run();
 
@@ -136,7 +139,8 @@ bool ShootCommand::run()
     firing_motor.stop();
     return true;
   }
-  printf("Shooting at %f RPM\n", flywheel_sys.getRPM());
+  printf("Shooting at %f RPM\n",
+         flywheel_sys.getRPM().Convert(units::revolution_per_min));
   firing_motor.spin(vex::fwd, volt, vex::volt); // TODO figure out if this needs to be negated to slap it into the flywheel
   return false;
 }
@@ -217,22 +221,17 @@ bool PrintOdomContinousCommand::run()
   return false;
 }
 
+TurnPid::pid_config_t vis_pid_cfg = {.p = .004_v / 1_deg,
+                                     .d = .0004_v / (1_deg / 1_s),
+                                     .deadband = 10_deg,
+                                     .on_target_time = .2_s};
 
-
-
-PID::pid_config_t vis_pid_cfg = {
-    .p = .004,
-    .d = .0004,
-    .deadband = 10,
-    .on_target_time = .2};
-
-FeedForward::ff_config_t vis_ff_cfg = {
-    .kS = 0.03};
+TurnFF::ff_config_t vis_ff_cfg = {.kS = 0.03_v};
 
 #define MIN_AREA 500
 #define MIN_VISION_AREA 150
 #define MAX_VISION_AREA 4000
-#define MAX_SPEED 0.5
+#define MAX_VOLTAGE 6_v
 
 VisionAimCommand::VisionAimCommand(bool odometry_fallback, int vision_center, int fallback_degrees)
     : pidff(vis_pid_cfg, vis_ff_cfg), odometry_fallback(odometry_fallback), first_run(true), fallback_triggered(false), vision_center(vision_center), fallback_degrees(fallback_degrees)
@@ -294,8 +293,8 @@ bool VisionAimCommand::run()
       (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > fallback_degrees))
   {
     fallback_triggered = true;
-    if (drive_sys.turn_to_heading(stored_pos.rot, 0.6))
-      return true;
+    if (drive_sys.turn_to_heading(1_deg * stored_pos.rot, 8_v))
+        return true;
     else
       return false;
   }
@@ -323,9 +322,9 @@ bool VisionAimCommand::run()
   {
 
     // Update the PID loop & drive the robot
-    pidff.set_target(vision_center);
-    pidff.set_limits(-MAX_SPEED, MAX_SPEED);
-    double out = pidff.update(x_val);
+    pidff.set_target((double)vision_center * 1_deg);
+    pidff.set_limits(-MAX_VOLTAGE, MAX_VOLTAGE);
+    units::Voltage out = pidff.update((double)x_val * 1_deg);
 
     // Currently set up for upside-down camera. Flip signs if going backwards.
     drive_sys.drive_tank(out, -out);
@@ -356,7 +355,13 @@ void VisionAimCommand::on_timeout()
  * @param drive_sys Reference to the TankDrive system
  * @param point The point we want to turn towards
  */
-TurnToPointCommand::TurnToPointCommand(TankDrive &drive_sys, OdometryTank &odom, Feedback &turn_feedback, point_t point) : drive_sys(drive_sys), odom(odom), feedback(turn_feedback), point(point) {}
+TurnToPointCommand::TurnToPointCommand(
+    TankDrive &drive_sys, OdometryTank &odom,
+    Feedback<units::Angle::Dims, units::Voltage::Dims> &turn_feedback,
+    point_t point)
+    : drive_sys(drive_sys), odom(odom), feedback(turn_feedback), point(point)
+{
+}
 
 /**
  * Run the TurnToPointCommand
@@ -370,7 +375,7 @@ bool TurnToPointCommand::run()
   double delta_y = point.y - odom.get_position().y;
 
   // get the angle
-  double heading_deg = rad2deg(atan2(delta_y, delta_x));
+  units::Angle heading_deg = 1_rad * atan2(delta_y, delta_x);
 
   return drive_sys.turn_to_heading(heading_deg, feedback);
 }
@@ -417,7 +422,7 @@ bool WallAlignCommand::run()
   // If we're not cutoff, drive
   if (tmr.time(seconds) < time)
   {
-    drive_sys.drive_tank(drive_power, drive_power);
+    drive_sys.drive_tank(12_v * drive_power, 12_v * drive_power);
     return false;
   }
   // otherwise stop and reset the position

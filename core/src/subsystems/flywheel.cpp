@@ -27,38 +27,57 @@ const int FlywheelWindowSize = 20;
 *         CONSTRUCTOR, GETTERS, SETTERS
 *********************************************************/
 //used when using bang bang or TBH control
-PID::pid_config_t empty_pid = PID::pid_config_t{};
-FeedForward::ff_config_t empty_ff = FeedForward::ff_config_t{};
+Flywheel::FW_PID::pid_config_t empty_pid = Flywheel::FW_PID::pid_config_t{};
+Flywheel::FW_FeedForward::ff_config_t empty_ff
+    = Flywheel::FW_FeedForward::ff_config_t{};
 
 /**
 * Create the Flywheel object using PID + feedforward for control.
 */
-Flywheel::Flywheel(motor_group &motors, PID::pid_config_t &pid_config, FeedForward::ff_config_t &ff_config, const double ratio)
-    :motors(motors), pid(pid_config), ff(ff_config), ratio(ratio), control_style(PID_Feedforward), smoothedRPM(0), RPM_avger(MovingAverage(FlywheelWindowSize)) {
-    }
+Flywheel::Flywheel(motor_group &motors, FW_PID::pid_config_t &pid_config,
+                   FW_FeedForward::ff_config_t &ff_config, const double ratio)
+    : motors(motors), pid(pid_config), ff(ff_config), ratio(ratio),
+      control_style(PID_Feedforward), smoothedRPM(0),
+      RPM_avger(MovingAverage<units::AngularSpeed::Dims>(FlywheelWindowSize))
+{
+}
 
 /**
 * Create the Flywheel object using only feedforward for control
 */
-Flywheel::Flywheel(motor_group &motors, FeedForward::ff_config_t &ff_config, const double ratio)
-    :motors(motors), pid(empty_pid), ff(ff_config), ratio(ratio), control_style(Feedforward), smoothedRPM(0), RPM_avger(MovingAverage(FlywheelWindowSize)) {}
+Flywheel::Flywheel(motor_group &motors, FW_FeedForward::ff_config_t &ff_config,
+                   const double ratio)
+    : motors(motors), pid(empty_pid), ff(ff_config), ratio(ratio),
+      control_style(Feedforward), smoothedRPM(0),
+      RPM_avger(MovingAverage<units::AngularSpeed::Dims>(FlywheelWindowSize))
+{
+}
 
 /**
 * Create the Flywheel object using Take Back Half for control
 */
-Flywheel::Flywheel(motor_group &motors, const double TBH_gain, const double ratio)
-    :motors(motors), pid(empty_pid), ff(empty_ff), TBH_gain(TBH_gain), ratio(ratio), control_style(Take_Back_Half), smoothedRPM(0), RPM_avger(MovingAverage(FlywheelWindowSize)) {}
+Flywheel::Flywheel(motor_group &motors, const double TBH_gain,
+                   const double ratio)
+    : motors(motors), pid(empty_pid), ff(empty_ff), TBH_gain(TBH_gain),
+      ratio(ratio), control_style(Take_Back_Half), smoothedRPM(0),
+      RPM_avger(MovingAverage<units::AngularSpeed::Dims>(FlywheelWindowSize))
+{
+}
 
 /**
 * Create the Flywheel object using Bang Bang for control
 */
 Flywheel::Flywheel(motor_group &motors, const double ratio)
-    :motors(motors), pid(empty_pid), ff(empty_ff), ratio(ratio), control_style(Bang_Bang), smoothedRPM(0), RPM_avger(MovingAverage(FlywheelWindowSize)) {}
+    : motors(motors), pid(empty_pid), ff(empty_ff), ratio(ratio),
+      control_style(Bang_Bang), smoothedRPM(0),
+      RPM_avger(MovingAverage<units::AngularSpeed::Dims>(FlywheelWindowSize))
+{
+}
 
 /**
 * Return the current value that the RPM should be set to
 */
-double Flywheel::getDesiredRPM() { return RPM; }
+units::AngularSpeed Flywheel::getDesiredRPM() { return RPM; }
 
 /**
 * Checks if the background RPM controlling task is running
@@ -76,56 +95,58 @@ motor_group* Flywheel::getMotors() { return &motors; } // TODO -- Remove?
 * return the current velocity of the flywheel motors, in RPM
 * @return the measured velocity of the flywheel
 */
-double Flywheel::measureRPM() { 
-  double rawRPM = ratio * motors.velocity(velocityUnits::rpm); 
+units::AngularSpeed Flywheel::measureRPM()
+{
+  units::AngularSpeed rawRPM
+      = ratio * motors.velocity(velocityUnits::rpm) * 1_rpm;
   RPM_avger.add_entry(rawRPM);
   smoothedRPM = RPM_avger.get_average();
   return smoothedRPM; //TODO Change back
 }
 
-double Flywheel::getRPM(){
-  return smoothedRPM;
-}
+units::AngularSpeed Flywheel::getRPM() { return smoothedRPM; }
 /**
 * Returns a POINTER TO the PID; not currently used.
 * @return pidPointer -pointer to the PID
 */
-PID* Flywheel::getPID() { return &pid; } // TODO -- Remove?
+Flywheel::FW_PID *Flywheel::getPID() { return &pid; } // TODO -- Remove?
 
 /**
 * returns the current OUT value of the PID - the value that the PID would set the motors to
 * @return the voltage that PID wants the motors at to achieve the target RPM
 */
-double Flywheel::getPIDValue() { return pid.get(); }
+units::Voltage Flywheel::getPIDValue() { return pid.get(); }
 
 /**
 * returns the current OUT value of the Feedforward - the value that the Feedforward would set the motors to
 * @return the voltage that feedforward wants the motors at to achieve the target RPM
 */
-double Flywheel::getFeedforwardValue() { 
-  double v = getDesiredRPM();
-  return ff.calculate(v, 0); 
+units::Voltage Flywheel::getFeedforwardValue()
+{
+  units::AngularSpeed v = getDesiredRPM();
+  return ff.calculate(v, 0_rpm / 1_min);
 }
 
 /**
 * get the gain used for TBH control
 * @return the gain used in TBH control
 */
-double Flywheel::getTBHGain(){
-  return TBH_gain;
-}
+Flywheel::TBH_Gain_Type Flywheel::getTBHGain() { return TBH_gain; }
 
 /**
 * Sets the value of the PID target
 * @param value - desired value of the PID
 */
-void Flywheel::setPIDTarget(double value) { pid.set_target(value); }
+void Flywheel::setPIDTarget(units::AngularSpeed value)
+{
+  pid.set_target(value);
+}
 
 /**
 * updates the value of the PID
 * @param value - value to update the PID with
 */
-void Flywheel::updatePID(double value) { pid.update(value); }
+void Flywheel::updatePID(units::AngularSpeed value) { pid.update(value); }
 
 /*********************************************************
 *         RPM SETTING THREADS
@@ -144,14 +165,11 @@ int spinRPMTask_BangBang(void* wheelPointer) {
       // if it below the RPM, go, otherwise don't
       wheel->measureRPM();
 
-      if (wheel->getRPM() < wheel->getDesiredRPM())
-        {
-          wheel->spin_raw(1, fwd);
-        }
-      else
-        {
-          wheel->stopMotors();
-        }
+      if (wheel->getRPM() < wheel->getDesiredRPM()) {
+        wheel->spin_raw(12_v, fwd);
+      } else {
+        wheel->stopMotors();
+      }
       vexDelay(10);
     }
   return 0;
@@ -167,7 +185,7 @@ int spinRPMTask_Feedforward(void *wheelPointer)
   while(true) {
     wheel->measureRPM();
     wheel->updatePID(wheel->getRPM());   // check the current velocity and update the PID with it.
-    double output = wheel->getFeedforwardValue();
+    units::Voltage output = wheel->getFeedforwardValue();
     wheel->spin_raw(output, fwd);   // set the motors to whatever feedforward tells them to do
     vexDelay(1);
   }
@@ -182,7 +200,7 @@ int spinRPMTask_PID_Feedforward(void* wheelPointer) {
   while(true) {
     wheel->measureRPM();
     wheel->updatePID(wheel->getRPM());   // check the current velocity and update the PID with it.
-    double output = wheel->getPIDValue() + wheel->getFeedforwardValue();
+    units::Voltage output = wheel->getPIDValue() + wheel->getFeedforwardValue();
     wheel->spin_raw(output, fwd);   // set the motors to whatever PID tells them to do
     vexDelay(1);
   }
@@ -193,25 +211,28 @@ int spinRPMTask_PID_Feedforward(void* wheelPointer) {
 * Runs a Take Back Half variant to control RPM
 * https://www.vexwiki.org/programming/controls_algorithms/tbh
 */
-int spinRPMTask_TBH(void* wheelPointer) {
+int spinRPMTask_TBH(void *wheelPointer)
+{
+  using namespace unit_literals;
+
   Flywheel *wheel = static_cast<Flywheel *>(wheelPointer);
 
-  double tbh = 0.0;
-  double output = 0.0;
-  double previous_error = 0.0;
+  units::Voltage tbh = 0.0_v;
+  units::Voltage output = 0_v;
+  units::AngularSpeed previous_error = 0.0_rpm;
 
   while (true){
     wheel->measureRPM();
 
     //reset if set to 0, this keeps the tbh val from screwing us up when we start up again
-    if (wheel->getDesiredRPM()==0){
-      output = 0;
-      tbh = 0;
+    if (wheel->getDesiredRPM() == 0_rpm) {
+      output = 0_v;
+      tbh = 0_v;
     }
-   
-    double error = wheel->getDesiredRPM() - wheel->getRPM();
+
+    units::AngularSpeed error = wheel->getDesiredRPM() - wheel->getRPM();
     output += wheel->getTBHGain() * error;
-    wheel->spin_raw(clamp(output, 0, 1), fwd);
+    wheel->spin_raw(clamp(output, 0_v, 12_v), fwd);
 
     if (sign(error)!=sign(previous_error)){
       output = .5 * (output + tbh);
@@ -221,8 +242,8 @@ int spinRPMTask_TBH(void* wheelPointer) {
 
     vexDelay(1);
   }
-  
-   return 0; 
+
+  return 0;
 }
 
 /*********************************************************
@@ -235,8 +256,9 @@ int spinRPMTask_TBH(void* wheelPointer) {
 * @param speed - speed (between -1 and 1) to set the motor
 * @param dir - direction that the motor moves in; defaults to forward
 */
-void Flywheel::spin_raw(double speed, directionType dir){
-  motors.spin(dir, speed * 12, voltageUnits::volt);
+void Flywheel::spin_raw(units::Voltage speed, directionType dir)
+{
+  motors.spin(dir, speed.Convert(units::volt), voltageUnits::volt);
 }
 
 /**
@@ -254,9 +276,10 @@ void Flywheel::spin_manual(double speed, directionType dir){
 * what control scheme is dependent on control_style
 * @param inputRPM - set the current RPM
 */
-void Flywheel::spinRPM(int inputRPM) {
+void Flywheel::spinRPM(units::AngularSpeed inputRPM)
+{
   // setting to 0 is equivelent to stopping
-  if (inputRPM==0){
+  if (inputRPM == 0_rpm) {
     stop();
   }
   // only run if the RPM is different or it isn't already running
@@ -293,8 +316,8 @@ void Flywheel::spinRPM(int inputRPM) {
 void Flywheel::stop() {
   rpmTask.stop();
   taskRunning = false;
-  RPM = 0.0;
-  smoothedRPM = 0.0;
+  RPM = 0.0_rpm;
+  smoothedRPM = 0.0_rpm;
   motors.stop();
 }
 

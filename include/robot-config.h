@@ -35,19 +35,36 @@ extern vex::optical roller_sensor;
 // ======== UTILS ========
 // Drive Tuning
 
+using DrivePid = PID<units::Length::Dims, units::Voltage::Dims>;
+using TurnPid = PID<units::Angle::Dims, units::Voltage::Dims>;
 
-extern PID::pid_config_t drive_pid_cfg, turn_pid_cfg;
-extern FeedForward::ff_config_t drive_ff_cfg, turn_ff_cfg;
-extern MotionController::m_profile_cfg_t drive_fast_mprofile_cfg, drive_slow_mprofile_cfg;
-// extern MotionController::m_profile_cfg_t turn_fast_mprofile_cfg, turn_slow_mprofile_cfg;
+using DriveFF = FeedForward<units::Length::Dims, units::Voltage::Dims>;
+using TurnFF = FeedForward<units::Angle::Dims, units::Voltage::Dims>;
 
-extern MotionController drive_fast_mprofile, drive_slow_mprofile, drive_super_fast_mprofile;
-// extern MotionController turn_fast_mprofile, turn_slow_mprofile;
+using DriveMC = MotionController<units::Length::Dims, units::Voltage::Dims>;
+using TurnMC = MotionController<units::Angle::Dims, units::Voltage::Dims>;
+
+extern DrivePid::pid_config_t drive_pid_cfg;
+extern TurnPid::pid_config_t turn_pid_cfg;
+
+extern DriveFF::ff_config_t drive_ff_cfg;
+extern TurnFF::ff_config_t turn_ff_cfg;
+
+extern DriveMC::m_profile_cfg_t drive_fast_mprofile_cfg,
+    drive_slow_mprofile_cfg;
+
+extern DriveMC drive_fast_mprofile, drive_slow_mprofile,
+    drive_super_fast_mprofile;
+
 extern robot_specs_t config;
 
 // Flywheel Tuning
-extern FeedForward::ff_config_t flywheel_ff_cfg;
-extern PID::pid_config_t flywheel_pid_cfg;
+
+using FeedForwardFW = FeedForward<units::Angle::Dims, units::Voltage::Dims>;
+using PidFW = PID<units::AngularSpeed::Dims, units::Voltage::Dims>;
+
+extern FeedForwardFW::ff_config_t flywheel_ff_cfg;
+extern PidFW::pid_config_t flywheel_pid_cfg;
 
 // ======== SUBSYSTEMS ========
 extern OdometryTank odometry_sys;

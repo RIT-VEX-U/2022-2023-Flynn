@@ -35,7 +35,7 @@ class SpinRPMCommand: public AutoCommand {
     Flywheel &flywheel;
 
     // parameters for spinRPM
-    int rpm;
+    units::AngularSpeed rpm;
 };
 
 /**
@@ -63,7 +63,7 @@ class WaitUntilUpToSpeedCommand: public AutoCommand {
     Flywheel &flywheel;
 
     // if the actual speed is equal to the desired speed +/- this value, we are ready to fire
-    int threshold_rpm;
+    units::AngularSpeed threshold_rpm;
 };
 
 /**

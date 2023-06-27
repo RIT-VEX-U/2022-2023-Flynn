@@ -1,7 +1,9 @@
 #include "../core/include/utils/pidff.h"
 #include "../core/include/utils/math_util.h"
 
-PIDFF::PIDFF(PID::pid_config_t &pid_cfg, FeedForward::ff_config_t &ff_cfg)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+PIDFF<input_dims, output_dims>::PIDFF(typename PID_Type::pid_config_t &pid_cfg,
+                                      typename FF_Type::ff_config_t &ff_cfg)
     : pid(pid_cfg), ff_cfg(ff_cfg), ff(ff_cfg), out(0), lower_lim(0),
       upper_lim(0)
 {
@@ -13,12 +15,14 @@ PIDFF::PIDFF(PID::pid_config_t &pid_cfg, FeedForward::ff_config_t &ff_cfg)
  * @param start_pt the current sensor value
  * @param set_pt where the sensor value should be
  */
-void PIDFF::init(double start_pt, double set_pt)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+void PIDFF<input_dims, output_dims>::init(InputType start_pt, InputType set_pt)
 {
     pid.init(start_pt, set_pt);
 }
 
-void PIDFF::set_target(double set_pt)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+void PIDFF<input_dims, output_dims>::set_target(InputType set_pt)
 {
     pid.set_target(set_pt);
 }
@@ -30,10 +34,12 @@ void PIDFF::set_target(double set_pt)
  * @param val value from the sensor
  * @return feedback loop result
  */
-double PIDFF::update(double val)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+units::Quantity<output_dims>
+PIDFF<input_dims, output_dims>::update(InputType val)
 {
-    double pid_out = pid.update(val);
-    double ff_out = ff_cfg.kS * sign(pid_out);
+    OutputType pid_out = pid.update(val);
+    OutputType ff_out = ff_cfg.kS * sign(pid_out);
     out = clamp(pid_out + ff_out, lower_lim, upper_lim);
 
     return out;
@@ -47,11 +53,14 @@ double PIDFF::update(double val)
  * @param a_setpt Acceleration for feedfoward
  * @return feedback loop result
 */
-double PIDFF::update(double val, double vel_setpt, double a_setpt)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+units::Quantity<output_dims>
+PIDFF<input_dims, output_dims>::update(InputType val, VelType vel_setpt,
+                                       AccelType a_setpt)
 {
 
-    double pid_out = pid.update(val);
-    double ff_out = ff.calculate(vel_setpt, a_setpt);
+    OutputType pid_out = pid.update(val);
+    OutputType ff_out = ff.calculate(vel_setpt, a_setpt);
     out = clamp(ff_out + pid_out, lower_lim, upper_lim);
     
     return out;
@@ -60,7 +69,8 @@ double PIDFF::update(double val, double vel_setpt, double a_setpt)
 /**
  * @return the last saved result from the feedback controller
  */
-double PIDFF::get()
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+units::Quantity<output_dims> PIDFF<input_dims, output_dims>::get()
 {
     return out;
 }
@@ -71,7 +81,9 @@ double PIDFF::get()
  * @param lower Upper limit
  * @param upper Lower limit
  */
-void PIDFF::set_limits(double lower, double upper)
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+void PIDFF<input_dims, output_dims>::set_limits(OutputType lower,
+                                                OutputType upper)
 {
     upper_lim = upper;
     lower_lim = lower;
@@ -80,7 +92,12 @@ void PIDFF::set_limits(double lower, double upper)
 /** 
  * @return true if the feedback controller has reached it's setpoint
  */
-bool PIDFF::is_on_target()
+template <units::Dimensions input_dims, units::Dimensions output_dims>
+bool PIDFF<input_dims, output_dims>::is_on_target()
 {
     return pid.is_on_target();
 }
+
+template class PIDFF<units::Length::Dims, units::Voltage::Dims>;
+template class PIDFF<units::Angle::Dims, units::Voltage::Dims>;
+template class PIDFF<units::AngularSpeed::Dims, units::Voltage::Dims>;

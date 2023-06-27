@@ -1,5 +1,5 @@
+#include "../core/include/utils/units.h"
 #include <vector>
-
 /**
  * MovingAverage
  *
@@ -12,8 +12,12 @@
  * Using a MovingAverage is thus a tradeoff between accuracy and lag time (more samples) vs. less accuracy and faster updating (less samples).  
  *
  */
-class MovingAverage {
-  public:
+template <units::Dimensions dims>
+class MovingAverage
+{
+  using value_type = units::Quantity<dims>;
+
+public:
   /*
    * Create a moving average calculator with 0 as the default value
    *
@@ -25,7 +29,7 @@ class MovingAverage {
    * @param buffer_size    The size of the buffer. The number of samples that constitute a valid reading
    * @param starting_value The value that the average will be before any data is added
    */
-  MovingAverage(int buffer_size, double starting_value);
+  MovingAverage(int buffer_size, value_type starting_value);
 
   /*
   * Add a reading to the buffer
@@ -37,13 +41,13 @@ class MovingAverage {
   *     ^ 
   * @param n  the sample that will be added to the moving average.
   */
-  void add_entry(double n);
+  void add_entry(value_type n);
 
   /**
    * Returns the average based off of all the samples collected so far
    * @return the calculated average. sum(samples)/numsamples
    */
-  double get_average();
+  value_type get_average();
 
   /**
   * How many samples the average is made from
@@ -54,7 +58,6 @@ class MovingAverage {
 
   private:
     int buffer_index;               //index of the next value to be overridden
-    std::vector<double> buffer;     //all current data readings we've taken 
-    double current_avg;             //the current value of the data
-
+    std::vector<value_type> buffer; // all current data readings we've taken
+    value_type current_avg;         // the current value of the data
 };
