@@ -77,7 +77,7 @@ class Lift
         vexDelay(50);
       }
 
-      return 0;
+      return 0; 
     }, this);
 
   }

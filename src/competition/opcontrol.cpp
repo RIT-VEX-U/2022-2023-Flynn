@@ -4,7 +4,19 @@
 #include "vex_global.h"
 #include "vision.h"
 #include <algorithm>
+#include <experimental/optional>
 #include <stdio.h>
+
+template <typename Iter, typename Predicate>
+std::experimental::optional<typename Iter::value_type>
+find_if_option(Iter iter, Predicate predicate)
+{
+  auto res = std::find_if(iter.begin(), iter.end(), predicate);
+  if (res == iter.end()) {
+    return {};
+  }
+  return std::experimental::optional<typename Iter::value_type>(*res);
+}
 
 int controller_screen()
 {
@@ -26,17 +38,17 @@ int controller_screen()
                                  Brain.Battery.voltage());
     main_controller.Screen.setCursor(3, 1);
 
-    // recommended by a static analyzer :)
-    // https://godbolt.org/z/3EjzG5WEj for it compared to a raw loop
-    const std::string &problem =
-        std::find_if(motor_names.begin(), motor_names.end(),
-                     [](auto name_and_motor) {
-                       return !name_and_motor.second.installed();
-                     })
-            ->first;
+    std::experimental::optional problem_motor
+        = find_if_option(motor_names, [](auto name_and_motor) {
+            return !name_and_motor.second.installed();
+          });
 
+    std::string &problem_str = happy;
+    if (problem_motor) {
+      problem_str = problem_motor->first;
+    }
     main_controller.Screen.print("D: %.0f      %s", intake.temperature(celsius),
-                                 problem.c_str());
+                                 problem_motor->first.c_str());
 
     vexDelay(500);
   }
