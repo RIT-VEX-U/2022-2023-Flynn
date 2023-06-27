@@ -2,6 +2,11 @@
 
 namespace screen
 {
+  /**
+   * @brief The ScreenData class holds the data that will be passed to the
+   * screen thread
+   * you probably shouldnt have to use it
+   */
   struct ScreenData {
     ScreenData(const std::vector<Page *> &m_pages, int m_page,
                vex::brain::lcd *m_screen)
@@ -14,9 +19,13 @@ namespace screen
   };
 
   static vex::thread *screen_thread = nullptr;
-
   static bool running = false;
 
+  /**
+   * @brief runs the screen thread
+   * This should only be called by start_screen
+   * If you are calling this, maybe don't
+   */
   int screen_thread_func(void *screen_data_v)
   {
     ScreenData screen_data = *static_cast<ScreenData *>(screen_data_v);
@@ -28,19 +37,20 @@ namespace screen
     int y_press = 0;
 
     while (running) {
-      for (int i = 0; i < screen_data.pages.size(); i++) {
-        if (i == screen_data.page) {
-          screen_data.pages[i]->update(was_pressed, x_press, y_press);
+      Page *front_page = screen_data.pages[screen_data.page];
+
+      // Update all pages
+      for (auto page : screen_data.pages) {
+        if (page == front_page) {
+          page->update(was_pressed, x_press, y_press);
         } else {
-          screen_data.pages[i]->update(false, 0, 0);
+          page->update(false, 0, 0);
         }
       }
-      screen_data.pages[screen_data.page]->update(was_pressed, x_press,
-                                                  y_press);
 
+      // Draw First Page
       if (frame % 5 == 0) {
-        screen_data.pages[screen_data.page]->draw(*screen_data.screen, false,
-                                                  frame);
+        front_page->draw(*screen_data.screen, false, frame);
       }
 
       vexDelay(20);
@@ -48,7 +58,11 @@ namespace screen
 
     return 0;
   }
-
+  /**
+   * @brief FunctionPage
+   * @param update_f drawing function
+   * @param draw_f drawing function
+   */
   FunctionPage::FunctionPage(update_func_t update_f, draw_func_t draw_f)
       : update_f(update_f), draw_f(draw_f)
   {
@@ -76,6 +90,10 @@ namespace screen
   void start_screen(vex::brain::lcd &screen, std::vector<Page *> pages,
                     int first_page)
   {
+    if (running) {
+      printf("THERE IS ALREADY A SCREEN THREAD RUNNING\n");
+      return;
+    }
     ScreenData *data = new ScreenData{pages, first_page, &screen};
 
     screen_thread
