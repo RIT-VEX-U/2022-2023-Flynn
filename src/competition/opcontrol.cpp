@@ -7,15 +7,17 @@
 #include <experimental/optional>
 #include <stdio.h>
 
+using std::experimental::optional;
+
 template <typename Iter, typename Predicate>
-std::experimental::optional<typename Iter::value_type>
-find_if_option(Iter iter, Predicate predicate)
+optional<typename Iter::value_type> find_if_option(Iter iter,
+                                                   Predicate predicate)
 {
   auto res = std::find_if(iter.begin(), iter.end(), predicate);
   if (res == iter.end()) {
     return {};
   }
-  return std::experimental::optional<typename Iter::value_type>(*res);
+  return optional<typename Iter::value_type>(*res);
 }
 
 int controller_screen()
@@ -25,29 +27,32 @@ int controller_screen()
   {
     uint32_t bat = (uint32_t)Brain.Battery.capacity();
     double f = flywheel_motors.temperature(celsius);
-    //    double i = intake.temperature(celsius);
-    //    double d = (left_motors.temperature(celsius) +
-    //    right_motors.temperature(celsius)) / 2;
+    double i = intake.temperature(celsius);
+    double d
+        = (left_motors.temperature(celsius) + right_motors.temperature(celsius))
+          / 2;
 
     main_controller.Screen.setCursor(1, 1);
     main_controller.Screen.print("F: %.0f        B: %d%%", f, bat);
 
     main_controller.Screen.setCursor(2, 1);
-    main_controller.Screen.print("I: %.0f        V: %.1fv",
-                                 intake.temperature(celsius),
+    main_controller.Screen.print("I: %.0f        V: %.1fv", i,
                                  Brain.Battery.voltage());
     main_controller.Screen.setCursor(3, 1);
 
-    std::experimental::optional problem_motor
-        = find_if_option(motor_names, [](auto name_and_motor) {
-            return !name_and_motor.second.installed();
-          });
+    // recommended by a static analyzer :)
+    // https://godbolt.org/z/3EjzG5WEj for it compared to a raw loop
+    auto is_uninstalled = [](auto name_and_motor) {
+      return !name_and_motor.second.installed();
+    };
+
+    optional problem_motor = find_if_option(motor_names, is_uninstalled);
 
     std::string &problem_str = happy;
     if (problem_motor) {
       problem_str = problem_motor->first;
     }
-    main_controller.Screen.print("D: %.0f      %s", intake.temperature(celsius),
+    main_controller.Screen.print("D: %.0f      %s", d,
                                  problem_motor->first.c_str());
 
     vexDelay(500);
