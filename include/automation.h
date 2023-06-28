@@ -183,7 +183,7 @@ private:
   vex::timer tmr;
   bool odometry_fallback;
   bool first_run;
-  pose_t stored_pos;
+  units::pose_t stored_pos;
   bool fallback_triggered;
   int vision_center;
   int fallback_degrees;

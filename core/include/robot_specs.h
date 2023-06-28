@@ -12,10 +12,10 @@ typedef struct
 {  
   double robot_radius; ///< if you were to draw a circle with this radius, the robot would be entirely contained within it
 
-  double odom_wheel_diam; ///< the diameter of the wheels used for 
+  units::Length odom_wheel_diam; ///< the diameter of the wheels used for
   double odom_gear_ratio; ///< the ratio of the odometry wheel to the encoder reading odometry data
-  double dist_between_wheels; ///< the distance between centers of the central
-                              ///< drive wheels
+  units::Length dist_between_wheels; ///< the distance between centers of the
+                                     ///< central drive wheels
 
   /// the distance at which to stop trying to turn  towards the target. If we
   /// are less than this value, we can continue driving forward to minimize our

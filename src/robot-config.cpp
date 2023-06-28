@@ -92,20 +92,19 @@ DriveMC drive_fast_mprofile(drive_fast_mprofile_cfg),
     drive_slow_mprofile(drive_slow_mprofile_cfg),
     drive_super_fast_mprofile(drive_fast_mprofile_cfg);
 
-robot_specs_t config
-    = {.robot_radius = 10,
-       .odom_wheel_diam = 6.424194,
-       .odom_gear_ratio = 1, // .44    16:12
-       .dist_between_wheels = 10.99,
+robot_specs_t config = {
+    .robot_radius = 10,
+    .odom_wheel_diam = 6.424194_in,
+    .odom_gear_ratio = 1, // .44    16:12
+    .dist_between_wheels = 10.99_in,
 
-       .drive_correction_cutoff = 6_in,
+    .drive_correction_cutoff = 6_in,
 
-       .drive_feedback = &drive_fast_mprofile,
-       .turn_feedback = new PIDFF<units::Angle::Dims, units::Voltage::Dims>(
-           turn_pid_cfg, turn_ff_cfg),
-       .correction_pid = {.p = .012_v / units::degree,
-                          .i = 0_v / (units::degree * units::second),
-                          .d = 0.0012_v / (units::degree_per_sec)}};
+    .drive_feedback = &drive_fast_mprofile,
+    .turn_feedback = new PIDFF<units::Angle::Dims, units::Voltage::Dims>(turn_pid_cfg, turn_ff_cfg),
+    .correction_pid = {.p = .012_v / units::degree,
+                       .i = 0_v / (units::degree * units::second),
+                       .d = 0.0012_v / (units::degree_per_sec)}};
 
 // Flywheel Tuning
 FeedForwardFW::ff_config_t flywheel_ff_cfg = {.kV = 0.0003_v / 1_rpm};

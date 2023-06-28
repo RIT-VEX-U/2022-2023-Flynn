@@ -31,7 +31,7 @@ OdometryTank::OdometryTank(CustomEncoder &left_enc, CustomEncoder &right_enc, ro
  * Resets the position and rotational data to the input.
  * 
  */
-void OdometryTank::set_position(const pose_t &newpos)
+void OdometryTank::set_position(const units::pose_t &newpos)
 {
   mut.lock();
   rotation_offset = newpos.rot - (current_pos.rot - rotation_offset);
@@ -44,123 +44,125 @@ void OdometryTank::set_position(const pose_t &newpos)
  * Update, store and return the current position of the robot. Only use if not initializing
  * with a separate thread.
  */
-pose_t OdometryTank::update()
+units::pose_t OdometryTank::update()
 {
-    double lside_revs = 0, rside_revs = 0;
+  units::Angle lside_revs = 0_rev, rside_revs = 0_rev;
 
-    if(left_side != NULL && right_side != NULL)
-    {
-      lside_revs = left_side->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
-      rside_revs = right_side->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
-    }else if(left_enc != NULL && right_enc != NULL)
-    {
-      lside_revs = left_enc->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
-      rside_revs = right_enc->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
-    }
+  if (left_side != NULL && right_side != NULL) {
+    lside_revs = 1_rev * left_side->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
+    rside_revs = 1_rev * right_side->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
+  } else if (left_enc != NULL && right_enc != NULL) {
+    lside_revs = 1_rev * left_enc->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
+    rside_revs = 1_rev * right_enc->position(vex::rotationUnits::rev) / config.odom_gear_ratio;
+  }
 
-    double angle = 0;
+  units::Angle angle = 0_deg;
 
-    // If the IMU data was passed in, use it for rotational data
-    if(imu == NULL || imu->installed() == false)
-    {
-      // Get the difference in distance driven between the two sides
-      // Uses the absolute position of the encoders, so resetting them will result in
-      // a bad angle.
-      // Get the arclength of the turning circle of the robot
-      double distance_diff = (rside_revs - lside_revs) * PI * config.odom_wheel_diam;
+  // If the IMU data was passed in, use it for rotational data
+  if (imu == NULL || imu->installed() == false) {
+    // Get the difference in distance driven between the two sides
+    // Uses the absolute position of the encoders, so resetting them will result
+    // in a bad angle. Get the arclength of the turning circle of the robot
+    units::Length distance_diff
+        = units::arc_length((rside_revs - lside_revs), config.odom_wheel_diam / 2.0);
 
+    // Use the arclength formula to calculate the angle. Add 90 to make "0
+    // degrees" to starboard
+    angle = (1_rad * distance_diff / config.dist_between_wheels) + 90_deg;
 
-      //Use the arclength formula to calculate the angle. Add 90 to make "0 degrees" to starboard
-      angle = ((180.0 / PI) * (distance_diff / config.dist_between_wheels)) + 90;
+    // printf("angle: %f, ", (180.0 / PI) * (distance_diff /
+    // config.dist_between_wheels));
 
-      // printf("angle: %f, ", (180.0 / PI) * (distance_diff / config.dist_between_wheels));
+  } else {
+    // Translate "0 forward and clockwise positive" to "90 forward and CCW
+    // negative"
+    angle = (-imu->rotation(vex::rotationUnits::deg) + 90) * 1_deg;
+  }
 
-    } else
-    {
-        // Translate "0 forward and clockwise positive" to "90 forward and CCW negative"
-        angle = -imu->rotation(vex::rotationUnits::deg) + 90;
-    }
+  // Offset the angle, if we've done a set_position
+  angle += rotation_offset;
 
-    // Offset the angle, if we've done a set_position
-    angle += rotation_offset;
+  // Limit the angle betwen 0 and 360.
+  // fmod (floating-point modulo) gets it between -359 and +359, so tack on
+  // another 360 if it's negative.
+  angle = mod(angle, 360.0_deg);
+  if (angle < 0_deg)
+    angle += 360_deg;
 
-    //Limit the angle betwen 0 and 360. 
-    //fmod (floating-point modulo) gets it between -359 and +359, so tack on another 360 if it's negative.
-    angle = fmod(angle, 360.0);
-    if(angle < 0)
-        angle += 360;
+  current_pos = calculate_new_pos(config, current_pos, lside_revs, rside_revs, angle);
 
-    current_pos = calculate_new_pos(config, current_pos, lside_revs, rside_revs, angle);
+  static units::pose_t last_pos = current_pos;
+  static timer tmr;
+  bool update_vel_accel = tmr.time(sec) > 0.1;
 
+  // This loop runs too fast. Only check at LEAST every 1/10th sec
+  if (update_vel_accel) {
+    static units::Speed last_speed = 0_inps;
+    static units::AngularSpeed last_ang_speed = 0_rpm;
 
-    static pose_t last_pos = current_pos;
-    static timer tmr;
-    bool update_vel_accel = tmr.time(sec) > 0.1;
+    // Calculate robot velocity
+    speed = pos_diff(current_pos, last_pos) / (tmr.time(sec) * 1_s);
 
-    // This loop runs too fast. Only check at LEAST every 1/10th sec
-    if(update_vel_accel)
-        {
-        static double last_speed = 0;
-        static double last_ang_speed = 0;
+    // Calculate robot acceleration
+    accel = (speed - last_speed) / (tmr.time(sec) * 1_s);
 
-        // Calculate robot velocity
-        speed = pos_diff(current_pos, last_pos) / tmr.time(sec);
+    // Calculate robot angular velocity (deg/sec)
+    ang_speed_deg = units::smallest_angle(current_pos.rot, last_pos.rot) / (tmr.time(sec) * 1_s);
 
-        // Calculate robot acceleration
-        accel = (speed - last_speed) / tmr.time(sec);
+    // Calculate robot angular acceleration (deg/sec^2)
+    ang_accel_deg = (ang_speed_deg - last_ang_speed) / (tmr.time(sec) * 1_s);
 
-        // Calculate robot angular velocity (deg/sec)
-        ang_speed_deg =
-            smallest_angle(current_pos.rot, last_pos.rot) / tmr.time(sec);
+    tmr.reset();
+    last_pos = current_pos;
+    last_speed = speed;
+    last_ang_speed = ang_speed_deg;
+  }
 
-        // Calculate robot angular acceleration (deg/sec^2)
-        ang_accel_deg = (ang_speed_deg - last_ang_speed) / tmr.time(sec);
-
-        tmr.reset();
-        last_pos = current_pos;
-        last_speed = speed;
-        last_ang_speed = ang_speed_deg;
-        }
-
-    return current_pos;
+  return current_pos;
 }
 
 /**
  * Using information about the robot's mechanical structure and sensors, calculate a new position
  * of the robot, relative to when this method was previously ran.
  */
-pose_t OdometryTank::calculate_new_pos(robot_specs_t &config, pose_t &curr_pos, double lside_revs, double rside_revs, double angle_deg)
+units::pose_t OdometryTank::calculate_new_pos(robot_specs_t &config, units::pose_t &curr_pos,
+                                              units::Angle lside_revs, units::Angle rside_revs,
+                                              units::Angle angle)
 {
-    pose_t new_pos;
+  units::pose_t new_pos;
 
-    static double stored_lside_revs = lside_revs;
-    static double stored_rside_revs = rside_revs;
+  static units::Angle stored_lside_revs = lside_revs;
+  static units::Angle stored_rside_revs = rside_revs;
 
-    // Convert the revolutions into "change in distance", and average the values for a "distance driven"
-    double lside_diff = (lside_revs - stored_lside_revs) * PI * config.odom_wheel_diam;
-    double rside_diff = (rside_revs - stored_rside_revs) * PI * config.odom_wheel_diam;
-    double dist_driven = (lside_diff + rside_diff) / 2.0;
+  // Convert the revolutions into "change in distance", and average the values
+  // for a "distance driven"
+  units::Length rside_diff
+      = units::arc_length((rside_revs - stored_rside_revs), config.odom_wheel_diam / 2.0);
+  units::Length lside_diff
+      = units::arc_length((lside_revs - stored_lside_revs), config.odom_wheel_diam / 2.0);
+  units::Length dist_driven = (lside_diff + rside_diff) / 2.0;
 
-    double angle = angle_deg * PI / 180.0; // Degrees to radians
+  // Create a vector from the change in distance in the current direction of
+  // the robot
+  // deg2rad((smallest_angle(curr_pos.rot, angle_deg)/2 + curr_pos.rot,
+  // dist_driven)
+  Vector2D chg_vec(angle.Convert(units::radian), dist_driven.Convert(units::inch));
 
-    // Create a vector from the change in distance in the current direction of the robot
-    //deg2rad((smallest_angle(curr_pos.rot, angle_deg)/2 + curr_pos.rot, dist_driven)
-    Vector2D chg_vec(angle, dist_driven);
-    
-    // Create a vector from the current position in reference to X,Y=0,0
-    point_t curr_point = {.x = curr_pos.x, .y = curr_pos.y};
-    Vector2D curr_vec(curr_point);
+  // Create a vector from the current position in reference to X,Y=0,0
+  point_t curr_point = {.x = curr_pos.x.Convert(units::inch), .y = curr_pos.y.Convert(units::inch)};
+  Vector2D curr_vec(curr_point);
 
-    // Tack on the "difference" vector to the current vector
-    Vector2D new_vec = curr_vec + chg_vec;
+  // Tack on the "difference" vector to the current vector
+  Vector2D new_vec = curr_vec + chg_vec;
 
-    new_pos.x = new_vec.get_x();
-    new_pos.y = new_vec.get_y();
-    new_pos.rot = angle_deg;
+  new_pos.x = new_vec.get_x() * 1_in;
+  new_pos.y = new_vec.get_y() * 1_in;
+  new_pos.rot = angle;
 
-    // Store the left and right encoder values to find the difference in the next iteration
-    stored_lside_revs = lside_revs;
-    stored_rside_revs = rside_revs;
+  // Store the left and right encoder values to find the difference in the next
+  // iteration
+  stored_lside_revs = lside_revs;
+  stored_rside_revs = rside_revs;
 
-    return new_pos;
+  return new_pos;
 }

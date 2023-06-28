@@ -105,14 +105,12 @@ private:
  */
 class DriveToPointCommand: public AutoCommand {
   public:
-    DriveToPointCommand(
-        TankDrive &drive_sys,
-        Feedback<units::Length::Dims, units::Voltage::Dims> &feedback, double x,
-        double y, directionType dir, double max_speed = 1);
-    DriveToPointCommand(
-        TankDrive &drive_sys,
-        Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
-        point_t point, directionType dir, double max_speed = 1);
+    DriveToPointCommand(TankDrive &drive_sys,
+                        Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+                        units::Length x, units::Length y, directionType dir, double max_speed = 1);
+    DriveToPointCommand(TankDrive &drive_sys,
+                        Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+                        units::point_t point, directionType dir, double max_speed = 1);
 
     /**
      * Run drive_to_point
@@ -135,8 +133,8 @@ class DriveToPointCommand: public AutoCommand {
     Feedback<units::Length::Dims, units::Voltage::Dims> &feedback;
 
     // parameters for drive_to_point
-    double x;
-    double y;
+    units::Length x;
+    units::Length y;
     directionType dir;
     double max_speed;
     
@@ -213,7 +211,7 @@ class OdomSetPosition: public AutoCommand {
      * @param odom the odometry system we are setting
      * @param newpos the position we are telling the odometry to take. defaults to (0, 0), angle = 90
     */
-    OdomSetPosition(OdometryBase &odom, const pose_t &newpos=OdometryBase::zero_pos);
+    OdomSetPosition(OdometryBase &odom, const units::pose_t &newpos = OdometryBase::zero_pos);
 
     /**
      * Run set_position
@@ -225,5 +223,5 @@ class OdomSetPosition: public AutoCommand {
   private:
     // drive system with an odometry config
     OdometryBase &odom;
-    pose_t newpos;
+    units::pose_t newpos;
 };

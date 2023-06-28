@@ -83,7 +83,7 @@ bool TankDrive::drive_forward(double inches, directionType dir,
   // Generate a point X inches forward of the current position, on first startup
   if (!func_initialized)
   {
-    pose_t cur_pos = odometry->get_position();
+    units::pose_t cur_pos = odometry->get_position();
 
     // forwards is positive Y axis, backwards is negative
     if (dir == directionType::rev)
@@ -92,8 +92,9 @@ bool TankDrive::drive_forward(double inches, directionType dir,
       inches = fabs(inches);
 
     // Use vector math to get an X and Y
-    Vector2D cur_pos_vec({.x=cur_pos.x , .y=cur_pos.y});
-    Vector2D delta_pos_vec(deg2rad(cur_pos.rot), inches);
+    Vector2D cur_pos_vec(
+        {.x = cur_pos.x.Convert(units::inch), .y = cur_pos.y.Convert(units::inch)});
+    Vector2D delta_pos_vec(deg2rad(cur_pos.rot.Convert(units::radian)), inches);
     Vector2D setpt_vec = cur_pos_vec + delta_pos_vec;
 
     // Save the new X and Y values
@@ -102,7 +103,7 @@ bool TankDrive::drive_forward(double inches, directionType dir,
   }
 
   // Call the drive_to_point with updated point values
-  return drive_to_point(pos_setpt.x, pos_setpt.y, dir, feedback, max_speed);
+  return drive_to_point(pos_setpt.x * 1_in, pos_setpt.y * 1_in, dir, feedback, max_speed);
 }
 /**
  * Autonomously drive the robot forward a certain distance
@@ -153,7 +154,7 @@ bool TankDrive::turn_relative(units::Angle amt, Turn_Feedback &feedback,
   // On the first run of the funciton, reset the gyro position and PID
   if (!func_initialized)
   {
-    units::Angle start_heading = 1_deg * odometry->get_position().rot;
+    units::Angle start_heading = odometry->get_position().rot;
     target_heading = start_heading + amt;
   }
 
@@ -195,7 +196,7 @@ bool TankDrive::turn_relative(units::Angle amt, units::Voltage limit)
   * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
   * @return true if we have reached our target point
   */
-bool TankDrive::drive_to_point(double x, double y, vex::directionType dir,
+bool TankDrive::drive_to_point(units::Length x, units::Length y, vex::directionType dir,
                                Drive_Feedback &feedback, double max_speed)
 {
   // We can't run the auto drive function without odometry
@@ -208,9 +209,7 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir,
 
   if (!func_initialized) {
 
-    units::Length initial_dist
-        = 1_in
-          * OdometryBase::pos_diff(odometry->get_position(), {.x = x, .y = y});
+    units::Length initial_dist = OdometryBase::pos_diff(odometry->get_position(), {.x = x, .y = y});
 
     // Reset the control loops
     correction_pid.init(0_deg, 0_deg);
@@ -223,37 +222,35 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir,
   }
 
   // Store the initial position of the robot
-  pose_t current_pos = odometry->get_position();
-  pose_t end_pos = {.x=x, .y=y};
+  units::pose_t current_pos = odometry->get_position();
+  units::pose_t end_pos = {.x = x, .y = y, .rot = current_pos.rot};
 
   // Create a point (and vector) to get the direction
-  point_t pos_diff_pt = 
-  {
-    .x = x - current_pos.x,
-    .y = y - current_pos.y
-  };
+  point_t pos_diff_pt = {.x = (x - current_pos.x).Convert(units::inch),
+                         .y = (y - current_pos.y).Convert(units::inch)};
 
   Vector2D point_vec(pos_diff_pt);
 
   // Get the distance between 2 points
-  units::Length dist_left = 1_in * OdometryBase::pos_diff(current_pos, end_pos);
+  units::Length dist_left = OdometryBase::pos_diff(current_pos, end_pos);
 
   double sign = 1;
 
-  // Make an imaginary perpendicualar line to that between the bot and the point. If the point is behind that line,
-  // and the point is within the robot's radius, use negatives for feedback control.
+  // Make an imaginary perpendicualar line to that between the bot and the point. If the point is
+  // behind that line, and the point is within the robot's radius, use negatives for feedback
+  // control.
 
-  double angle_to_point = atan2(y - current_pos.y, x - current_pos.x) * 180.0 / PI;
-  double angle = fmod(current_pos.rot - angle_to_point, 360.0);
+  units::Angle angle_to_point
+      = 1_rad * atan2((y - current_pos.y).Convert(1_in), (x - current_pos.x).Convert(1_in));
+  units::Angle angle = mod(current_pos.rot - angle_to_point, 360.0_deg);
 
   // Normalize the angle between 0 and 360
-  if (angle > 360) angle -= 360;
-  if (angle < 0) angle += 360; 
+  angle = units::wrap_angle(angle);
 
   // If the angle is behind the robot, report negative.
-  if (dir == directionType::fwd && angle > 90 && angle < 270)
+  if (dir == directionType::fwd && angle > 90_deg && angle < 270_deg)
     sign = -1;
-  else if(dir == directionType::rev && (angle < 90 || angle > 270))
+  else if (dir == directionType::rev && (angle < 90_deg || angle > 270_deg))
     sign = -1;
 
   if (abs(dist_left) < config.drive_correction_cutoff) {
@@ -269,13 +266,9 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir,
 
   // Going backwards "flips" the robot's current heading
   if (dir == directionType::fwd)
-    delta_heading = 1_deg
-                    * OdometryBase::smallest_angle(
-                        current_pos.rot, heading.Convert(units::degree));
+    delta_heading = units::smallest_angle(current_pos.rot, heading);
   else
-    delta_heading = 1_deg
-                    * OdometryBase::smallest_angle(
-                        current_pos.rot - 180, heading.Convert(units::degree));
+    delta_heading = units::smallest_angle(current_pos.rot - 180_deg, heading);
 
   // Update the PID controllers with new information
   correction_pid.update(delta_heading);
@@ -329,7 +322,8 @@ bool TankDrive::drive_to_point(double x, double y, vex::directionType dir,
   * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
   * @return true if we have reached our target point
   */
-bool TankDrive::drive_to_point(double x, double y, vex::directionType dir, double max_speed)
+bool TankDrive::drive_to_point(units::Length x, units::Length y, vex::directionType dir,
+                               double max_speed)
 {
   if(drive_default_feedback != NULL)
     return this->drive_to_point(x, y, dir, *drive_default_feedback, max_speed);
@@ -363,8 +357,7 @@ bool TankDrive::turn_to_heading(units::Angle heading, Turn_Feedback &feedback,
 
   if(!func_initialized)
   {
-    units::Angle initial_delta
-        = units::smallest_angle(1_deg * odometry->get_position().rot, heading);
+    units::Angle initial_delta = units::smallest_angle(odometry->get_position().rot, heading);
     feedback.init(-initial_delta, 0_deg);
     feedback.set_limits(-abs(limit), abs(limit));
 
@@ -372,8 +365,7 @@ bool TankDrive::turn_to_heading(units::Angle heading, Turn_Feedback &feedback,
   }
 
   // Get the difference between the new heading and the current, and decide whether to turn left or right.
-  units::Angle delta_heading
-      = units::smallest_angle(1_deg * odometry->get_position().rot, heading);
+  units::Angle delta_heading = units::smallest_angle(odometry->get_position().rot, heading);
   feedback.update(-delta_heading);
 
   fflush(stdout);
@@ -427,7 +419,9 @@ bool TankDrive::pure_pursuit(std::vector<PurePursuit::hermite_point> path,
   is_pure_pursuit = true;
   std::vector<point_t> smoothed_path = PurePursuit::smooth_path_hermite(path, res);
 
-  point_t lookahead = PurePursuit::get_lookahead(smoothed_path, {odometry->get_position().x, odometry->get_position().y}, radius);
+  point_t lookahead = PurePursuit::get_lookahead(
+      smoothed_path,
+      {odometry->get_position().x.Convert(1_in), odometry->get_position().y.Convert(1_in)}, radius);
   //printf("%f\t%f\n", odometry->get_position().x, odometry->get_position().y); 
   //printf("%f\t%f\n", lookahead.x, lookahead.y);
   bool is_last_point = (path.back().x == lookahead.x) && (path.back().y == lookahead.y);
@@ -435,7 +429,7 @@ bool TankDrive::pure_pursuit(std::vector<PurePursuit::hermite_point> path,
   if(is_last_point)
     is_pure_pursuit = false;
 
-  bool retval = drive_to_point(lookahead.x, lookahead.y, dir, feedback, max_speed);
+  bool retval = drive_to_point(lookahead.x * 1_in, lookahead.y * 1_in, dir, feedback, max_speed);
 
   if(is_last_point)
     return retval;

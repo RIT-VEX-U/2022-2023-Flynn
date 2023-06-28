@@ -45,12 +45,12 @@ void OdometryBase::end_async()
 /**
 * Gets the current position and rotation
 */
-pose_t OdometryBase::get_position(void)
+units::pose_t OdometryBase::get_position(void)
 {
     mut.lock();
 
     // Create a new struct to pass-by-value
-    pose_t out = current_pos;
+    units::pose_t out = current_pos;
 
     mut.unlock();
 
@@ -60,7 +60,7 @@ pose_t OdometryBase::get_position(void)
 /**
  * Sets the current position of the robot
  */
-void OdometryBase::set_position(const pose_t& newpos)
+void OdometryBase::set_position(const units::pose_t& newpos)
 {
     mut.lock();
 
@@ -75,18 +75,20 @@ void OdometryBase::set_position(const pose_t& newpos)
  * @param end_pos to this point
  * @return the euclidean distance between start_pos and end_pos
  */
-double OdometryBase::pos_diff(pose_t start_pos, pose_t end_pos)
+units::Length OdometryBase::pos_diff(units::pose_t start_pos,
+                                     units::pose_t end_pos)
 {
-  // Use the pythagorean theorem
-  double retval = sqrt(pow(end_pos.x - start_pos.x, 2) + pow(end_pos.y - start_pos.y, 2));
-  
-  return retval;
+    // Use the pythagorean theorem
+    units::Length retval = sqrt(square(end_pos.x - start_pos.x)
+                                + square(end_pos.y - start_pos.y));
+
+    return retval;
 }
 
 /**
  * Get the change in rotation between two points
  */
-double OdometryBase::rot_diff(pose_t pos1, pose_t pos2)
+units::Angle OdometryBase::rot_diff(units::pose_t pos1, units::pose_t pos2)
 {
   return pos1.rot - pos2.rot;
 }
@@ -114,34 +116,34 @@ double OdometryBase::smallest_angle(double start_deg, double end_deg)
 units::Speed OdometryBase::get_speed()
 {
   mut.lock();
-  double retval = speed;
-  mut.unlock();
-
-  return 1_inps * retval;
-}
-
-units::Acceleration OdometryBase::get_accel()
-{
-  mut.lock();
-  double retval = accel;
-  mut.unlock();
-
-  return 1_inps / 1_s * retval;
-}
-
-double OdometryBase::get_angular_speed_deg()
-{
-  mut.lock();
-  double retval = ang_speed_deg;
+  units::Speed retval = speed;
   mut.unlock();
 
   return retval;
 }
 
-double OdometryBase::get_angular_accel_deg()
+units::Acceleration OdometryBase::get_accel()
 {
   mut.lock();
-  double retval = ang_accel_deg;
+  units::Acceleration retval = accel;
+  mut.unlock();
+
+  return retval;
+}
+
+units::AngularSpeed OdometryBase::get_angular_speed_deg()
+{
+  mut.lock();
+  units::AngularSpeed retval = ang_speed_deg;
+  mut.unlock();
+
+  return retval;
+}
+
+units::AngularAccel OdometryBase::get_angular_accel_deg()
+{
+  mut.lock();
+  units::AngularAccel retval = ang_accel_deg;
   mut.unlock();
 
   return retval;

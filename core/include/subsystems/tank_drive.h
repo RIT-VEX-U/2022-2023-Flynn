@@ -129,7 +129,7 @@ public:
    * @param feedback   the feedback controller we will use to travel. controls the rate at which we accelerate and drive.
    * @param max_speed  the maximum percentage of robot speed at which the robot will travel. 1 = full power
    */
-  bool drive_to_point(double x, double y, vex::directionType dir,
+  bool drive_to_point(units::Length x, units::Length y, vex::directionType dir,
                       Drive_Feedback &feedback, double max_speed = 1);
 
   /**
@@ -144,7 +144,8 @@ public:
    * @param max_speed  the maximum percentage of robot speed at which the robot
    * will travel. 1 = full power
    */
-  bool drive_to_point(double x, double y, vex::directionType dir, double max_speed=1);
+  bool drive_to_point(units::Length x, units::Length y, vex::directionType dir,
+                      double max_speed = 1);
 
   /**
    * Turn the robot in place to an exact heading relative to the field.

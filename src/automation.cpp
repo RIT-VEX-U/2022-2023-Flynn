@@ -205,16 +205,18 @@ PrintOdomCommand::PrintOdomCommand(OdometryTank &odom) : odom(odom) {}
 
 bool PrintOdomCommand::run()
 {
-  pose_t pos = odom.get_position();
-  printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+  units::pose_t pos = odom.get_position();
+  printf("%.2f, %.2f, %.2f\n", pos.x.Convert(units::inch), pos.y.Convert(units::inch),
+         pos.rot.Convert(units::degree));
   return true;
 }
 
 PrintOdomContinousCommand::PrintOdomContinousCommand(OdometryTank &odom) : odom(odom) {}
 bool PrintOdomContinousCommand::run()
 {
-  pose_t pos = odom.get_position();
-  printf("CONTINUAL(%.2f, %.2f), %.2f\n", pos.x, pos.y, pos.rot);
+  units::pose_t pos = odom.get_position();
+  printf("CONTINUAL(%.2f, %.2f), %.2f\n", pos.x.Convert(units::inch), pos.y.Convert(units::inch),
+         pos.rot.Convert(units::degree));
   if (main_controller.ButtonA.pressing()){
     return true;
   }
@@ -289,11 +291,12 @@ bool VisionAimCommand::run()
     first_run = false;
   }
 
-  if (odometry_fallback &&
-      (fallback_triggered || fabs(OdometryBase::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot)) > fallback_degrees))
-  {
+  if (odometry_fallback
+      && (fallback_triggered
+          || abs(units::smallest_angle(stored_pos.rot, odometry_sys.get_position().rot))
+                 > 1_deg * (double)fallback_degrees)) {
     fallback_triggered = true;
-    if (drive_sys.turn_to_heading(1_deg * stored_pos.rot, 8_v))
+    if (drive_sys.turn_to_heading(stored_pos.rot, 8_v))
         return true;
     else
       return false;
@@ -371,8 +374,8 @@ TurnToPointCommand::TurnToPointCommand(
 bool TurnToPointCommand::run()
 {
   // get differences in x and y to calculate angle relative to x axis
-  double delta_x = point.x - odom.get_position().x;
-  double delta_y = point.y - odom.get_position().y;
+  double delta_x = point.x - odom.get_position().x.Convert(units::inch);
+  double delta_y = point.y - odom.get_position().y.Convert(units::inch);
 
   // get the angle
   units::Angle heading_deg = 1_rad * atan2(delta_y, delta_x);
@@ -428,8 +431,8 @@ bool WallAlignCommand::run()
   // otherwise stop and reset the position
   drive_sys.stop();
 
-  pose_t old_pos = odom.get_position();
-  pose_t newpos = {.x = x, .y = y, .rot = heading};
+  units::pose_t old_pos = odom.get_position();
+  units::pose_t newpos = {.x = x * 1_in, .y = y * 1_in, .rot = heading * 1_deg};
   if (x == NO_CHANGE)
   {
     newpos.x = old_pos.x;

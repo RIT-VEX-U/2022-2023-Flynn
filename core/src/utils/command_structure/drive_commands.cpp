@@ -96,11 +96,9 @@ void TurnDegreesCommand::on_timeout(){
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
  */
 DriveToPointCommand::DriveToPointCommand(
-    TankDrive &drive_sys,
-    Feedback<units::Length::Dims, units::Voltage::Dims> &feedback, double x,
-    double y, directionType dir, double max_speed)
-    : drive_sys(drive_sys), feedback(feedback), x(x), y(y), dir(dir),
-      max_speed(max_speed)
+    TankDrive &drive_sys, Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+    units::Length x, units::Length y, directionType dir, double max_speed)
+    : drive_sys(drive_sys), feedback(feedback), x(x), y(y), dir(dir), max_speed(max_speed)
 {
 }
 
@@ -113,11 +111,10 @@ DriveToPointCommand::DriveToPointCommand(
  * @param max_speed 0 -> 1 percentage of the drive systems speed to drive at
  */
 DriveToPointCommand::DriveToPointCommand(
-    TankDrive &drive_sys,
-    Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
-    point_t point, directionType dir, double max_speed)
-    : drive_sys(drive_sys), feedback(feedback), x(point.x), y(point.y),
-      dir(dir), max_speed(max_speed)
+    TankDrive &drive_sys, Feedback<units::Length::Dims, units::Voltage::Dims> &feedback,
+    units::point_t point, directionType dir, double max_speed)
+    : drive_sys(drive_sys), feedback(feedback), x(point.x), y(point.y), dir(dir),
+      max_speed(max_speed)
 {
 }
 
@@ -201,7 +198,10 @@ bool DriveStopCommand::run() {
  * @param odom the odometry system we are setting
  * @param newpos the now position to set the odometry to
  */
-OdomSetPosition::OdomSetPosition(OdometryBase &odom, const pose_t &newpos): odom(odom), newpos(newpos){}
+OdomSetPosition::OdomSetPosition(OdometryBase &odom, const units::pose_t &newpos)
+    : odom(odom), newpos(newpos)
+{
+}
 
 bool OdomSetPosition::run() {
   odom.set_position(newpos);

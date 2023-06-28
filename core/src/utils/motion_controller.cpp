@@ -101,20 +101,21 @@ MotionController<input_dims, output_dims>::get_motion()
 }
 
 /**
- * This method attempts to characterize the robot's drivetrain and automatically tune the feedforward.
- * It does this by first calculating the kS (voltage to overcome static friction) by slowly increasing
- * the voltage until it moves.
- * 
- * Next is kV (voltage to sustain a certain velocity), where the robot will record it's steady-state velocity
- * at 'pct' speed.
- * 
- * Finally, kA (voltage needed to accelerate by a certain rate), where the robot will record the entire movement's
- * velocity and acceleration, record a plot of [X=(pct-kV*V-kS), Y=(Acceleration)] along the movement,
- * and since kA*Accel = pct-kV*V-kS, the reciprocal of the linear regression is the kA value.
- * 
+ * This method attempts to characterize the robot's drivetrain and automatically tune the
+ * feedforward. It does this by first calculating the kS (voltage to overcome static friction) by
+ * slowly increasing the voltage until it moves.
+ *
+ * Next is kV (voltage to sustain a certain velocity), where the robot will record it's steady-state
+ * velocity at 'pct' speed.
+ *
+ * Finally, kA (voltage needed to accelerate by a certain rate), where the robot will record the
+ * entire movement's velocity and acceleration, record a plot of [X=(pct-kV*V-kS), Y=(Acceleration)]
+ * along the movement, and since kA*Accel = pct-kV*V-kS, the reciprocal of the linear regression is
+ * the kA value.
+ *
  * @param drive The tankdrive to operate on
  * @param odometry The robot's odometry subsystem
- * @param pct Maximum velocity in percent (0->1.0)
+ * @param volts Maximum voltage applied
  * @param duration Amount of time the robot should be moving for the test
  * @return A tuned feedforward object
  */
@@ -126,13 +127,12 @@ tune_feedforward(TankDrive &drive, OdometryTank &odometry, units::Voltage volts,
     using FF = FeedForward<units::Length::Dims, units::Voltage::Dims>;
     typename FF::ff_config_t out = {};
 
-    pose_t start_pos = odometry.get_position();
+    units::pose_t start_pos = odometry.get_position();
 
     // ========== kS Tuning =========
     // Start at 0 and slowly increase the power until the robot starts moving
     units::Voltage power = 0_v;
-    while(odometry.pos_diff(start_pos, odometry.get_position()) < 0.05)
-    {
+    while (odometry.pos_diff(start_pos, odometry.get_position()) < 0.05_in) {
         drive.drive_tank(power, power);
         power += 0.001_v;
         vexDelay(100);

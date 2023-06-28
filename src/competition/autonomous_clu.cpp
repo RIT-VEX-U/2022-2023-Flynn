@@ -51,11 +51,11 @@ void testing()
     CommandController ctrl = auto_non_loader_side();
     ctrl.run();
 
-    while(true)
-    {
-        pose_t pos = odometry_sys.get_position();
-        printf("x: %2f, y: %2f, z: %2f\n", pos.x, pos.y, pos.rot);
-        vexDelay(50);
+    while (true) {
+      units::pose_t pos = odometry_sys.get_position();
+      printf("x: %2f, y: %2f, z: %2f\n", pos.x.Convert(units::inch), pos.y.Convert(units::inch),
+             pos.rot.Convert(units::degree));
+      vexDelay(50);
     }
 }
 

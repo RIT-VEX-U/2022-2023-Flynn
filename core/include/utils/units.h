@@ -141,6 +141,8 @@ namespace units
   constexpr Dimensions angle_dimensions = {0, 0, 0, 0, 0, 1};
   constexpr Dimensions angular_speed_dimensions
       = angle_dimensions - time_dimensions;
+  constexpr Dimensions angular_accel_dimensions
+      = angular_speed_dimensions - time_dimensions;
 
   typedef Quantity<number_dimensions> Number;
 
@@ -161,6 +163,7 @@ namespace units
 
   typedef Quantity<angle_dimensions> Angle;
   typedef Quantity<angular_speed_dimensions> AngularSpeed;
+  typedef Quantity<angular_accel_dimensions> AngularAccel;
 
   template <Dimensions dim>
   constexpr Quantity<dim> operator+(const Quantity<dim> &lhs,
@@ -566,6 +569,15 @@ constexpr units::Quantity<dims> clamp(units::Quantity<dims> v,
 // other global functions unique to units lib
 namespace units
 {
+  inline Angle wrap_angle(Angle a)
+  {
+    Angle angle = mod(a, 360 * degree);
+    if (angle < 0 * degree)
+      angle += 360 * degree;
+
+    return angle;
+  }
+
   inline Angle smallest_angle(Angle a1, Angle a2)
   {
     Angle retval;

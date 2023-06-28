@@ -48,8 +48,9 @@ int print_odom()
 {
   while (true)
   {
-    pose_t pos = odometry_sys.get_position();
-    printf("%.2f, %.2f, %.2f\n", pos.x, pos.y, pos.rot);
+    units::pose_t pos = odometry_sys.get_position();
+    printf("%.2f, %.2f, %.2f\n", pos.x.Convert(units::inch), pos.y.Convert(units::inch),
+           pos.rot.Convert(units::degree));
     vexDelay(500);
   }
   return 0;
@@ -169,21 +170,22 @@ Map from page 40 of the game manual
 
 CommandController prog_skills_loader_side()
 {
+  CommandController lss;
+  /*
   glbl_vision_center = 125;
   target_red = true;
   flapup_solenoid.set(true);
-  pose_t start_pos = pose_t{.x = 36.0, .y = 12.2, .rot = -90};
+  units::pose_t start_pos = units::pose_t{.x = 36.0_in, .y = 12._in2, .rot = -90_deg};
 
   pose_t roller_in_pos = {.x = 36.0, .y = 4.16, .rot = -90};
 
-  CommandController lss;
   lss.add(new OdomSetPosition(odometry_sys, start_pos)); // #1
 
   // spin -90 degree roller
   lss.add(new SpinRollerCommand(roller_in_pos), 5.0);
   lss.add(DRIVE_FORWARD_FAST(6, rev));
 
-  point_t corner_disk_point = {.x = 10, .y = 12};
+  units::point_t corner_disk_point = {.x = 10_in, .y = 12_in};
 
   // intake corner disk
   lss.add({
@@ -233,7 +235,8 @@ CommandController prog_skills_loader_side()
   lss.add(WAIT_FOR_FLYWHEEL, 1.0);
   lss.add(CLEAR_DISKS);
 
-  // lss.add(PrintOdomContinous); /// the guy youre looking for =================================================================================> :)
+  // lss.add(PrintOdomContinous); /// the guy youre looking for
+  =================================================================================> :)
 
   // DISKS AGAINST L PIECE
   point_t disk_pos1 = {.x = 24.0, .y = 81.5};
@@ -322,7 +325,7 @@ CommandController prog_skills_loader_side()
   lss.add(new PrintOdomCommand(odometry_sys), 400);
 
   lss.add(new EndgameCommand(endgame_solenoid));
-
+*/
   return lss;
 }
 
@@ -356,6 +359,7 @@ CommandController auto_loader_side()
 
   CommandController lsa;
 
+  /*
   flap_down();
 
   pose_t start_pos = pose_t{.x = 36.0, .y = 12.2, .rot = -90};
@@ -505,7 +509,7 @@ CommandController auto_loader_side()
       DRIVE_TO_POINT_FAST_PT(pre_op_lineup, fwd)->withTimeout(2.0),
       TURN_TO_HEADING(130)->withTimeout(2.0),
   });
-
+*/
   return lsa;
 }
 
@@ -538,6 +542,9 @@ CommandController auto_loader_side_disks_last()
 {
 #define point_t point_t
 
+  CommandController lsdl;
+
+  /*
   point_t goal_point = {15, 125};
   pose_t start_point_odom = {.x = 83, .y = 13, .rot = 90.f};
   point_t start_point = {.x = start_point_odom.x, .y = start_point_odom.y};
@@ -546,7 +553,6 @@ CommandController auto_loader_side_disks_last()
   point_t post_3_stack = {52, 30};
   point_t pre_roller_pt = {31, 15};
 
-  CommandController lsdl;
   lsdl.add({
       new OdomSetPosition(odometry_sys, start_point_odom),
       TURN_TO_POINT(goal_point),
@@ -568,6 +574,7 @@ CommandController auto_loader_side_disks_last()
       TURN_TO_HEADING(270)->withTimeout(2.0),
       //  DO LE ROLLERS
   });
+*/
   return lsdl;
 
 #undef point_t
@@ -579,138 +586,140 @@ CommandController auto_loader_side_disks_last()
 #define INTAKE_DOWN (new FunctionCommand([]() {intake_down(); return true; }))
 CommandController skills_rollers_last()
 {
-  auto_tmr.reset();
-  flap_down();
+  //  auto_tmr.reset();
+  //  flap_down();
   CommandController srl;
-  srl.add({
-              new FlapDownCommand(),
+  /*
+    srl.add({
+                new FlapDownCommand(),
 
-              // preload+1
-              new OdomSetPosition(odometry_sys, {.x = 30.655172, .y = 13.034482, .rot = -180.0}),
+                // preload+1
+                new OdomSetPosition(odometry_sys, {.x = 30.655172, .y = 13.034482, .rot = -180.0}),
 
-              SPIN_FW_AT(3000),
-              START_INTAKE,
-              DRIVE_TO_POINT_FAST(12.551724, 13.5172415, fwd),
-              TURN_TO_HEADING(90.0),
-              STOP_INTAKE,
-              DRIVE_TO_POINT_FAST(12.310345, 51.413795, fwd),
-              TURN_TO_HEADING(89.5),
-              SHOOT_3(SHOT_SPACING), // preload+1
+                SPIN_FW_AT(3000),
+                START_INTAKE,
+                DRIVE_TO_POINT_FAST(12.551724, 13.5172415, fwd),
+                TURN_TO_HEADING(90.0),
+                STOP_INTAKE,
+                DRIVE_TO_POINT_FAST(12.310345, 51.413795, fwd),
+                TURN_TO_HEADING(89.5),
+                SHOOT_3(SHOT_SPACING), // preload+1
 
-              // 3 stack on line
-              INTAKE_UP,
-              SPIN_FW_AT(2750),
-              TURN_TO_HEADING(-30.0),
-              START_INTAKE,
-              (new FunctionCommand([]()
-                                   {
-        auto dropper = [](){
-          vexDelay(475);
-          intake_down();
-          return 0;
-        };
-        vex::thread mine(dropper);
-        return true; })),
+                // 3 stack on line
+                INTAKE_UP,
+                SPIN_FW_AT(2750),
+                TURN_TO_HEADING(-30.0),
+                START_INTAKE,
+                (new FunctionCommand([]()
+                                     {
+          auto dropper = [](){
+            vexDelay(475);
+            intake_down();
+            return 0;
+          };
+          vex::thread mine(dropper);
+          return true; })),
 
-              DRIVE_TO_POINT_FAST(46.58621, 24.137932, fwd),
-              new DelayCommand(500),
-              TURN_TO_HEADING(0.0),
-              STOP_INTAKE,
+                DRIVE_TO_POINT_FAST(46.58621, 24.137932, fwd),
+                new DelayCommand(500),
+                TURN_TO_HEADING(0.0),
+                STOP_INTAKE,
 
-              SHOOT_3(SHOT_SPACING), // 3 stack on line
+                SHOOT_3(SHOT_SPACING), // 3 stack on line
 
-              // 3 stack not on line
-              SPIN_FW_AT(2650),
-              TURN_TO_HEADING(45.0),
-              INTAKE_UP,
-              START_INTAKE,
+                // 3 stack not on line
+                SPIN_FW_AT(2650),
+                TURN_TO_HEADING(45.0),
+                INTAKE_UP,
+                START_INTAKE,
 
-              DRIVE_TO_POINT_FAST(69.27586, 50.03448, fwd),
-              (new FunctionCommand([]()
-                                   {
-        auto dropper = [](){
-          vexDelay(275);
-          intake_down();
-          return 0;
-        };
-        vex::thread mine(dropper);
-        return true; })),
+                DRIVE_TO_POINT_FAST(69.27586, 50.03448, fwd),
+                (new FunctionCommand([]()
+                                     {
+          auto dropper = [](){
+            vexDelay(275);
+            intake_down();
+            return 0;
+          };
+          vex::thread mine(dropper);
+          return true; })),
 
-              new DelayCommand(500),
+                new DelayCommand(500),
 
-              TURN_TO_HEADING(-25.0),
-              // new FlapDownCommand(),
-              STOP_INTAKE,
+                TURN_TO_HEADING(-25.0),
+                // new FlapDownCommand(),
+                STOP_INTAKE,
 
-              SHOOT_3(SHOT_SPACING), // 3 stack not on line
+                SHOOT_3(SHOT_SPACING), // 3 stack not on line
 
-              // side 3 in a row
-              SPIN_FW_AT(2900),
-              START_INTAKE,
+                // side 3 in a row
+                SPIN_FW_AT(2900),
+                START_INTAKE,
 
-              TURN_TO_HEADING(-320.0),
-              DRIVE_TO_POINT_FAST(109.586205, 95.31035, fwd),
-              TURN_TO_HEADING(-65.0),
-              DRIVE_TO_POINT_FAST(128.06897, 61.5, fwd),
-              TURN_TO_HEADING(-452.0),
-              SHOOT_3(SHOT_SPACING), // side 3 in a row
-                                     //
-                                     // barrier side 1
+                TURN_TO_HEADING(-320.0),
+                DRIVE_TO_POINT_FAST(109.586205, 95.31035, fwd),
+                TURN_TO_HEADING(-65.0),
+                DRIVE_TO_POINT_FAST(128.06897, 61.5, fwd),
+                TURN_TO_HEADING(-452.0),
+                SHOOT_3(SHOT_SPACING), // side 3 in a row
+                                       //
+                                       // barrier side 1
 
-              SPIN_FW_AT(2900),
-              TURN_TO_HEADING(-175.0), // lesser to hit barrier more
-              START_INTAKE,
-              DRIVE_TO_POINT_FAST(82.0, 59.2, fwd),
-              TURN_TO_HEADING(-39.0),
+                SPIN_FW_AT(2900),
+                TURN_TO_HEADING(-175.0), // lesser to hit barrier more
+                START_INTAKE,
+                DRIVE_TO_POINT_FAST(82.0, 59.2, fwd),
+                TURN_TO_HEADING(-39.0),
 
-              STOP_INTAKE,
-              SHOOT_3(SHOT_SPACING),
+                STOP_INTAKE,
+                SHOOT_3(SHOT_SPACING),
 
-              // barrier side 2
-              SPIN_FW_AT(2900),
-              TURN_TO_HEADING(-80.0),
-              START_INTAKE,
-              DRIVE_TO_POINT_FAST(87.6, 18.6, fwd),
-              TURN_TO_HEADING(11.0),
-              DRIVE_FORWARD_FAST(8, rev),
+                // barrier side 2
+                SPIN_FW_AT(2900),
+                TURN_TO_HEADING(-80.0),
+                START_INTAKE,
+                DRIVE_TO_POINT_FAST(87.6, 18.6, fwd),
+                TURN_TO_HEADING(11.0),
+                DRIVE_FORWARD_FAST(8, rev),
 
-              STOP_INTAKE,
-              SHOOT_3(SHOT_SPACING),
+                STOP_INTAKE,
+                SHOOT_3(SHOT_SPACING),
 
-              //
-              // center line row of 3
-              SPIN_FW_AT(3200),
-              TURN_TO_HEADING(125.0),
-              START_INTAKE,
-              DRIVE_TO_POINT_FAST(60.48276, 64.344826, fwd),
-              TURN_TO_HEADING(225.0),
-              DRIVE_TO_POINT_FAST(26.034483, 29.758621, fwd),
-              TURN_TO_HEADING(355.0),
-              STOP_INTAKE,
-              SHOOT_3(SHOT_SPACING), // center line row of 3
+                //
+                // center line row of 3
+                SPIN_FW_AT(3200),
+                TURN_TO_HEADING(125.0),
+                START_INTAKE,
+                DRIVE_TO_POINT_FAST(60.48276, 64.344826, fwd),
+                TURN_TO_HEADING(225.0),
+                DRIVE_TO_POINT_FAST(26.034483, 29.758621, fwd),
+                TURN_TO_HEADING(355.0),
+                STOP_INTAKE,
+                SHOOT_3(SHOT_SPACING), // center line row of 3
 
-              new FunctionCommand([]()
-                                  {printf("========  Before rollers at %f sec ========", auto_tmr.value());return true; }),
-              TURN_TO_HEADING(270.0),
+                new FunctionCommand([]()
+                                    {printf("========  Before rollers at %f sec ========",
+    auto_tmr.value());return true; }), TURN_TO_HEADING(270.0),
 
-              new FunctionCommand([]()
-                                  {
-                            double seconds_left = (60.0-auto_tmr.value());
-                            double needed = 5.0;
-                            if (seconds_left > needed){
-                              CommandController rollers;
-                              rollers.add(
-                                new SpinRollerCommand({0,0 ,0 }), 4.0); 
-                              rollers.run();
-                            }
-                          return true; }),
+                new FunctionCommand([]()
+                                    {
+                              double seconds_left = (60.0-auto_tmr.value());
+                              double needed = 5.0;
+                              if (seconds_left > needed){
+                                CommandController rollers;
+                                rollers.add(
+                                  new SpinRollerCommand({0,0 ,0 }), 4.0);
+                                rollers.run();
+                              }
+                            return true; }),
 
-              // endgaming
-              new EndgameCommand(endgame_solenoid),
+                // endgaming
+                new EndgameCommand(endgame_solenoid),
 
-              DRIVE_FORWARD_FAST(4, fwd),
-          },
-          3.0);
+                DRIVE_FORWARD_FAST(4, fwd),
+            },
+            3.0);
+    */
   return srl;
 }
 
@@ -725,11 +734,12 @@ CommandController skills_rollers_last()
 
 CommandController disk_rush_auto()
 {
-  flap_down();
-  left_motors.setStopping(vex::brake);
-  right_motors.setStopping(vex::brake);
+  //  flap_down();
+  //  left_motors.setStopping(vex::brake);
+  //  right_motors.setStopping(vex::brake);
   CommandController dra;
-  // auto x = new OdomSetPosition()
+  /*
+         // auto x = new OdomSetPosition()
   dra.add({
               new OdomSetPosition(odometry_sys, {.x = 53.896553, .y = 17.068966, .rot = 135.0}),
               START_INTAKE,
@@ -767,7 +777,7 @@ CommandController disk_rush_auto()
           return 0;
         };
 
-        
+
         vex::thread mine(dropper);
 
 
@@ -829,13 +839,14 @@ CommandController disk_rush_auto()
         DRIVE_FORWARD_FAST(5, rev),
     });
   }
-
+*/
   return dra;
 }
 
 CommandController only_roller_auto()
 {
   CommandController only_r;
+  /*
   for (int i = 0; i < num_roller_fallback; i++)
   {
     only_r.add({
@@ -862,12 +873,14 @@ CommandController only_roller_auto_fancy()
                  TURN_TO_HEADING(-90),
              },
              3.0);
+*/
   return only_r;
 }
 
 CommandController safe_auto()
 {
   CommandController sa;
+  /*
   flap_down();
   sa.add({
              new OdomSetPosition(odometry_sys, {.x = 84.48276, .y = 16.172415, .rot = 90.0}),
@@ -907,6 +920,6 @@ CommandController safe_auto()
             //  new SpinRollerCommand({0, 0, 0}),
          },
          3.0);
-         
-         return sa;
+         */
+  return sa;
 }
