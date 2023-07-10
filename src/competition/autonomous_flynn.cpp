@@ -13,8 +13,8 @@
   {                           \
   }
 
-const double TURN_SPEED = 0.6;
-const double INTAKE_VOLT = 12;
+//const double TURN_SPEED = 0.6;
+//const double INTAKE_VOLT = 12;
 const double SINGLE_SHOT_TIME = 0.2;
 const double SINGLE_SHOT_VOLT = 6;
 const double THRESHOLD_RPM = 150;

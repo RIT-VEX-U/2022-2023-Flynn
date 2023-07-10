@@ -80,9 +80,9 @@ units::pose_t Odometry3Wheel::update()
  * This uses a series of arclength formulae for finding distance driven and change in angle.
  * Then vector math is used to combine it with the robot's old position data
  * 
- * @param lside_delta_deg Left encoder change in rotation, in degrees
- * @param rside_delta_deg Right encoder change in rotation, in degrees
- * @param offax_delta_deg Off-axis (perpendicular) encoder change in rotation, in degrees
+ * @param lside_delta Left encoder change in rotation, in degrees
+ * @param rside_delta Right encoder change in rotation, in degrees
+ * @param offax_delta Off-axis (perpendicular) encoder change in rotation, in degrees
  * @param old_pos Robot's old position, for integration
  * @param cfg Data on robot's configuration (wheel diameter, wheelbase, off-axis distance from center)
  * @return The robot's new position (x, y, rot) 

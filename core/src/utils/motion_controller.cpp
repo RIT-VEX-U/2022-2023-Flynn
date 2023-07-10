@@ -100,6 +100,8 @@ MotionController<input_dims, output_dims>::get_motion()
     return cur_motion;
 }
 
+using DriveFF = FeedForward<units::Length::Dims, units::Voltage::Dims>;
+
 /**
  * This method attempts to characterize the robot's drivetrain and automatically tune the
  * feedforward. It does this by first calculating the kS (voltage to overcome static friction) by
@@ -119,13 +121,10 @@ MotionController<input_dims, output_dims>::get_motion()
  * @param duration Amount of time the robot should be moving for the test
  * @return A tuned feedforward object
  */
-
-FeedForward<units::Length::Dims, units::Voltage::Dims>::ff_config_t
-tune_feedforward(TankDrive &drive, OdometryTank &odometry, units::Voltage volts,
-                 units::Time duration)
+DriveFF::ff_config_t tune_feedforward(TankDrive &drive, OdometryTank &odometry,
+                                      units::Voltage volts, units::Time duration)
 {
-    using FF = FeedForward<units::Length::Dims, units::Voltage::Dims>;
-    typename FF::ff_config_t out = {};
+    typename DriveFF::ff_config_t out = {};
 
     units::pose_t start_pos = odometry.get_position();
 
@@ -150,8 +149,8 @@ tune_feedforward(TankDrive &drive, OdometryTank &odometry, units::Voltage volts,
     timer tmr;
     units::Time time;
 
-    MovingAverage<FF::VelocityType::Dims> vel_ma(3);
-    MovingAverage<FF::AccelType::Dims> accel_ma(3);
+    MovingAverage<DriveFF::VelocityType::Dims> vel_ma(3);
+    MovingAverage<DriveFF::AccelType::Dims> accel_ma(3);
 
     // Move the robot forward at a fixed percentage for X seconds while taking velocity and accel measurements
     do
