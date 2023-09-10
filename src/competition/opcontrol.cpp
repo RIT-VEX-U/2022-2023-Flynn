@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include "vex_global.h"
 #include "v5_api.h"
+#include "../core/include/utils/logger.h"
 
 int controller_screen()
 {
@@ -45,6 +46,18 @@ int controller_screen()
  */
 void opcontrol()
 {
+
+  Logger l("log.txt");
+
+
+
+  int num = 5;
+  l.Log(LogLevel::CRITICAL, "Critically Important Hello");
+  l.Logf(LogLevel::ERROR, "I Errored %d times\n", num);
+  l.Logln("Me with a newline");
+
+  printf("AHHHHH\n");
+
   // test_stuff();
   vex::thread controller_screen_thread(controller_screen);
 

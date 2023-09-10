@@ -5,7 +5,7 @@
 #include <string>
 #include "vex.h"
 
-enum LogLevel { DEBUG, NOTICE, WARNING, ERROR, CRITICAL };
+enum LogLevel { DEBUG, NOTICE, WARNING, ERROR, CRITICAL, TIME};
 
 class Logger {
 private:
@@ -14,7 +14,7 @@ private:
     void write_level(LogLevel l);
 
 public:
-    const int MAX_FORMAT_LEN = 256;
+    const int MAX_FORMAT_LEN = 512;
     explicit Logger(const std::string &filename);
 
     // No copying or reassigning bc then who owns the file?

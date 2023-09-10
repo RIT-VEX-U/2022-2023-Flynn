@@ -1,5 +1,6 @@
 #include "../core/include/utils/logger.h"
-#include "stdarg.h"
+#include <stdarg.h>
+
 
 void Logger::write_level(LogLevel l)
 {
@@ -24,6 +25,10 @@ void Logger::write_level(LogLevel l)
         break;
     case CRITICAL:
         sd.appendfile(filename.c_str(), critical, 10);
+        break;
+    case TIME:
+        int32_t msec = vexSystemTimeGet();
+        Logf("%d: ", msec);
         break;
     };
 }
