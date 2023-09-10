@@ -1,14 +1,13 @@
 #include "../core/include/utils/logger.h"
 #include <stdarg.h>
 
-
 void Logger::write_level(LogLevel l)
 {
-    unsigned char *debug =    (unsigned char *)"DEBUG:\t";
-    unsigned char *notice =   (unsigned char *)"NOTICE:\t";
-    unsigned char *warning =  (unsigned char *)"WARNING:\t";
-    unsigned char *error =    (unsigned char *)"ERROR:\t";
-    unsigned char *critical = (unsigned char *)"CRITICAL:\t";
+    unsigned char *debug = (unsigned char *)"DEBUG: ";
+    unsigned char *notice = (unsigned char *)"NOTICE: ";
+    unsigned char *warning = (unsigned char *)"WARNING: ";
+    unsigned char *error = (unsigned char *)"ERROR: ";
+    unsigned char *critical = (unsigned char *)"CRITICAL: ";
     switch (l)
     {
     case DEBUG:
@@ -21,7 +20,7 @@ void Logger::write_level(LogLevel l)
         sd.appendfile(filename.c_str(), warning, 9);
         break;
     case ERROR:
-        sd.appendfile(filename.c_str(), error, 6);
+        sd.appendfile(filename.c_str(), error, 7);
         break;
     case CRITICAL:
         sd.appendfile(filename.c_str(), critical, 10);
@@ -33,9 +32,9 @@ void Logger::write_level(LogLevel l)
     };
 }
 
-Logger::Logger(const std::string &filename) : filename(filename) {}
-
-
+Logger::Logger(const std::string &filename) : filename(filename) {
+    sd.savefile(filename.c_str(), NULL, 0);
+}
 
 void Logger::Log(const std::string &s)
 {
@@ -65,9 +64,11 @@ void Logger::Logf(const char *fmt, ...)
     va_list args;
     va_start(args, fmt);
 
-    vex_vsnprintf(buf, MAX_FORMAT_LEN, fmt, args);
+    int32_t written = vex_vsnprintf(buf, MAX_FORMAT_LEN, fmt, args);
 
     va_end(args);
+    sd.appendfile(filename.c_str(), (unsigned char *)buf, written);
+
 }
 void Logger::Logf(LogLevel level, const char *fmt, ...)
 {
@@ -76,6 +77,8 @@ void Logger::Logf(LogLevel level, const char *fmt, ...)
     write_level(level);
     va_list args;
     va_start(args, fmt);
-    vex_vsnprintf(buf, MAX_FORMAT_LEN, fmt, args);
+    int32_t written = vex_vsnprintf(buf, MAX_FORMAT_LEN, fmt, args);
     va_end(args);
+
+    sd.appendfile(filename.c_str(), (unsigned char *)buf, written);
 }
